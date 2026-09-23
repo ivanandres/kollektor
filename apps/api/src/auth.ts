@@ -29,6 +29,7 @@ export function createAuth(opts: {
         session: schema.session,
         account: schema.account,
         verification: schema.verification,
+        rateLimit: schema.rateLimit,
       },
     }),
     // Optional "Continuar con Google" (redirect URI: <BETTER_AUTH_URL>/api/auth/callback/google).
@@ -79,7 +80,19 @@ export function createAuth(opts: {
     },
     // Mobile (Expo) clients authenticate with `Authorization: Bearer <session token>`.
     plugins: [bearer()],
-    rateLimit: { enabled: env.NODE_ENV === 'production' },
+    // Stored in Postgres so limits hold across serverless instances. Stricter on credentials.
+    rateLimit: {
+      enabled: env.NODE_ENV === 'production',
+      storage: 'database',
+      window: 60,
+      max: 100,
+      customRules: {
+        '/sign-in/email': { window: 60, max: 5 },
+        '/sign-up/email': { window: 60, max: 5 },
+        '/request-password-reset': { window: 300, max: 3 },
+        '/delete-user': { window: 60, max: 3 },
+      },
+    },
     databaseHooks: {
       user: {
         create: {
