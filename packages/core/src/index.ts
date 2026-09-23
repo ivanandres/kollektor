@@ -89,8 +89,8 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
         SELECT DISTINCT w.release_id FROM wishlist_items w
           JOIN external_ids e ON e.entity_type = 'release' AND e.entity_id = w.release_id AND e.source = ${deps.marketValue.source}
          WHERE w.status <> 'purchased' AND w.release_id IS NOT NULL AND NOT EXISTS (
-           SELECT 1 FROM price_snapshots ps WHERE ps.release_id = w.release_id AND ps.kind = 'lowest'
-             AND ps.captured_at > now() - interval '20 hours')`);
+           SELECT 1 FROM market_listings ml WHERE ml.release_id = w.release_id
+             AND ml.checked_at > now() - interval '20 hours')`);
       for (const r of wished)
         await jobs.enqueue(
           'wishlist.check_listing',

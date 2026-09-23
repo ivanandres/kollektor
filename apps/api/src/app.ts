@@ -67,6 +67,7 @@ export function createApp(deps: AppDeps) {
   authed.use('/catalog/albums/:id/external-versions', limit);
   authed.use('/me/avatar-upload', limit);
   authed.use('/collection/:id/photos/upload', limit);
+  authed.use('/collection/:id/link', limit);
   authed.use('/me/discogs/connect', limit);
   authed.route('/me/discogs', discogsAccountRoutes(deps));
   authed.route('/me', meRoutes(deps));

@@ -5,6 +5,7 @@ import {
   integer,
   numeric,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -62,4 +63,23 @@ export const fxRates = pgTable(
     source: text('source').notNull(),
   },
   (t) => [uniqueIndex('fx_rates_uq').on(t.date, t.base, t.quote)],
+);
+
+/**
+ * Current marketplace availability of a release (cheapest copy for sale), one row per release
+ * and source. Kept apart from price_snapshots so buying signals don't displace value estimates.
+ */
+export const marketListings = pgTable(
+  'market_listings',
+  {
+    releaseId: uuid('release_id')
+      .notNull()
+      .references(() => releases.id, { onDelete: 'cascade' }),
+    source: text('source').notNull(),
+    /** null = nothing for sale right now */
+    lowestPrice: numeric('lowest_price', { precision: 12, scale: 2, mode: 'number' }),
+    currency: char('currency', { length: 3 }),
+    checkedAt: timestamp('checked_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.releaseId, t.source] })],
 );

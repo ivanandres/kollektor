@@ -59,12 +59,17 @@ export function valuationService(deps: CoreDeps, currency: CurrencyService) {
         capturedAt: item.updatedAt,
       };
     }
+    // Latest snapshot of each (source, kind, condition): history length never hides a kind.
     const snaps = await db
-      .select()
+      .selectDistinctOn([priceSnapshots.source, priceSnapshots.kind, priceSnapshots.condition])
       .from(priceSnapshots)
       .where(eq(priceSnapshots.releaseId, item.releaseId))
-      .orderBy(desc(priceSnapshots.capturedAt))
-      .limit(50);
+      .orderBy(
+        priceSnapshots.source,
+        priceSnapshots.kind,
+        priceSnapshots.condition,
+        desc(priceSnapshots.capturedAt),
+      );
     const best = pickSnapshot(snaps, item.conditionMedia);
     if (!best) return null;
     return {
@@ -165,16 +170,22 @@ export function valuationService(deps: CoreDeps, currency: CurrencyService) {
       );
     if (!ext) return false;
     const lowest = await provider.getLowestListing(ext.externalId);
-    if (!lowest) return false;
-    await db.insert(priceSnapshots).values({
+    // One row per release: "nothing for sale" is recorded too, so stale alerts clear.
+    const values = {
       releaseId,
       source: provider.source,
-      kind: 'lowest',
-      price: lowest.amount,
-      currency: lowest.currency,
-      capturedAt: nowOf(deps),
-    });
-    return true;
+      lowestPrice: lowest?.amount ?? null,
+      currency: lowest?.currency ?? null,
+      checkedAt: nowOf(deps),
+    };
+    await db
+      .insert(schema.marketListings)
+      .values(values)
+      .onConflictDoUpdate({
+        target: [schema.marketListings.releaseId, schema.marketListings.source],
+        set: values,
+      });
+    return lowest != null;
   }
 
   /** Stores today's totals for the "collection value over time" chart. */

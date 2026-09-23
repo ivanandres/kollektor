@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { addToCollectionInput, addToWishlistInput } from '@kollektor/schemas';
 import { seedLibrary } from '../../testing/library';
@@ -78,6 +79,21 @@ describe('wishlist', () => {
     ctx.catalog.lowest.set('2000001', { amount: 60, currency: 'USD' });
     await ctx.core.valuation.refreshLowestListing(item!.release!.id);
     expect((await ctx.core.wishlist.list(ctx.userId))[0]).toMatchObject({ belowTarget: false });
+    // Sold out → the alert and the listing disappear
+    ctx.catalog.lowest.set('2000001', { amount: 40, currency: 'USD' });
+    await ctx.core.valuation.refreshLowestListing(item!.release!.id);
+    expect((await ctx.core.wishlist.list(ctx.userId))[0]!.belowTarget).toBe(true);
+    ctx.catalog.lowest.set('2000001', null);
+    await ctx.core.valuation.refreshLowestListing(item!.release!.id);
+    expect((await ctx.core.wishlist.list(ctx.userId))[0]).toMatchObject({
+      market: null,
+      belowTarget: false,
+    });
+    // Buying signals never replace the owner's value estimate
+    const snaps = await h.db.execute<{ n: number }>(
+      sql`SELECT count(*)::int AS n FROM price_snapshots WHERE kind = 'lowest' AND source = 'discogs' AND captured_at > now() - interval '1 minute'`,
+    );
+    expect(snaps[0]!.n).toBe(0);
   });
 
   it('refuses to purchase an edition of a different album', async () => {

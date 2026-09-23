@@ -70,7 +70,12 @@ export class S3StorageService implements StorageService {
     }
     if (parsed.origin !== base.origin || parsed.search || parsed.hash) return null;
     if (!parsed.pathname.startsWith(base.pathname)) return null;
-    const key = decodeURIComponent(parsed.pathname.slice(base.pathname.length));
+    let key: string;
+    try {
+      key = decodeURIComponent(parsed.pathname.slice(base.pathname.length));
+    } catch {
+      return null; // malformed escapes ("%E0")
+    }
     return key && !key.split('/').includes('..') ? key : null;
   }
 

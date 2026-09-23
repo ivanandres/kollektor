@@ -235,14 +235,17 @@ export function wishlistService(
           release_id: string;
           price: string;
           currency: string;
-          captured_at: Date;
+          checked_at: Date;
         }>(sql`
-          SELECT DISTINCT ON (release_id) release_id, price, currency, captured_at FROM price_snapshots
-           WHERE kind = 'lowest' AND release_id::text = ANY(ARRAY[${sql.join(
-             releaseIds.map((r) => sql`${r}`),
-             sql`, `,
-           )}])
-           ORDER BY release_id, captured_at DESC`)
+          SELECT DISTINCT ON (release_id) release_id, lowest_price AS price, currency, checked_at
+            FROM market_listings
+           WHERE lowest_price IS NOT NULL
+             AND checked_at > now() - interval '48 hours'
+             AND release_id::text = ANY(ARRAY[${sql.join(
+               releaseIds.map((r) => sql`${r}`),
+               sql`, `,
+             )}])
+           ORDER BY release_id, checked_at DESC`)
       : [];
     const market = new Map(listings.map((l) => [l.release_id, l]));
     const belowTarget = async (r: (typeof rows)[number]) => {
@@ -271,7 +274,7 @@ export function wishlistService(
           ? {
               lowest: Number(m.price),
               currency: m.currency,
-              checkedAt: new Date(m.captured_at).toISOString(),
+              checkedAt: new Date(m.checked_at).toISOString(),
             }
           : null;
       })(),

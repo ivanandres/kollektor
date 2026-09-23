@@ -581,6 +581,20 @@ export function catalogService(deps: CoreDeps) {
 
   /** Removes a user's private release (and its album, if empty) once nothing references it. */
   async function deleteOrphanPrivateRelease(userId: string, releaseId: string): Promise<void> {
+    try {
+      await deleteOrphanPrivateReleaseTx(userId, releaseId);
+    } catch (e) {
+      // A concurrent add started using it again: keeping the row is the right outcome.
+      if (
+        (e as { cause?: { code?: string }; code?: string }).cause?.code === '23503' ||
+        (e as { code?: string }).code === '23503'
+      )
+        return;
+      throw e;
+    }
+  }
+
+  async function deleteOrphanPrivateReleaseTx(userId: string, releaseId: string): Promise<void> {
     await db.transaction(async (tx) => {
       const [rel] = await tx
         .select({ albumId: releases.albumId, owner: releases.createdByUserId })
