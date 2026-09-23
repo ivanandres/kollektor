@@ -14,7 +14,8 @@ El modelo gira alrededor de **la edición que posee el usuario**
 | Frontend web (Next.js)                       | ⏳ Pendiente: espera las pantallas de diseño |
 | App móvil (Expo)                             | ⏳ Post-MVP (Fase 13)                        |
 
-Detalle en [`docs/estado-backend.md`](docs/estado-backend.md). Análisis y decisiones en
+Detalle en [`docs/estado-backend.md`](docs/estado-backend.md). Para diseñar las pantallas:
+[`docs/pantallas-y-datos.md`](docs/pantallas-y-datos.md) (qué datos y acciones tiene cada una). Análisis y decisiones en
 [`docs/00-analisis-y-arquitectura.md`](docs/00-analisis-y-arquitectura.md) y [`docs/adr/`](docs/adr/).
 
 ## Estructura
@@ -73,7 +74,7 @@ su variable en `.env`:
 ## Comandos
 
 ```bash
-pnpm test            # 103 tests (unitarios + integración contra Postgres + API de punta a punta)
+pnpm test            # 112 tests (unitarios + integración contra Postgres + API de punta a punta)
 pnpm typecheck
 pnpm lint
 pnpm format
