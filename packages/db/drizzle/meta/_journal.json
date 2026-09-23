@@ -29,6 +29,13 @@
       "when": 1790139968004,
       "tag": "0003_account_deletion_and_copy_photos",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790141486538,
+      "tag": "0004_external_accounts",
+      "breakpoints": true
     }
   ]
 }

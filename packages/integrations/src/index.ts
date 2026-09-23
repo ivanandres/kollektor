@@ -1,5 +1,6 @@
 import type { CoreDeps } from '@kollektor/core';
 import { DiscogsService } from './discogs/service';
+import { DiscogsOAuthConnector } from './discogs/oauth';
 import { ConsoleEmailService, ResendEmailService, type EmailService } from './email/resend';
 import { ChainFx, CurrencyApiFx, FrankfurterFx } from './fx/providers';
 import { GeniusLyricsService } from './lyrics/genius';
@@ -9,6 +10,7 @@ import { ClaudeCoverRecognizer } from './vision/claude';
 import { YouTubeService } from './youtube/service';
 
 export { DiscogsService } from './discogs/service';
+export { DiscogsOAuthConnector } from './discogs/oauth';
 export { RateLimiter } from './discogs/rate-limiter';
 export * as discogsMapper from './discogs/mapper';
 export { SpotifyService } from './spotify/service';
@@ -29,6 +31,8 @@ export { S3StorageService, type StorageService, type UploadTarget } from './stor
 export interface IntegrationEnv {
   DISCOGS_USER_TOKEN?: string;
   DISCOGS_USER_AGENT?: string;
+  DISCOGS_CONSUMER_KEY?: string;
+  DISCOGS_CONSUMER_SECRET?: string;
   ANTHROPIC_API_KEY?: string;
   VISION_MODEL?: string;
   SPOTIFY_CLIENT_ID?: string;
@@ -48,12 +52,15 @@ export interface IntegrationEnv {
 export function integrationsFromEnv(
   env: IntegrationEnv,
 ): Omit<CoreDeps, 'db' | 'now' | 'config'> & { email: EmailService; storage?: StorageService } {
+  const userAgent = env.DISCOGS_USER_AGENT ?? 'Kollektor/0.1';
   const discogs = env.DISCOGS_USER_TOKEN
-    ? new DiscogsService({
-        token: env.DISCOGS_USER_TOKEN,
-        userAgent: env.DISCOGS_USER_AGENT ?? 'Kollektor/0.1',
-      })
-    : undefined;
+    ? new DiscogsService({ token: env.DISCOGS_USER_TOKEN, userAgent })
+    : env.DISCOGS_CONSUMER_KEY && env.DISCOGS_CONSUMER_SECRET
+      ? new DiscogsService({
+          consumer: { key: env.DISCOGS_CONSUMER_KEY, secret: env.DISCOGS_CONSUMER_SECRET },
+          userAgent,
+        })
+      : undefined;
   const musicLinks = [
     ...(env.SPOTIFY_CLIENT_ID && env.SPOTIFY_CLIENT_SECRET
       ? [
@@ -73,6 +80,14 @@ export function integrationsFromEnv(
     lyrics: env.GENIUS_ACCESS_TOKEN
       ? new GeniusLyricsService({ accessToken: env.GENIUS_ACCESS_TOKEN })
       : undefined,
+    discogsOAuth:
+      env.DISCOGS_CONSUMER_KEY && env.DISCOGS_CONSUMER_SECRET
+        ? new DiscogsOAuthConnector({
+            consumerKey: env.DISCOGS_CONSUMER_KEY,
+            consumerSecret: env.DISCOGS_CONSUMER_SECRET,
+            userAgent: env.DISCOGS_USER_AGENT ?? 'Kollektor/0.1',
+          })
+        : undefined,
     recognizer: env.ANTHROPIC_API_KEY
       ? new ClaudeCoverRecognizer({
           apiKey: env.ANTHROPIC_API_KEY,

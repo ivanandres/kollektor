@@ -5,6 +5,7 @@ import { catalogService } from './modules/catalog/service';
 import { collectionService } from './modules/collection/service';
 import { currencyService } from './modules/currency/service';
 import { discoveryService } from './modules/discovery/service';
+import { accountService } from './modules/accounts/service';
 import { importService } from './modules/imports/service';
 import { jobService } from './modules/jobs/service';
 import { musicLinkService } from './modules/music/service';
@@ -44,7 +45,8 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
   const music = musicLinkService(deps, catalog);
   const recognition = recognitionService(deps);
   const jobs = jobService(deps);
-  const imports = importService(deps, collection, jobs);
+  const accounts = accountService(deps);
+  const imports = importService(deps, collection, jobs, accounts);
   const publicViews = publicService(deps, profiles, collection, wishlist, stats);
 
   /** Periodic maintenance: daily value snapshots and weekly market refresh (rate-limit friendly). */
@@ -136,6 +138,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
     recognition,
     jobs,
     imports,
+    accounts,
     publicViews,
     scheduleMaintenance,
     runJobs: (limit?: number, budgetMs?: number) => jobs.runDue(jobHandlers, limit, { budgetMs }),

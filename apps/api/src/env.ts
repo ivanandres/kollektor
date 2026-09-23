@@ -16,6 +16,12 @@ export const envSchema = z.object({
   CRON_SECRET: optional,
   DISCOGS_USER_TOKEN: optional,
   DISCOGS_USER_AGENT: optional,
+  DISCOGS_CONSUMER_KEY: optional,
+  DISCOGS_CONSUMER_SECRET: optional,
+  /** 32 random bytes, base64 (`openssl rand -base64 32`). Encrypts linked-account tokens. */
+  TOKEN_ENCRYPTION_KEY: optional,
+  /** Where to send the user after linking Discogs (web page or app deep link). Default: WEB_ORIGIN. */
+  DISCOGS_CONNECT_RETURN_URL: optional,
   ANTHROPIC_API_KEY: optional,
   VISION_MODEL: optional,
   VISION_DAILY_LIMIT: z.coerce.number().int().positive().default(30),

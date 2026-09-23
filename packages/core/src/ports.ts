@@ -183,6 +183,22 @@ export interface RecognitionHints {
   confidence: number;
 }
 
+/** OAuth 1.0a handshake with an external service + per-user API access (Discogs). */
+export interface OAuthConnector {
+  readonly provider: string;
+  requestToken(
+    callbackUrl: string,
+  ): Promise<{ token: string; secret: string; authorizeUrl: string }>;
+  accessToken(
+    requestToken: string,
+    requestSecret: string,
+    verifier: string,
+  ): Promise<{ token: string; secret: string }>;
+  identity(token: string, secret: string): Promise<{ id: string; username: string }>;
+  /** API client acting as the user (private collection, their seller settings, their quota). */
+  catalogFor(token: string, secret: string): CatalogProvider & MarketValueProvider;
+}
+
 export interface CoverRecognizer {
   extract(images: RecognitionImage[]): Promise<RecognitionHints>;
 }

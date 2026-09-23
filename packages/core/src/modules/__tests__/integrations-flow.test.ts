@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { addToCollectionInput, collectionQuery } from '@kollektor/schemas';
-import { createUser, FakeMusicLinks, FakeRecognizer } from '../../testing';
+import { sql } from 'drizzle-orm';
+import { createUser, FakeDiscogsOAuth, FakeMusicLinks, FakeRecognizer } from '../../testing';
 import { seedLibrary } from '../../testing/library';
 import { useCore } from '../../testing/setup';
 
@@ -134,6 +135,58 @@ describe('discogs import', () => {
     await ctx.core.imports.startDiscogsImport(ctx.userId, 'ivan');
     for (let i = 0; i < 5; i++) await ctx.core.imports.runBatch(ctx.userId, 10);
     expect((await ctx.core.collection.list(ctx.userId, collectionQuery.parse({}))).total).toBe(5);
+  });
+});
+
+describe('linked Discogs account', () => {
+  it('connects via OAuth, stores encrypted tokens and imports a private collection', async () => {
+    const oauth = new FakeDiscogsOAuth(ctx.catalog);
+    await h.setup({
+      discogsOAuth: oauth,
+      config: { tokenEncryptionKey: Buffer.alloc(32, 7).toString('base64') },
+    });
+    oauth.catalog = ctx.catalog; // setup() created a fresh fake catalog
+    seedLibrary(ctx.catalog);
+    ctx.catalog.privateCollections.set('ivan_vinilos', ['1873013', '2000006']);
+    // Public import fails for a private collection…
+    await expect(ctx.core.imports.startDiscogsImport(ctx.userId, 'ivan_vinilos')).rejects.toThrow();
+
+    const { authorizeUrl } = await ctx.core.accounts.startDiscogsConnect(
+      ctx.userId,
+      'https://api.test/api/discogs/callback',
+      'https://app.test/perfil',
+    );
+    const token = new URL(authorizeUrl).searchParams.get('oauth_token')!;
+    await expect(ctx.core.accounts.completeDiscogsConnect(token, 'wrong')).rejects.toThrow();
+    // A failed exchange consumes the handshake: the user must start again.
+    const retry = await ctx.core.accounts.startDiscogsConnect(
+      ctx.userId,
+      'https://api.test/api/discogs/callback',
+      null,
+    );
+    const done = await ctx.core.accounts.completeDiscogsConnect(
+      new URL(retry.authorizeUrl).searchParams.get('oauth_token')!,
+      'ok',
+    );
+    expect(done).toMatchObject({ userId: ctx.userId, username: 'ivan_vinilos' });
+    expect(await ctx.core.accounts.discogsStatus(ctx.userId)).toMatchObject({
+      connected: true,
+      username: 'ivan_vinilos',
+    });
+
+    const [stored] = await h.db.execute<{ token_enc: string }>(
+      sql`SELECT token_enc FROM external_accounts`,
+    );
+    expect(stored!.token_enc).not.toContain('user-token');
+
+    // …but works through the linked account, without typing the username.
+    const started = await ctx.core.imports.startDiscogsImport(ctx.userId);
+    expect(started).toMatchObject({ username: 'ivan_vinilos', total: 2 });
+    await ctx.core.imports.runBatch(ctx.userId, 10);
+    expect((await ctx.core.collection.list(ctx.userId, collectionQuery.parse({}))).total).toBe(2);
+
+    await ctx.core.accounts.disconnectDiscogs(ctx.userId);
+    expect((await ctx.core.accounts.discogsStatus(ctx.userId)).connected).toBe(false);
   });
 });
 

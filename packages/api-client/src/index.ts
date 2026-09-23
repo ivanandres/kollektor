@@ -160,6 +160,16 @@ export function createApiClient(opts: ApiClientOptions) {
         get<{ username: string; available: boolean }>('/me/username-available', { username }),
       avatarUpload: (contentType: 'image/jpeg' | 'image/png' | 'image/webp') =>
         post<T.UploadTarget>('/me/avatar-upload', { contentType }),
+      discogs: {
+        status: () =>
+          get<{ connected: boolean; username: string | null; connectedAt: string | null }>(
+            '/me/discogs',
+          ),
+        /** Open `authorizeUrl` in the browser; Discogs sends the user back to `returnTo?discogs=connected`. */
+        connect: (returnTo?: string) =>
+          post<{ authorizeUrl: string }>('/me/discogs/connect', { returnTo }),
+        disconnect: () => del('/me/discogs'),
+      },
     },
     collection: {
       list: (query: Partial<CollectionQuery> = {}) =>
@@ -246,7 +256,7 @@ export function createApiClient(opts: ApiClientOptions) {
     },
     discover: () => get<T.Insight[]>('/discover'),
     imports: {
-      startDiscogs: (username: string) =>
+      startDiscogs: (username?: string) =>
         post<{ username: string; total: number; queued: number; status: T.ImportStatus }>(
           '/imports/discogs',
           { username },

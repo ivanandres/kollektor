@@ -19,6 +19,7 @@ import {
   mapVersion,
   splitTitle,
 } from './mapper';
+import { oauthHeader } from './oauth';
 import { RateLimiter } from './rate-limiter';
 import type {
   DMarketStats,
@@ -30,9 +31,20 @@ import type {
   DCollectionResponse,
 } from './types';
 
-export interface DiscogsConfig {
-  /** Personal access token (app-level). Required for search. */
+export interface DiscogsOAuthCredentials {
+  consumerKey: string;
+  consumerSecret: string;
   token: string;
+  tokenSecret: string;
+}
+
+export interface DiscogsConfig {
+  /** Personal access token (app-level). Required for search unless `oauth` is given. */
+  token?: string;
+  /** Acting as a user who linked their account (OAuth 1.0a, PLAINTEXT signature over HTTPS). */
+  oauth?: DiscogsOAuthCredentials;
+  /** App-level consumer key/secret (alternative to a personal token for search). */
+  consumer?: { key: string; secret: string };
   /** Discogs requires a unique, descriptive User-Agent. */
   userAgent: string;
   currency?: string;
@@ -73,7 +85,15 @@ export class DiscogsService implements CatalogProvider, MarketValueProvider {
       url.toString(),
       {
         headers: {
-          Authorization: `Discogs token=${this.cfg.token}`,
+          Authorization: this.cfg.oauth
+            ? oauthHeader({
+                oauth_consumer_key: this.cfg.oauth.consumerKey,
+                oauth_token: this.cfg.oauth.token,
+                oauth_signature: `${this.cfg.oauth.consumerSecret}&${this.cfg.oauth.tokenSecret}`,
+              })
+            : this.cfg.consumer
+              ? `Discogs key=${this.cfg.consumer.key}, secret=${this.cfg.consumer.secret}`
+              : `Discogs token=${this.cfg.token}`,
           'User-Agent': this.cfg.userAgent,
           Accept: 'application/vnd.discogs.v2.discogs+json',
         },

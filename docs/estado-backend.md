@@ -1,6 +1,6 @@
 # Estado del backend — noche del 23/09/2026
 
-Resumen: el backend del MVP (fases 1 a 11 del roadmap) está implementado, con 93 tests pasando contra
+Resumen: el backend del MVP (fases 1 a 11 del roadmap) está implementado, con 100 tests pasando contra
 Postgres real. Falta todo lo visual: web (fase 12, espera las pantallas de diseño) y app móvil (fase 13).
 
 ## Por fase
@@ -83,8 +83,9 @@ mismo `SearchProvider` (Meilisearch o Typesense), sin tocar la API.
   Si no, el link queda como `unavailable`, nunca como un link inventado.
 - **Rate limit por usuario:** es en memoria, por instancia. Alcanza para el MVP; con varias instancias
   conviene moverlo a Postgres o Redis.
-- **Discogs OAuth por usuario** (colecciones privadas y más cupo): no está hecho. Hoy la importación
-  funciona con colecciones públicas.
+- **Discogs OAuth:** está implementado (vincular cuenta, tokens cifrados con AES-256-GCM, importar
+  colecciones privadas), pero probado solo con respuestas simuladas. La firma sigue la documentación de
+  Discogs (PLAINTEXT sobre HTTPS). Hay que validarlo con una app real registrada en Discogs.
 - **Deploy:** la configuración de Vercel y Docker está escrita pero no pude probarla en este entorno (no hay
   Docker ni cuenta de Vercel). Hay que validarla en el primer deploy.
 - Los **tipos de cambio** y las **APIs externas reales** no se pudieron llamar desde este entorno, porque la

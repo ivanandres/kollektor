@@ -181,6 +181,8 @@ export class FakeCatalog implements CatalogProvider, MarketValueProvider {
   }
 
   userCollections = new Map<string, string[]>();
+  /** Only visible through a user's own OAuth session. */
+  privateCollections = new Map<string, string[]>();
   async listUserCollection(username: string, page = 1) {
     const ids = this.userCollections.get(username);
     if (!ids) throw new Error('not found');
@@ -200,6 +202,53 @@ export class FakeCatalog implements CatalogProvider, MarketValueProvider {
 
   async getMarketValues(id: string) {
     return this.market.get(id) ?? [];
+  }
+}
+
+/** OAuth connector whose per-user client can see that user's (private) collection. */
+export class FakeDiscogsOAuth {
+  readonly provider = 'discogs';
+  private n = 0;
+  constructor(
+    public catalog: FakeCatalog,
+    private readonly user = { id: '42', username: 'ivan_vinilos' },
+  ) {}
+  async requestToken(callbackUrl: string) {
+    const token = `req${++this.n}`;
+    return {
+      token,
+      secret: `${token}-secret`,
+      authorizeUrl: `https://discogs.test/authorize?oauth_token=${token}&cb=${encodeURIComponent(callbackUrl)}`,
+    };
+  }
+  async accessToken(requestToken: string, requestSecret: string, verifier: string) {
+    if (requestSecret !== `${requestToken}-secret` || verifier !== 'ok')
+      throw new Error('bad verifier');
+    return { token: 'user-token', secret: 'user-secret' };
+  }
+  async identity() {
+    return this.user;
+  }
+  /** Acting as the user: private collections are visible. */
+  catalogFor(token: string) {
+    if (token !== 'user-token') throw new Error('bad token');
+    const c = this.catalog;
+    return Object.assign(Object.create(Object.getPrototypeOf(c)), c, {
+      listUserCollection: async (username: string, page = 1) => {
+        const ids = c.privateCollections.get(username) ?? c.userCollections.get(username);
+        if (!ids) throw new Error('not found');
+        return {
+          items: ids.map((externalReleaseId, i) => ({
+            instanceId: `${username}-p${i}`,
+            externalReleaseId,
+            dateAdded: null,
+          })),
+          page,
+          pages: 1,
+          total: ids.length,
+        };
+      },
+    }) as FakeCatalog;
   }
 }
 

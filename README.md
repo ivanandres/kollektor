@@ -62,6 +62,7 @@ su variable en `.env`:
 | Variable                                                        | Habilita                                                                     |
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `DISCOGS_USER_TOKEN`                                            | Buscar/importar ediciones, valores de mercado, importar colección de Discogs |
+| `DISCOGS_CONSUMER_KEY/SECRET` + `TOKEN_ENCRYPTION_KEY`          | Que cada usuario vincule su cuenta de Discogs (colecciones privadas)         |
 | `ANTHROPIC_API_KEY` (+ `VISION_MODEL`, default `claude-opus-5`) | Identificar discos por foto                                                  |
 | `SPOTIFY_CLIENT_ID/SECRET`, `YOUTUBE_API_KEY`                   | Links verificados a cada tema                                                |
 | `GENIUS_ACCESS_TOKEN`                                           | Link "Ver letra"                                                             |
@@ -72,7 +73,7 @@ su variable en `.env`:
 ## Comandos
 
 ```bash
-pnpm test            # 93 tests (unitarios + integración contra Postgres + API de punta a punta)
+pnpm test            # 100 tests (unitarios + integración contra Postgres + API de punta a punta)
 pnpm typecheck
 pnpm lint
 pnpm format

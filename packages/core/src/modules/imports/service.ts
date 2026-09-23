@@ -1,5 +1,6 @@
 import type { CoreDeps } from '../../context';
 import { DomainError } from '../../lib/errors';
+import type { AccountService } from '../accounts/service';
 import type { CollectionService } from '../collection/service';
 import type { JobService } from '../jobs/service';
 
@@ -8,13 +9,23 @@ const PAGE_JOB = 'import.discogs_page';
 const MAX_PAGES = 50; // 5,000 records
 
 /**
- * Imports a user's public Discogs collection. The first page is read in the request (validates
- * the username/privacy right away); following pages and every record are queued as jobs and
+ * Imports a user's Discogs collection. The first page is read in the request (validates the
+ * username/privacy right away); following pages and every record are queued as jobs and
  * processed in rate-limit-friendly batches (client polling `runBatch`, or cron).
+ * With a linked Discogs account, the user's own session is used, so private collections work.
  */
-export function importService(deps: CoreDeps, collection: CollectionService, jobs: JobService) {
-  function provider() {
-    const p = deps.catalogProvider;
+export function importService(
+  deps: CoreDeps,
+  collection: CollectionService,
+  jobs: JobService,
+  accounts?: AccountService,
+) {
+  async function provider(userId: string, username: string) {
+    const linked = await accounts?.discogsFor(userId);
+    const p =
+      linked && linked.username?.toLowerCase() === username.toLowerCase()
+        ? linked.client
+        : deps.catalogProvider;
     if (!p?.listUserCollection)
       throw new DomainError('NOT_CONFIGURED', 'La importación desde Discogs no está disponible');
     return p as typeof p & Required<Pick<typeof p, 'listUserCollection'>>;
@@ -22,7 +33,7 @@ export function importService(deps: CoreDeps, collection: CollectionService, job
 
   /** Lists one page, queues its records and the next page. Returns what it found. */
   async function queuePage(userId: string, username: string, page: number) {
-    const res = await provider().listUserCollection(username, page);
+    const res = await (await provider(userId, username)).listUserCollection(username, page);
     let queued = 0;
     for (const entry of res.items) {
       const isNew = await jobs.enqueue(
@@ -41,7 +52,10 @@ export function importService(deps: CoreDeps, collection: CollectionService, job
     return { total: res.total, queued };
   }
 
-  async function startDiscogsImport(userId: string, username: string) {
+  async function startDiscogsImport(userId: string, requestedUsername?: string | null) {
+    const username = requestedUsername || (await accounts?.discogsStatus(userId))?.username;
+    if (!username)
+      throw new DomainError('VALIDATION', 'Indicá tu usuario de Discogs o conectá tu cuenta');
     // Re-running an import retries records that failed before; imported copies never duplicate.
     const retried = await jobs.retryFailed(RELEASE_JOB, userId);
     const first = await queuePage(userId, username, 1);

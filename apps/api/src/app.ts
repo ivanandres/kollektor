@@ -8,6 +8,7 @@ import { collectionRoutes } from './routes/collection';
 import { insightRoutes } from './routes/insights';
 import { meRoutes } from './routes/me';
 import { publicRoutes } from './routes/public';
+import { discogsAccountRoutes, discogsCallbackRoutes } from './routes/discogs';
 import { perUserRateLimit } from './lib/rate-limit';
 import { accessLog } from './lib/log';
 import { wishlistRoutes } from './routes/wishlist';
@@ -45,6 +46,7 @@ export function createApp(deps: AppDeps) {
   });
 
   app.route('/public', publicRoutes(deps));
+  app.route('/discogs', discogsCallbackRoutes(deps));
 
   // Everything below requires a session (cookie on web, bearer token on mobile).
   const authed = new Hono<AppEnv>();
@@ -65,6 +67,8 @@ export function createApp(deps: AppDeps) {
   authed.use('/catalog/albums/:id/external-versions', limit);
   authed.use('/me/avatar-upload', limit);
   authed.use('/collection/:id/photos/upload', limit);
+  authed.use('/me/discogs/connect', limit);
+  authed.route('/me/discogs', discogsAccountRoutes(deps));
   authed.route('/me', meRoutes(deps));
   authed.route('/collection', collectionRoutes(deps));
   authed.route('/wishlist', wishlistRoutes(deps));

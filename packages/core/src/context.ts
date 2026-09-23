@@ -2,6 +2,7 @@ import type { Database } from '@kollektor/db';
 import type {
   CatalogProvider,
   CoverRecognizer,
+  OAuthConnector,
   FxRateProvider,
   LyricsProvider,
   MarketValueProvider,
@@ -16,6 +17,7 @@ export interface CoreDeps {
   musicLinks?: MusicLinkProvider[];
   lyrics?: LyricsProvider;
   recognizer?: CoverRecognizer;
+  discogsOAuth?: OAuthConnector;
   now?: () => Date;
   config?: {
     /** Photo recognitions per user per day. */
@@ -24,6 +26,8 @@ export interface CoreDeps {
     catalogStaleAfterDays?: number;
     /** Re-check "not found" music links after this. */
     musicLinkRetryAfterDays?: number;
+    /** 32-byte base64 key for encrypting OAuth tokens at rest. */
+    tokenEncryptionKey?: string;
   };
 }
 

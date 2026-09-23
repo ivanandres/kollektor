@@ -12,7 +12,10 @@ export function bootstrap(env: Env) {
   const core = createCore({
     db,
     ...adapters,
-    config: { visionDailyLimit: env.VISION_DAILY_LIMIT },
+    config: {
+      visionDailyLimit: env.VISION_DAILY_LIMIT,
+      tokenEncryptionKey: env.TOKEN_ENCRYPTION_KEY,
+    },
   });
   const auth = createAuth({ db, core, email, env, storage });
   const app = createApp({ core, auth, env, storage });

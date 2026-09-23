@@ -65,3 +65,33 @@ export const usageCounters = pgTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.kind, t.day] })],
 );
+
+/** Accounts linked in external services (Discogs OAuth). Tokens are encrypted at rest. */
+export const externalAccounts = pgTable(
+  'external_accounts',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    provider: text('provider').notNull(),
+    externalUserId: text('external_user_id'),
+    externalUsername: text('external_username'),
+    tokenEnc: text('token_enc').notNull(),
+    secretEnc: text('secret_enc').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.provider] })],
+);
+
+/** In-flight OAuth 1.0a handshakes (request token → user → verifier). Short-lived. */
+export const oauthRequests = pgTable('oauth_requests', {
+  requestToken: text('request_token').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  provider: text('provider').notNull(),
+  secretEnc: text('secret_enc').notNull(),
+  returnTo: text('return_to'),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+});

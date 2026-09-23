@@ -27,7 +27,8 @@ export function insightRoutes({ core }: AppDeps) {
       // Import an existing public Discogs collection: start, then poll `run` to process batches.
       .post('/imports/discogs', async (c) => {
         const { username } = parse(
-          z.object({ username: z.string().trim().min(1).max(100) }),
+          // Optional when the user linked their Discogs account (then their own, even private).
+          z.object({ username: z.string().trim().min(1).max(100).optional() }),
           await jsonBody(c),
         );
         return c.json(await core.imports.startDiscogsImport(c.get('userId'), username), 202);

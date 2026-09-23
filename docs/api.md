@@ -46,6 +46,16 @@ Base: `/api` (local: `http://localhost:3001/api`). JSON en todo, salvo el export
 | `GET /me/username-available?username=` | `{ username, available }` |
 | `POST /me/avatar-upload` | `{ contentType: image/jpeg\|png\|webp }` → `{ uploadUrl, publicUrl, method: "PUT", headers }`. El cliente hace `PUT` del archivo a `uploadUrl` y después `PATCH /me/profile { avatarUrl: publicUrl }`. Al registrarla se verifica que la imagen exista y pese menos de 5 MB (si pesa más, se borra) |
 
+### Cuenta de Discogs vinculada (opcional)
+
+| Método y ruta | Descripción |
+|---|---|
+| `GET /me/discogs` | `{ connected, username, connectedAt }` |
+| `POST /me/discogs/connect` | `{ returnTo? }` → `{ authorizeUrl }`. El cliente abre esa URL; después de autorizar, Discogs vuelve a `/api/discogs/callback`, que redirige a `returnTo` (la web o un deep link configurado en `DISCOGS_CONNECT_RETURN_URL`) con `?discogs=connected`, `?discogs=error` o `?discogs=cancelled` |
+| `DELETE /me/discogs` | Desvincula la cuenta y borra los tokens, que se guardan cifrados |
+
+Con la cuenta vinculada, `POST /imports/discogs` sin `username` importa **tu** colección, aunque sea privada.
+
 ## Colección
 
 | Método y ruta | Descripción |
@@ -156,7 +166,7 @@ las hizo (`isVerified: false`).
 
 | Método y ruta | Descripción |
 |---|---|
-| `POST /imports/discogs` | `{ username }` de una colección pública de Discogs → `202 { total, queued, status }`. Valida el usuario al instante (404 si no existe, 403 si su colección es privada); el resto de las páginas se lista en segundo plano |
+| `POST /imports/discogs` | `{ username? }`: una colección pública de Discogs o, sin `username`, la de tu cuenta vinculada → `202 { total, queued, status }`. Valida el usuario al instante (404 si no existe, 403 si su colección es privada); el resto de las páginas se lista en segundo plano |
 | `POST /imports/discogs/run` | Procesa un lote de 10 discos. El cliente lo llama en bucle y muestra el progreso con `status: { pending, done, failed, listing }`. Termina cuando `pending = 0` y `listing = false` |
 | `GET /imports/discogs` | Estado de la importación |
 

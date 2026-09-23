@@ -5,6 +5,7 @@ import {
   FakeFx,
   FakeMusicLinks,
   FakeRecognizer,
+  FakeDiscogsOAuth,
   seedLibrary,
 } from '@kollektor/core/testing';
 import { createTestDb, resetDb } from '@kollektor/db/testing';
@@ -36,6 +37,8 @@ const core = createCore({
     }),
   ],
   recognizer: new FakeRecognizer({ artist: 'Pink Floyd', title: 'The Dark Side of the Moon' }),
+  discogsOAuth: new FakeDiscogsOAuth(catalog),
+  config: { tokenEncryptionKey: Buffer.alloc(32, 1).toString('base64') },
 });
 const objects = new Map<string, number>();
 const deletedKeys: string[] = [];
@@ -535,6 +538,37 @@ describe('MVP flow', () => {
       statuses.push((await call('/catalog/external/search?q=pink', { session: eve2 })).status);
     expect(statuses.slice(0, 30).every((s) => s === 200)).toBe(true);
     expect(statuses[30]).toBe(429);
+  });
+
+  it('links a Discogs account through the OAuth callback (no open redirects)', async () => {
+    const start = await call('/me/discogs/connect', {
+      method: 'POST',
+      session: ivan,
+      body: { returnTo: 'http://localhost:3000/perfil' },
+    });
+    const authorize = new URL(start.json.authorizeUrl);
+    expect(authorize.searchParams.get('cb')).toBe('http://localhost:3001/api/discogs/callback');
+    const token = authorize.searchParams.get('oauth_token')!;
+    const cb = await app.request(`/api/discogs/callback?oauth_token=${token}&oauth_verifier=ok`);
+    expect(cb.status).toBe(302);
+    expect(cb.headers.get('location')).toBe('http://localhost:3000/perfil?discogs=connected');
+    expect((await call('/me/discogs', { session: ivan })).json).toMatchObject({
+      connected: true,
+      username: 'ivan_vinilos',
+    });
+
+    // Foreign returnTo falls back to the web app; bad verifier → error.
+    const evil = await call('/me/discogs/connect', {
+      method: 'POST',
+      session: ivan,
+      body: { returnTo: 'https://evil.example.com/' },
+    });
+    const t2 = new URL(evil.json.authorizeUrl).searchParams.get('oauth_token')!;
+    const bad = await app.request(`/api/discogs/callback?oauth_token=${t2}&oauth_verifier=nope`);
+    expect(bad.headers.get('location')).toBe('http://localhost:3000?discogs=error');
+    const cancelled = await app.request('/api/discogs/callback?denied=1');
+    expect(cancelled.headers.get('location')).toBe('http://localhost:3000?discogs=cancelled');
+    expect((await call('/me/discogs', { method: 'DELETE', session: ivan })).status).toBe(204);
   });
 
   it('validation errors are structured', async () => {
