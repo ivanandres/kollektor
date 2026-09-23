@@ -112,7 +112,15 @@ export function recognitionService(deps: CoreDeps) {
       throw new DomainError('NOT_CONFIGURED', 'El reconocimiento de imágenes no está configurado');
     provider();
     const remainingToday = await consumeQuota(userId);
-    const hints = await deps.recognizer.extract(images);
+    let hints: RecognitionHints;
+    try {
+      hints = await deps.recognizer.extract(images);
+    } catch (e) {
+      // A failed call shouldn't cost the user one of today's tries.
+      await db.execute(sql`UPDATE ${schema.usageCounters} SET count = count - 1
+        WHERE user_id = ${userId} AND kind = 'vision' AND day = ${toIsoDate(nowOf(deps))}`);
+      throw e;
+    }
     const { candidates, strategies } = await candidatesFrom(hints);
     return { hints, strategies, candidates, remainingToday };
   }

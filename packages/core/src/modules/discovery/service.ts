@@ -99,7 +99,9 @@ export function discoveryService(deps: CoreDeps, achievements: AchievementServic
       ), top AS (SELECT artist_id FROM mine ORDER BY n DESC LIMIT 3),
       top_styles AS (
         SELECT DISTINCT t.artist_id, ast.style_id FROM top t
-          JOIN album_artists aa ON aa.artist_id = t.artist_id JOIN album_styles ast ON ast.album_id = aa.album_id
+          JOIN album_artists aa ON aa.artist_id = t.artist_id
+          JOIN albums al0 ON al0.id = aa.album_id AND (al0.created_by_user_id IS NULL OR al0.created_by_user_id = ${userId})
+          JOIN album_styles ast ON ast.album_id = aa.album_id
       ), candidates AS (
         SELECT aa.artist_id AS candidate, ts.artist_id AS source, array_agg(DISTINCT s.name) AS shared, count(DISTINCT ts.style_id) AS score
           FROM top_styles ts JOIN album_styles ast ON ast.style_id = ts.style_id

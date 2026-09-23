@@ -35,7 +35,7 @@ export function createApp(deps: AppDeps) {
     if (!env.CRON_SECRET || c.req.header('authorization') !== `Bearer ${env.CRON_SECRET}`)
       return c.json({ error: { code: 'FORBIDDEN', message: 'No autorizado' } }, 401);
     await core.scheduleMaintenance();
-    return c.json(await core.runJobs(40));
+    return c.json(await core.runJobs(40, 45_000));
   });
 
   // Everything below requires a session (cookie on web, bearer token on mobile).

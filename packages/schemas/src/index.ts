@@ -169,7 +169,8 @@ export const addToCollectionInput = withPriceCurrency(
 });
 export type AddToCollectionInput = z.infer<typeof addToCollectionInput>;
 
-export const updateCollectionItemInput = withPriceCurrency(collectionItemFields);
+/** Price/currency consistency is checked against the stored row by the service. */
+export const updateCollectionItemInput = collectionItemFields;
 export type UpdateCollectionItemInput = z.infer<typeof updateCollectionItemInput>;
 
 /** Query-string friendly: arrays accept "a,b,c" or repeated params. */
@@ -253,7 +254,7 @@ export type UpdateWishlistInput = z.infer<typeof updateWishlistInput>;
 
 export const wishlistQuery = z.object({
   status: list(wishlistStatus),
-  includePurchased: z.coerce.boolean().default(false),
+  includePurchased: z.stringbool().default(false),
 });
 
 // ─── Search / external catalog ──────────────────────────────────────────────

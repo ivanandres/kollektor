@@ -27,6 +27,8 @@ const {
 type EditionType = (typeof schema.editionType.enumValues)[number];
 
 const SIZE_RE = /^\d+(\.\d+)?"$/;
+const COLOR_RE =
+  /\b(red|blue|green|yellow|orange|purple|violet|pink|white|clear|transparent|translucent|gold|silver|splatter|marbled?|swirl|smoke|colou?red|opaque|rojo|azul|verde|amarillo|blanco|transparente)\b/i;
 const SPEED_RE = /RPM$/i;
 
 export function splitFormat(f: ExternalFormat) {
@@ -37,8 +39,12 @@ export function splitFormat(f: ExternalFormat) {
     qty: f.qty,
     size,
     speed,
-    color: f.text,
-    descriptions: f.descriptions.filter((d) => d !== size && d !== speed),
+    // Discogs' free text holds colors ("Red Translucent") but also "180 Gram", "Gatefold"…
+    color: f.text && COLOR_RE.test(f.text) ? f.text : null,
+    descriptions: [
+      ...f.descriptions.filter((d) => d !== size && d !== speed),
+      ...(f.text && !COLOR_RE.test(f.text) ? [f.text] : []),
+    ],
   };
 }
 
@@ -166,6 +172,16 @@ export function catalogService(deps: CoreDeps) {
     master: ExternalMaster | null = null,
   ): Promise<string> {
     return db.transaction(async (tx) => {
+      // Serialize concurrent imports touching the same release/album/artists/labels so two
+      // users adding editions of the same album can't create duplicate catalog rows.
+      const lockKeys = [
+        `release:${ext.externalId}`,
+        `album:${albumKey(ext)}`,
+        ...(master?.artists ?? ext.artists).map((a) => `artist:${a.externalId ?? a.name}`),
+        ...ext.labels.map((l) => `label:${l.externalId ?? l.name}`),
+      ];
+      for (const key of [...new Set(lockKeys)].sort())
+        await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`${ext.source}:${key}`}))`);
       const existing = await repo.findExternal(tx, 'release', ext.source, ext.externalId);
       if (existing) {
         await tx
@@ -201,7 +217,12 @@ export function catalogService(deps: CoreDeps) {
           releaseYear: ext.year,
           releaseDate: ext.releaseDate,
           country: ext.country,
-          editionType: inferEditionType(allDescriptions, ext.year, album?.year ?? null),
+          // Without a master we don't know the original year, so we can't call it "original".
+          editionType: inferEditionType(
+            allDescriptions,
+            ext.year,
+            ext.masterId ? (album?.year ?? null) : null,
+          ),
           formatSummary: ext.formatSummary,
           barcode: ext.barcodes[0] ?? null,
           notes: ext.notes,

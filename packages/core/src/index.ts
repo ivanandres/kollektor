@@ -57,7 +57,10 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
           JOIN external_ids e ON e.entity_type = 'release' AND e.entity_id = ci.release_id AND e.source = ${deps.marketValue.source}
          WHERE ci.deleted_at IS NULL AND NOT EXISTS (
            SELECT 1 FROM price_snapshots ps WHERE ps.release_id = ci.release_id AND ps.source = ${deps.marketValue.source}
-             AND ps.kind <> 'lowest' AND ps.captured_at > now() - interval '7 days')`);
+             AND ps.captured_at > now() - interval '7 days')
+           AND NOT EXISTS (
+             SELECT 1 FROM sync_jobs j WHERE j.type = 'release.refresh_value' AND j.status IN ('pending', 'running')
+               AND j.payload->>'releaseId' = ci.release_id::text)`);
       for (const r of stale)
         await jobs.enqueue(
           'release.refresh_value',
@@ -114,7 +117,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
     jobs,
     imports,
     scheduleMaintenance,
-    runJobs: (limit?: number) => jobs.runDue(jobHandlers, limit),
+    runJobs: (limit?: number, budgetMs?: number) => jobs.runDue(jobHandlers, limit, { budgetMs }),
   };
 }
 

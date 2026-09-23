@@ -100,7 +100,21 @@ export function wishlistService(
         notes: input.notes ?? null,
         clientRequestId: input.clientRequestId ?? null,
       })
+      .onConflictDoNothing()
       .returning();
+    if (!row) {
+      // Concurrent retry with the same clientRequestId won the race.
+      const [prev] = await db
+        .select({ id: wishlistItems.id })
+        .from(wishlistItems)
+        .where(
+          and(
+            eq(wishlistItems.userId, userId),
+            eq(wishlistItems.clientRequestId, input.clientRequestId!),
+          ),
+        );
+      return (await list(userId, { ids: [prev!.id], includePurchased: true }))[0]!;
+    }
     await recordActivity(db, {
       userId,
       type: 'wishlist.added',
@@ -113,6 +127,9 @@ export function wishlistService(
 
   async function update(userId: string, id: string, input: UpdateWishlistInput) {
     const current = await getOwned(userId, id);
+    const merged = { ...current, ...input };
+    if (merged.targetPrice != null && !merged.targetCurrency)
+      throw invalid('La moneda es obligatoria si hay precio objetivo');
     if (input.status === 'purchased' && !current.collectionItemId)
       throw invalid('Para marcar como comprado usá "Agregar a mi colección"');
     await db
@@ -139,9 +156,11 @@ export function wishlistService(
     const w = await getOwned(userId, id);
     if (w.status === 'purchased') throw conflict('Este ítem ya fue comprado');
     const { releaseId: chosenRelease, discogsReleaseId, ...fields } = input;
-    let releaseId = chosenRelease ?? w.releaseId ?? undefined;
+    // The edition actually bought wins over the one on the wishlist.
+    let releaseId = chosenRelease;
     if (!releaseId && discogsReleaseId != null)
       releaseId = await catalog.importFromProvider(String(discogsReleaseId));
+    releaseId ??= w.releaseId ?? undefined;
     if (!releaseId) throw invalid('Elegí la edición que compraste');
     if ((await catalog.albumIdOfRelease(releaseId)) !== w.albumId)
       throw invalid('La edición no corresponde al álbum de la wishlist');

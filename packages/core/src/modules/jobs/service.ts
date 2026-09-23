@@ -5,6 +5,8 @@ import { nowOf } from '../../context';
 
 const { syncJobs } = schema;
 const MAX_ATTEMPTS = 5;
+/** Jobs left "running" longer than this (e.g. the function was killed) go back to pending. */
+const LEASE_MS = 10 * 60_000;
 
 export type JobHandler = (payload: Record<string, unknown>) => Promise<void>;
 
@@ -34,8 +36,12 @@ export function jobService(deps: CoreDeps) {
   async function runDue(
     handlers: Record<string, JobHandler>,
     limit = 20,
-    filter: { type?: string; userId?: string } = {},
+    filter: { type?: string; userId?: string; budgetMs?: number } = {},
   ) {
+    const started = Date.now();
+    await db.execute(sql`
+      UPDATE ${syncJobs} SET status = 'pending', updated_at = now()
+       WHERE status = 'running' AND updated_at < now() - make_interval(secs => ${LEASE_MS / 1000})`);
     const typeCond = filter.type ? sql`AND type = ${filter.type}` : sql``;
     const userCond = filter.userId ? sql`AND payload->>'userId' = ${filter.userId}` : sql``;
     const picked = await db.execute<{
@@ -51,7 +57,17 @@ export function jobService(deps: CoreDeps) {
           ORDER BY run_after LIMIT ${limit} FOR UPDATE SKIP LOCKED)
       RETURNING id, type, payload, attempts`);
     const result = { done: 0, failed: 0, retried: 0 };
-    for (const job of picked) {
+    for (const [index, job] of picked.entries()) {
+      if (filter.budgetMs != null && Date.now() - started > filter.budgetMs) {
+        // Out of time: give the rest back without counting the attempt.
+        const rest = picked.slice(index).map((j) => j.id);
+        await db.execute(sql`UPDATE ${syncJobs} SET status = 'pending', attempts = attempts - 1
+          WHERE id IN (${sql.join(
+            rest.map((id) => sql`${id}::uuid`),
+            sql`, `,
+          )})`);
+        break;
+      }
       const handler = handlers[job.type];
       try {
         if (!handler) throw new Error(`No handler for job type ${job.type}`);

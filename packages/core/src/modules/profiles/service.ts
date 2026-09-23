@@ -48,13 +48,21 @@ export function profileService(
       .from(user)
       .where(eq(user.id, userId));
     if (!u) throw notFound('Usuario');
-    const username = await suggestUsername(u.name || u.email);
-    const [created] = await db
-      .insert(profiles)
-      .values({ userId, username, displayName: u.name || null })
-      .onConflictDoNothing()
-      .returning();
-    return created ?? (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0]!;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const username = await suggestUsername(u.name || u.email);
+      try {
+        const [created] = await db
+          .insert(profiles)
+          .values({ userId, username, displayName: u.name || null })
+          .onConflictDoNothing({ target: profiles.userId })
+          .returning();
+        return created ?? (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0]!;
+      } catch (e) {
+        // Username taken by a concurrent sign-up: pick another one.
+        if (attempt === 4) throw e;
+      }
+    }
+    throw conflict('No se pudo crear el perfil');
   }
 
   async function getProfile(userId: string): Promise<Profile> {

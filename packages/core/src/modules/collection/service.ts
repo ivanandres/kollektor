@@ -8,7 +8,7 @@ import type {
 } from '@kollektor/schemas';
 import type { CoreDeps, Db } from '../../context';
 import { nowOf } from '../../context';
-import { notFound } from '../../lib/errors';
+import { invalid, notFound } from '../../lib/errors';
 import { recordActivity } from '../activity/service';
 import type { CatalogService, ReleaseDetail } from '../catalog/service';
 import type { ValuationService } from '../valuation/service';
@@ -160,7 +160,14 @@ export function collectionService(
   }
 
   async function update(userId: string, itemId: string, input: UpdateCollectionItemInput) {
-    await getOwnedRow(userId, itemId);
+    const current = await getOwnedRow(userId, itemId);
+    const merged = { ...current, ...input };
+    if (merged.purchasePrice != null && !merged.purchaseCurrency)
+      throw invalid('La moneda es obligatoria si hay precio', { path: 'purchaseCurrency' });
+    if (merged.valueOverride != null && !merged.valueOverrideCurrency)
+      throw invalid('La moneda es obligatoria si hay valor manual', {
+        path: 'valueOverrideCurrency',
+      });
     await db.transaction(async (tx) => {
       const values = itemValues(input);
       if (Object.keys(values).length)
@@ -181,7 +188,8 @@ export function collectionService(
     await db.transaction(async (tx) => {
       await tx
         .update(collectionItems)
-        .set({ deletedAt: nowOf(deps) })
+        // Frees the clientRequestId so a later retry can add the record again.
+        .set({ deletedAt: nowOf(deps), clientRequestId: null })
         .where(eq(collectionItems.id, itemId));
       await recordActivity(tx, {
         userId,
