@@ -47,8 +47,6 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
     const users = await deps.db.execute<{ user_id: string }>(
       sql`SELECT DISTINCT user_id FROM collection_items WHERE deleted_at IS NULL`,
     );
-    for (const u of users)
-      await jobs.enqueue('collection.snapshot', { userId: u.user_id }, { dedupeKey: `snapshot:${u.user_id}:${now}` });
     if (deps.marketValue) {
       const stale = await deps.db.execute<{ release_id: string }>(sql`
         SELECT DISTINCT ci.release_id FROM collection_items ci
@@ -57,8 +55,12 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
            SELECT 1 FROM price_snapshots ps WHERE ps.release_id = ci.release_id AND ps.source = ${deps.marketValue.source}
              AND ps.kind <> 'lowest' AND ps.captured_at > now() - interval '7 days')`);
       for (const r of stale)
-        await jobs.enqueue('release.refresh_value', { releaseId: r.release_id }, { dedupeKey: `value:${r.release_id}` });
+        await jobs.enqueue('release.refresh_value', { releaseId: r.release_id }, { dedupeKey: `value:${r.release_id}:${now}` });
     }
+    // Snapshots run after the value refreshes queued above.
+    const later = new Date((deps.now ? deps.now() : new Date()).getTime() + 30 * 60_000);
+    for (const u of users)
+      await jobs.enqueue('collection.snapshot', { userId: u.user_id }, { dedupeKey: `snapshot:${u.user_id}:${now}`, runAfter: later });
   }
 
   const jobHandlers = {
@@ -91,3 +93,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
 const nowIso = (deps: CoreDeps) => (deps.now ? deps.now() : new Date()).toISOString().slice(0, 10);
 
 export type Core = ReturnType<typeof createCore>;
+
+export { seedAll, seedAchievements, seedEssentialLists } from './seed/seed';
+export { ESSENTIAL_LISTS } from './seed/essential-lists';
+export { ACHIEVEMENTS } from './seed/achievements';

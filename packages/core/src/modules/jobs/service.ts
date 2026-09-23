@@ -8,7 +8,9 @@ const MAX_ATTEMPTS = 5;
 
 export type JobHandler = (payload: Record<string, unknown>) => Promise<void>;
 
-/** Minimal Postgres-backed queue. Triggered by cron (Vercel Cron today, system cron on a VPS). */
+/**
+ * Minimal Postgres-backed queue. Dedupe keys are permanent: include a date in the key for
+ * periodic work (e.g. `snapshot:<user>:<day>`). Triggered by cron (Vercel Cron today, system cron on a VPS). */
 export function jobService(deps: CoreDeps) {
   const { db } = deps;
 
@@ -25,7 +27,7 @@ export function jobService(deps: CoreDeps) {
       UPDATE ${syncJobs} SET status = 'running', attempts = attempts + 1, updated_at = now()
        WHERE id IN (
          SELECT id FROM ${syncJobs}
-          WHERE status = 'pending' AND run_after <= ${nowOf(deps)}
+          WHERE status = 'pending' AND run_after <= ${nowOf(deps).toISOString()}::timestamptz
           ORDER BY run_after LIMIT ${limit} FOR UPDATE SKIP LOCKED)
       RETURNING id, type, payload, attempts`);
     const result = { done: 0, failed: 0, retried: 0 };
@@ -34,8 +36,7 @@ export function jobService(deps: CoreDeps) {
       try {
         if (!handler) throw new Error(`No handler for job type ${job.type}`);
         await handler(job.payload);
-        // Done jobs release their dedupe key so the same work can be scheduled again later.
-        await db.update(syncJobs).set({ status: 'done', dedupeKey: null, updatedAt: nowOf(deps) }).where(eq(syncJobs.id, job.id));
+        await db.update(syncJobs).set({ status: 'done', updatedAt: nowOf(deps) }).where(eq(syncJobs.id, job.id));
         result.done++;
       } catch (e) {
         const final = job.attempts >= MAX_ATTEMPTS;
@@ -46,7 +47,6 @@ export function jobService(deps: CoreDeps) {
             status: final ? 'failed' : 'pending',
             lastError: e instanceof Error ? e.message : String(e),
             runAfter: new Date(nowOf(deps).getTime() + backoffMs),
-            dedupeKey: final ? null : undefined,
             updatedAt: nowOf(deps),
           })
           .where(and(eq(syncJobs.id, job.id)));
