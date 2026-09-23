@@ -6,6 +6,7 @@ import { collectionService } from './modules/collection/service';
 import { currencyService } from './modules/currency/service';
 import { discoveryService } from './modules/discovery/service';
 import { accountService } from './modules/accounts/service';
+import { listActivity } from './modules/activity/service';
 import { importService } from './modules/imports/service';
 import { jobService } from './modules/jobs/service';
 import { musicLinkService } from './modules/music/service';
@@ -139,6 +140,10 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
     jobs,
     imports,
     accounts,
+    activity: {
+      list: (userId: string, opts?: { limit?: number; before?: string }) =>
+        listActivity(deps.db, userId, opts),
+    },
     publicViews,
     scheduleMaintenance,
     runJobs: (limit?: number, budgetMs?: number) => jobs.runDue(jobHandlers, limit, { budgetMs }),

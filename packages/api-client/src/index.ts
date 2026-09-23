@@ -158,6 +158,9 @@ export function createApiClient(opts: ApiClientOptions) {
       updateProfile: (body: ProfileUpdateInput) => patch<T.Profile>('/me/profile', body),
       usernameAvailable: (username: string) =>
         get<{ username: string; available: boolean }>('/me/username-available', { username }),
+      /** "Tu actividad": pass the last entry's createdAt as `before` to paginate. */
+      activity: (query: { limit?: number; before?: string } = {}) =>
+        get<T.ActivityEntry[]>('/me/activity', query),
       avatarUpload: (contentType: 'image/jpeg' | 'image/png' | 'image/webp') =>
         post<T.UploadTarget>('/me/avatar-upload', { contentType }),
       discogs: {

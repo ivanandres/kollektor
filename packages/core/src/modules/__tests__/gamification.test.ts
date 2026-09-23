@@ -28,6 +28,23 @@ describe('achievements', () => {
     );
   });
 
+  it('builds a readable activity timeline', async () => {
+    seedLibrary(ctx.catalog);
+    await add({ discogsReleaseId: 2000002 });
+    const feed = await ctx.core.activity.list(ctx.userId);
+    expect(feed.map((e) => e.message)).toEqual(
+      expect.arrayContaining([
+        'Agregaste Animals — Pink Floyd a tu colección.',
+        'Desbloqueaste «Primer vinilo».',
+      ]),
+    );
+    const page2 = await ctx.core.activity.list(ctx.userId, {
+      limit: 1,
+      before: feed[0]!.createdAt,
+    });
+    expect(page2.length).toBeLessThanOrEqual(1);
+  });
+
   it('never revokes unlocked achievements', async () => {
     seedLibrary(ctx.catalog);
     const { item } = await add({ discogsReleaseId: 1873013 });

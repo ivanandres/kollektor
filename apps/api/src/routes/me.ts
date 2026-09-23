@@ -28,6 +28,16 @@ export function meRoutes({ core, storage }: AppDeps) {
       const key = `avatars/${c.get('userId')}/${crypto.randomUUID()}.${IMAGE_TYPES[contentType]}`;
       return c.json(await s.createUpload(key, contentType));
     })
+    .get('/activity', async (c) => {
+      const q = parse(
+        z.object({
+          limit: z.coerce.number().int().min(1).max(100).optional(),
+          before: z.iso.datetime({ offset: true }).optional(),
+        }),
+        { limit: c.req.query('limit'), before: c.req.query('before') },
+      );
+      return c.json(await core.activity.list(c.get('userId'), q));
+    })
     .get('/username-available', async (c) => {
       const u = parse(username, c.req.query('username') ?? '');
       return c.json({

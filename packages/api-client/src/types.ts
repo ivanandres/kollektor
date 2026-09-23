@@ -44,6 +44,7 @@ export type IdentifyResult = Omit<RawIdentify, 'candidates'> & {
   candidates: (RawIdentify['candidates'][number] & Ownership)[];
 };
 export type ImportStatus = Out<Core['imports']['status']>;
+export type ActivityEntry = Out<Core['activity']['list']>[number];
 export type PublicProfile = Out<Core['publicViews']['profile']>;
 export type PublicCollection = Out<Core['publicViews']['collectionOf']>;
 export type PublicWishlist = Out<Core['publicViews']['wishlistOf']>;
