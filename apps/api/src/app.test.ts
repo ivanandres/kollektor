@@ -214,6 +214,7 @@ describe('MVP flow', () => {
 
     const versions = await call('/catalog/external/masters/10362/versions', { session: ivan });
     expect(versions.json.items).toHaveLength(2);
+    expect(versions.json.items[0]).toMatchObject({ ownedCopies: 0, inWishlist: false });
 
     const added = await call('/collection', {
       method: 'POST',
@@ -607,6 +608,18 @@ describe('MVP flow', () => {
     const cancelled = await app.request('/api/discogs/callback?denied=1');
     expect(cancelled.headers.get('location')).toBe('http://localhost:3000?discogs=cancelled');
     expect((await call('/me/discogs', { method: 'DELETE', session: ivan })).status).toBe(204);
+  });
+
+  it('marks external candidates you already own or wish for ("¿ya lo tengo?")', async () => {
+    const r = await call('/catalog/external/search?artist=pink%20floyd&title=dark%20side', {
+      session: ivan,
+    });
+    const byCountry = Object.fromEntries(
+      r.json.items.map((i: { country: string }) => [i.country, i]),
+    );
+    expect(byCountry.UK).toMatchObject({ ownedCopies: 1 });
+    expect(byCountry.Japan.ownedCopies).toBe(0);
+    expect(byCountry.Japan.ownedEditionsOfAlbum).toBeGreaterThanOrEqual(1);
   });
 
   it('validation errors are structured', async () => {

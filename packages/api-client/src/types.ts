@@ -32,15 +32,28 @@ export type Achievement = Out<Core['achievements']['listWithProgress']>[number];
 export type EssentialProgress = Out<Core['achievements']['essentialProgress']>[number];
 export type Insight = Out<Core['discovery']['insights']>[number];
 export type TrackLinks = Out<Core['music']['getLinks']>;
-export type IdentifyResult = Out<Core['recognition']['identifyByPhoto']>;
+/** "¿Ya lo tengo?" flags added to every external candidate. */
+export interface Ownership {
+  ownedCopies: number;
+  ownedEditionsOfAlbum: number;
+  inWishlist: boolean;
+}
+
+type RawIdentify = Out<Core['recognition']['identifyByPhoto']>;
+export type IdentifyResult = Omit<RawIdentify, 'candidates'> & {
+  candidates: (RawIdentify['candidates'][number] & Ownership)[];
+};
 export type ImportStatus = Out<Core['imports']['status']>;
 export type PublicProfile = Out<Core['publicViews']['profile']>;
 export type PublicCollection = Out<Core['publicViews']['collectionOf']>;
 export type PublicWishlist = Out<Core['publicViews']['wishlistOf']>;
 
 type ExternalPage = Out<NonNullable<Core['deps']['catalogProvider']>['search']>;
-export type ExternalSearchPage = ExternalPage & { attribution: string };
-export type ExternalCandidate = ExternalPage['items'][number];
+export type ExternalCandidate = ExternalPage['items'][number] & Ownership;
+export type ExternalSearchPage = Omit<ExternalPage, 'items'> & {
+  items: ExternalCandidate[];
+  attribution: string;
+};
 
 export interface UnlockedAchievement {
   code: string;

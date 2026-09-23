@@ -141,6 +141,7 @@ las hizo (`isVerified: false`).
 
 | Método y ruta | Descripción |
 |---|---|
+| _Todas las respuestas con candidatos de Discogs_ | Cada candidato trae `ownedCopies` (copias tuyas de esa edición), `ownedEditionsOfAlbum` (ediciones tuyas del mismo álbum) e `inWishlist`: sirve para mostrar "Ya lo tenés" en la disquería |
 | `GET /catalog/external/search` | Busca en Discogs. Parámetros: `q`, `artist`, `title`, `catalogNumber`, `barcode`, `country`, `year`, `format`, `type` (`release`/`master`), `page`, `perPage` → `{ items: [candidato], page, pages, total }` |
 | `GET /catalog/external/masters/:id/versions` | Todas las ediciones de un álbum, para elegir la correcta |
 | `GET /catalog/external/releases/:id` | Vista previa completa de una edición de Discogs, sin importarla |

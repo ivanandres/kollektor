@@ -24,6 +24,17 @@ export function catalogRoutes({ core }: AppDeps) {
   };
   const attribution = { attribution: 'Datos provistos por Discogs' };
 
+  /** Adds "¿ya lo tengo?" flags to every external candidate. */
+  async function withOwnership<T extends { externalId: string; masterId: string | null }>(
+    userId: string,
+    items: T[],
+  ) {
+    const source = core.deps.catalogProvider?.source ?? 'discogs';
+    const owned = await core.collection.ownershipOf(userId, source, items);
+    const none = { ownedCopies: 0, ownedEditionsOfAlbum: 0, inWishlist: false };
+    return items.map((i) => ({ ...i, ...(owned.get(i.externalId) ?? none) }));
+  }
+
   return (
     new Hono<AppEnv>()
       .get('/releases/:id{[0-9a-f-]{36}}', async (c) =>
@@ -34,8 +45,10 @@ export function catalogRoutes({ core }: AppDeps) {
       )
       .get('/albums/:id{[0-9a-f-]{36}}/external-versions', async (c) => {
         const page = Number(c.req.query('page') ?? 1) || 1;
+        const res = await core.catalog.externalVersions(c.get('userId'), c.req.param('id'), page);
         return c.json({
-          ...(await core.catalog.externalVersions(c.get('userId'), c.req.param('id'), page)),
+          ...res,
+          items: await withOwnership(c.get('userId'), res.items),
           ...attribution,
         });
       })
@@ -48,15 +61,22 @@ export function catalogRoutes({ core }: AppDeps) {
         const q = parse(catalogSearchQuery, queryObject(c));
         if (!q.q && !q.artist && !q.title && !q.catalogNumber && !q.barcode)
           throw new DomainError('VALIDATION', 'Indicá qué buscar');
-        return c.json({ ...(await provider().search(q)), ...attribution });
+        const res = await provider().search(q);
+        return c.json({
+          ...res,
+          items: await withOwnership(c.get('userId'), res.items),
+          ...attribution,
+        });
       })
       .get('/external/releases/:id{[0-9]+}', async (c) =>
         c.json({ ...(await provider().getRelease(c.req.param('id'))), ...attribution }),
       )
       .get('/external/masters/:id{[0-9]+}/versions', async (c) => {
         const page = Number(c.req.query('page') ?? 1) || 1;
+        const res = await provider().getMasterVersions(c.req.param('id'), page);
         return c.json({
-          ...(await provider().getMasterVersions(c.req.param('id'), page)),
+          ...res,
+          items: await withOwnership(c.get('userId'), res.items),
           ...attribution,
         });
       })
@@ -67,15 +87,19 @@ export function catalogRoutes({ core }: AppDeps) {
           z.object({ barcode: z.string().regex(/^[\d\s-]{8,20}$/) }),
           await jsonBody(c),
         );
+        const res = await core.recognition.identifyByBarcode(barcode.replace(/\D/g, ''));
         return c.json({
-          ...(await core.recognition.identifyByBarcode(barcode.replace(/\D/g, ''))),
+          ...res,
+          candidates: await withOwnership(c.get('userId'), res.candidates),
           ...attribution,
         });
       })
       .post('/identify/photo', async (c) => {
         const images = await readImages(c.req.raw);
+        const res = await core.recognition.identifyByPhoto(c.get('userId'), images);
         return c.json({
-          ...(await core.recognition.identifyByPhoto(c.get('userId'), images)),
+          ...res,
+          candidates: await withOwnership(c.get('userId'), res.candidates),
           ...attribution,
         });
       })
