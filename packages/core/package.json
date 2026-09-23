@@ -1,0 +1,19 @@
+{
+  "name": "@kollektor/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@kollektor/db": "workspace:*",
+    "@kollektor/schemas": "workspace:*",
+    "drizzle-orm": "0.45.3",
+    "zod": "4.6.5"
+  }
+}
