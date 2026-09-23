@@ -579,7 +579,26 @@ export function catalogService(deps: CoreDeps) {
       .orderBy(asc(releases.releaseYear));
   }
 
+  /** All editions of an album in the external catalog ("otras ediciones"), when it has a master. */
+  async function externalVersions(userId: string, albumId: string, page = 1) {
+    await assertAlbumVisible(userId, albumId);
+    const provider = requireProvider();
+    const [ext] = await db
+      .select({ externalId: externalIds.externalId })
+      .from(externalIds)
+      .where(
+        and(
+          eq(externalIds.entityType, 'album'),
+          eq(externalIds.entityId, albumId),
+          eq(externalIds.source, provider.source),
+        ),
+      );
+    if (!ext?.externalId.startsWith('master:')) return { items: [], page: 1, pages: 0, total: 0 };
+    return provider.getMasterVersions(ext.externalId.slice('master:'.length), page);
+  }
+
   return {
+    externalVersions,
     importExternalRelease,
     importFromProvider,
     importMasterFromProvider,

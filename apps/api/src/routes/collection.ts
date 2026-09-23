@@ -1,4 +1,6 @@
 import { Hono } from 'hono';
+import { z } from 'zod';
+import { DomainError } from '@kollektor/core';
 import {
   addToCollectionInput,
   collectionQuery,
@@ -13,7 +15,15 @@ function csvCell(v: string): string {
   return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
-export function collectionRoutes({ core }: AppDeps) {
+const PHOTO_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' } as const;
+const ID = '[0-9a-f-]{36}';
+
+export function collectionRoutes({ core, storage }: AppDeps) {
+  const requireStorage = () => {
+    if (!storage)
+      throw new DomainError('NOT_CONFIGURED', 'El almacenamiento de imágenes no está configurado');
+    return storage;
+  };
   const withAchievements = async <T extends { unlockedAchievements: string[] }>(r: T) => ({
     ...r,
     unlockedAchievements: await core.achievements.getByCodes(r.unlockedAchievements),
@@ -111,6 +121,38 @@ export function collectionRoutes({ core }: AppDeps) {
       })
       .delete('/:id{[0-9a-f-]{36}}', async (c) => {
         await core.collection.remove(c.get('userId'), c.req.param('id'));
+        return c.body(null, 204);
+      })
+      // Photos of my copy: 1) get a presigned upload, 2) PUT the file, 3) register its public URL.
+      .post(`/:id{${ID}}/photos/upload`, async (c) => {
+        const s = requireStorage();
+        await core.collection.getOwnedRow(c.get('userId'), c.req.param('id'));
+        const { contentType } = parse(
+          z.object({ contentType: z.enum(Object.keys(PHOTO_TYPES) as [keyof typeof PHOTO_TYPES]) }),
+          await jsonBody(c),
+        );
+        const key = `copies/${c.get('userId')}/${c.req.param('id')}/${crypto.randomUUID()}.${PHOTO_TYPES[contentType]}`;
+        return c.json(await s.createUpload(key, contentType));
+      })
+      .post(`/:id{${ID}}/photos`, async (c) => {
+        const s = requireStorage();
+        const { url, caption } = parse(
+          z.object({ url: z.url(), caption: z.string().trim().max(200).optional() }),
+          await jsonBody(c),
+        );
+        if (!s.isOwnPublicUrl(url) || !url.includes(`/copies/${c.get('userId')}/`))
+          throw new DomainError('VALIDATION', 'Subí la foto con /photos/upload');
+        return c.json(
+          await core.collection.addPhoto(c.get('userId'), c.req.param('id'), url, caption),
+          201,
+        );
+      })
+      .delete(`/:id{${ID}}/photos/:photoId{${ID}}`, async (c) => {
+        await core.collection.removePhoto(
+          c.get('userId'),
+          c.req.param('id'),
+          c.req.param('photoId'),
+        );
         return c.body(null, 204);
       })
   );

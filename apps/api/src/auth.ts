@@ -37,6 +37,8 @@ export function createAuth(opts: { db: Database; core: Core; email: EmailService
         });
       },
     },
+    // "Borrar mi cuenta": POST /api/auth/delete-user { password } removes the user and all their data.
+    user: { deleteUser: { enabled: true } },
     session: {
       expiresIn: 60 * 60 * 24 * 30,
       updateAge: 60 * 60 * 24,

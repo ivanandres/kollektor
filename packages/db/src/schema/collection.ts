@@ -28,7 +28,7 @@ export const collectionItems = pgTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     releaseId: uuid('release_id')
       .notNull()
-      .references(() => releases.id, { onDelete: 'restrict' }),
+      .references(() => releases.id, { onDelete: 'no action' }),
     conditionMedia: grade('condition_media'),
     conditionSleeve: grade('condition_sleeve'),
     /** Number of this copy in a numbered edition, e.g. "245/500". */
@@ -62,6 +62,22 @@ export const collectionItems = pgTable(
     uniqueIndex('collection_items_client_request_uq').on(t.userId, t.clientRequestId),
     index('collection_items_release_idx').on(t.releaseId),
   ],
+);
+
+/** Photos of the user's own copy (not the generic cover, which belongs to the release). */
+export const collectionItemPhotos = pgTable(
+  'collection_item_photos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    collectionItemId: uuid('collection_item_id')
+      .notNull()
+      .references(() => collectionItems.id, { onDelete: 'cascade' }),
+    url: text('url').notNull(),
+    caption: text('caption'),
+    position: smallint('position').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('collection_item_photos_item_idx').on(t.collectionItemId)],
 );
 
 export const tags = pgTable(
@@ -98,7 +114,7 @@ export const wishlistItems = pgTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     albumId: uuid('album_id')
       .notNull()
-      .references(() => albums.id, { onDelete: 'restrict' }),
+      .references(() => albums.id, { onDelete: 'no action' }),
     /** Optional: a specific edition. NULL = any edition of the album. */
     releaseId: uuid('release_id').references(() => releases.id, { onDelete: 'set null' }),
     targetPrice: money('target_price'),

@@ -384,6 +384,82 @@ describe('MVP flow', () => {
     ).toBe(400);
   });
 
+  it('photos of my copy: presigned upload, register, list, delete', async () => {
+    const up = await call(`/collection/${itemId}/photos/upload`, {
+      method: 'POST',
+      session: ivan,
+      body: { contentType: 'image/jpeg' },
+    });
+    expect(up.json).toMatchObject({ method: 'PUT' });
+    expect(up.json.publicUrl).toContain('/copies/');
+    const added = await call(`/collection/${itemId}/photos`, {
+      method: 'POST',
+      session: ivan,
+      body: { url: up.json.publicUrl, caption: 'Etiqueta lado A' },
+    });
+    expect(added.status).toBe(201);
+    expect(
+      (
+        await call(`/collection/${itemId}/photos`, {
+          method: 'POST',
+          session: ivan,
+          body: { url: 'https://media.example.com/copies/otro/x.jpg' },
+        })
+      ).status,
+    ).toBe(400);
+    expect((await call(`/collection/${itemId}`, { session: ivan })).json.photos).toEqual([
+      { id: added.json.id, url: up.json.publicUrl, caption: 'Etiqueta lado A' },
+    ]);
+    expect(
+      (
+        await call(`/collection/${itemId}/photos/${added.json.id}`, {
+          method: 'DELETE',
+          session: ivan,
+        })
+      ).status,
+    ).toBe(204);
+  });
+
+  it('lists other editions of an album from Discogs', async () => {
+    const item = await call(`/collection/${itemId}`, { session: ivan });
+    const v = await call(`/catalog/albums/${item.json.release.album.id}/external-versions`, {
+      session: ivan,
+    });
+    expect(v.json.items.map((i: { country: string }) => i.country).sort()).toEqual(['Japan', 'UK']);
+  });
+
+  it("deleting the account removes all of the user's data", async () => {
+    const bye = await signUp('Bye', 'bye@example.com', 'bye-password-1');
+    await call('/collection', {
+      method: 'POST',
+      session: bye,
+      body: { discogsReleaseId: 1873013, tags: ['x'] },
+    });
+    await call('/collection', {
+      method: 'POST',
+      session: bye,
+      body: { manual: { album: { artists: ['Privado'], title: 'Solo mío' } } },
+    });
+    await call('/wishlist', {
+      method: 'POST',
+      session: bye,
+      body: { manual: { album: { artists: ['Privado'], title: 'Deseado' } } },
+    });
+    const del = await call('/auth/delete-user', {
+      method: 'POST',
+      session: bye,
+      body: { password: 'bye-password-1' },
+    });
+    expect(del.status).toBe(200);
+    expect((await call('/me/profile', { session: bye })).status).toBe(401);
+    const [left] = await handle.client`SELECT
+      (SELECT count(*) FROM albums WHERE title IN ('Solo mío', 'Deseado'))::int AS albums,
+      (SELECT count(*) FROM "user" WHERE email = 'bye@example.com')::int AS users`;
+    expect(left).toEqual({ albums: 0, users: 0 });
+    // The shared catalog row stays for everyone else
+    expect((await call(`/collection/${itemId}`, { session: ivan })).status).toBe(200);
+  });
+
   it('rate-limits external lookups per user', async () => {
     const eve2 = await signUp('Rate', 'rate@example.com');
     const statuses: number[] = [];

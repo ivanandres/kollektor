@@ -35,6 +35,7 @@ Base: `/api` (local: `http://localhost:3001/api`). JSON en todo, salvo el export
 | `GET /auth/get-session` | — | Sesión actual o `null` |
 | `POST /auth/request-password-reset` | `{ email, redirectTo }` | Envía un mail con un link; `redirectTo` es la pantalla web para elegir la contraseña nueva, que recibe `?token=` |
 | `POST /auth/reset-password` | `{ token, newPassword }` | Cierra las demás sesiones |
+| `POST /auth/delete-user` | `{ password }` | "Borrar mi cuenta": elimina al usuario y todos sus datos (colección, wishlist, cargas manuales, fotos registradas) |
 
 ## Perfil
 
@@ -55,6 +56,9 @@ Base: `/api` (local: `http://localhost:3001/api`). JSON en todo, salvo el export
 | `GET /collection/:id` | Ficha completa: edición, álbum, sellos, formatos, tracklist, imágenes, valor, tags |
 | `PATCH /collection/:id` | Campos de la copia (mismos que al agregar). `tags` reemplaza la lista completa |
 | `DELETE /collection/:id` | Borrado lógico. Los logros ya desbloqueados se conservan |
+| `POST /collection/:id/photos/upload` | `{ contentType }` → URL prefirmada para subir una foto **de tu copia** (etiqueta, tapa gastada…) |
+| `POST /collection/:id/photos` | `{ url, caption? }` registra la foto subida (máximo 10 por disco). Aparecen en `photos` de la ficha |
+| `DELETE /collection/:id/photos/:photoId` | |
 | `GET /collection/export.csv` | Exporta toda la colección, incluidos los campos privados, solo para su dueño |
 
 **Filtros de `GET /collection`:** todos opcionales y combinables. Para varios valores de un mismo filtro,
@@ -131,6 +135,7 @@ las hizo (`isVerified: false`).
 | `POST /catalog/identify/barcode` | `{ barcode }` leído en el dispositivo. No usa IA ni consume cupo |
 | `GET /catalog/releases/:id` | Ficha de una edición de la base |
 | `GET /catalog/albums/:id/releases` | Otras ediciones del mismo álbum en la base |
+| `GET /catalog/albums/:id/external-versions` | Todas las ediciones del álbum en Discogs ("otras ediciones"), si el álbum tiene master |
 | `GET /catalog/tracks/:id/links` | `{ track, links: { spotify?, youtube? }, lyrics }`. Cada link tiene uno de estos estados: `found` (con `url`), `not_found` (con el mensaje "No encontramos este tema.") o `unavailable` (el servicio falló; conviene reintentar más tarde). Solo se muestran coincidencias verificadas. La primera vez se buscan y después quedan en caché |
 
 ## Búsqueda global, estadísticas, logros y descubrir

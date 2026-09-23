@@ -14,7 +14,9 @@ import type { CatalogService, ReleaseDetail } from '../catalog/service';
 import type { ValuationService } from '../valuation/service';
 import { ARTIST_DISPLAY, COVER_URL, collectionFilters, collectionOrderBy } from './queries';
 
-const { collectionItems, tags, collectionItemTags } = schema;
+const { collectionItems, tags, collectionItemTags, collectionItemPhotos } = schema;
+
+const MAX_PHOTOS_PER_ITEM = 10;
 
 type ItemRow = typeof collectionItems.$inferSelect;
 
@@ -204,7 +206,7 @@ export function collectionService(
 
   async function get(userId: string, itemId: string): Promise<CollectionItemDetail> {
     const row = await getOwnedRow(userId, itemId);
-    const [release, tagRows, estimate, otherCopies] = await Promise.all([
+    const [release, tagRows, estimate, otherCopies, photos] = await Promise.all([
       catalog.getReleaseDetail(userId, row.releaseId),
       db
         .select({ name: tags.name })
@@ -222,6 +224,15 @@ export function collectionService(
             isNull(collectionItems.deletedAt),
           ),
         ),
+      db
+        .select({
+          id: collectionItemPhotos.id,
+          url: collectionItemPhotos.url,
+          caption: collectionItemPhotos.caption,
+        })
+        .from(collectionItemPhotos)
+        .where(eq(collectionItemPhotos.collectionItemId, itemId))
+        .orderBy(collectionItemPhotos.position, collectionItemPhotos.createdAt),
     ]);
     const paid = row.purchasePriceBase;
     const value = row.estimatedValueBase;
@@ -239,6 +250,7 @@ export function collectionService(
       storageLocation: row.storageLocation,
       notes: row.notes,
       tags: tagRows.map((t) => t.name).sort(),
+      photos,
       value: {
         baseCurrency: row.baseCurrency,
         paid,
@@ -417,7 +429,39 @@ export function collectionService(
     };
   }
 
-  return { add, update, remove, get, list, facets, getOwnedRow };
+  async function addPhoto(userId: string, itemId: string, url: string, caption?: string | null) {
+    await getOwnedRow(userId, itemId);
+    const [{ n } = { n: 0 }] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(collectionItemPhotos)
+      .where(eq(collectionItemPhotos.collectionItemId, itemId));
+    if (n >= MAX_PHOTOS_PER_ITEM) throw invalid(`Máximo ${MAX_PHOTOS_PER_ITEM} fotos por disco`);
+    const [photo] = await db
+      .insert(collectionItemPhotos)
+      .values({ collectionItemId: itemId, url, caption: caption ?? null, position: n })
+      .returning({
+        id: collectionItemPhotos.id,
+        url: collectionItemPhotos.url,
+        caption: collectionItemPhotos.caption,
+      });
+    return photo!;
+  }
+
+  async function removePhoto(userId: string, itemId: string, photoId: string): Promise<void> {
+    await getOwnedRow(userId, itemId);
+    const deleted = await db
+      .delete(collectionItemPhotos)
+      .where(
+        and(
+          eq(collectionItemPhotos.id, photoId),
+          eq(collectionItemPhotos.collectionItemId, itemId),
+        ),
+      )
+      .returning({ id: collectionItemPhotos.id });
+    if (!deleted.length) throw notFound('Foto');
+  }
+
+  return { add, update, remove, get, list, facets, getOwnedRow, addPhoto, removePhoto };
 }
 
 export interface CollectionItemDetail {
@@ -434,6 +478,8 @@ export interface CollectionItemDetail {
   storageLocation: string | null;
   notes: string | null;
   tags: string[];
+  /** Photos of this physical copy uploaded by the owner. */
+  photos: { id: string; url: string; caption: string | null }[];
   value: {
     baseCurrency: string | null;
     paid: number | null;

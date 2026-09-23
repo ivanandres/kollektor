@@ -32,6 +32,13 @@ export function catalogRoutes({ core }: AppDeps) {
       .get('/albums/:id{[0-9a-f-]{36}}/releases', async (c) =>
         c.json(await core.catalog.listAlbumReleases(c.get('userId'), c.req.param('id'))),
       )
+      .get('/albums/:id{[0-9a-f-]{36}}/external-versions', async (c) => {
+        const page = Number(c.req.query('page') ?? 1) || 1;
+        return c.json({
+          ...(await core.catalog.externalVersions(c.get('userId'), c.req.param('id'), page)),
+          ...attribution,
+        });
+      })
       .get('/tracks/:id{[0-9a-f-]{36}}/links', async (c) =>
         c.json(await core.music.getLinks(c.get('userId'), c.req.param('id'))),
       )

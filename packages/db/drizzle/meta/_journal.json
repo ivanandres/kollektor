@@ -22,6 +22,13 @@
       "when": 1790138797407,
       "tag": "0002_client_request_ids",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790139968004,
+      "tag": "0003_account_deletion_and_copy_photos",
+      "breakpoints": true
     }
   ]
 }
