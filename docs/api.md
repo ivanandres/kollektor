@@ -44,7 +44,7 @@ Base: `/api` (local: `http://localhost:3001/api`). JSON en todo, salvo el export
 | `GET /me/profile` | Perfil y ajustes de privacidad |
 | `PATCH /me/profile` | Campos opcionales: `username`, `displayName`, `bio`, `avatarUrl`, `profileVisibility`, `collectionVisibility`, `wishlistVisibility` (`private`/`public`), `showPrices`, `showValues`, `baseCurrency` (ISO 4217), `locale`. Cambiar `baseCurrency` recalcula toda la colección |
 | `GET /me/username-available?username=` | `{ username, available }` |
-| `POST /me/avatar-upload` | `{ contentType: image/jpeg\|png\|webp }` → `{ uploadUrl, publicUrl, method: "PUT", headers }`. El cliente hace `PUT` del archivo a `uploadUrl` y después `PATCH /me/profile { avatarUrl: publicUrl }` |
+| `POST /me/avatar-upload` | `{ contentType: image/jpeg\|png\|webp }` → `{ uploadUrl, publicUrl, method: "PUT", headers }`. El cliente hace `PUT` del archivo a `uploadUrl` y después `PATCH /me/profile { avatarUrl: publicUrl }`. Al registrarla se verifica que la imagen exista y pese menos de 5 MB (si pesa más, se borra) |
 
 ## Colección
 
@@ -156,18 +156,18 @@ las hizo (`isVerified: false`).
 
 | Método y ruta | Descripción |
 |---|---|
-| `POST /imports/discogs` | `{ username }` de una colección pública de Discogs → `202 { total, queued, status }` |
-| `POST /imports/discogs/run` | Procesa un lote de 10 discos. El cliente lo llama en bucle y muestra el progreso con `status: { pending, done, failed }` |
+| `POST /imports/discogs` | `{ username }` de una colección pública de Discogs → `202 { total, queued, status }`. Valida el usuario al instante (404 si no existe, 403 si su colección es privada); el resto de las páginas se lista en segundo plano |
+| `POST /imports/discogs/run` | Procesa un lote de 10 discos. El cliente lo llama en bucle y muestra el progreso con `status: { pending, done, failed, listing }`. Termina cuando `pending = 0` y `listing = false` |
 | `GET /imports/discogs` | Estado de la importación |
 
-Volver a importar la misma colección no duplica discos.
+Volver a importar la misma colección no duplica discos y reintenta los que habían fallado.
 
 ## Público (sin sesión, base para la V2)
 
 | Método y ruta | Descripción |
 |---|---|
 | `GET /public/users/:username` | Perfil público. Responde 404 si el perfil es privado |
-| `GET /public/users/:username/collection` | Solo si la colección es pública. Nunca incluye lugar de compra ni ubicación física. Los precios y valores aparecen solo si el dueño los habilitó |
+| `GET /public/users/:username/collection` | Solo si la colección es pública. Nunca incluye lugar de compra ni ubicación física. Los precios y valores aparecen solo si el dueño los habilitó. Acepta los filtros de la colección salvo `tag`; los filtros y ordenamientos por precio o valor solo funcionan si el dueño los hizo públicos |
 | `GET /public/users/:username/wishlist` | Solo si la wishlist es pública |
 
 ## Operación
