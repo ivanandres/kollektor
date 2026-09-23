@@ -31,6 +31,12 @@ export function createAuth(opts: {
         verification: schema.verification,
       },
     }),
+    // Optional "Continuar con Google" (redirect URI: <BETTER_AUTH_URL>/api/auth/callback/google).
+    // Note: on iOS, offering Google login requires also offering Sign in with Apple (App Store 4.8).
+    socialProviders:
+      env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+        ? { google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET } }
+        : {},
     emailAndPassword: {
       enabled: true,
       minPasswordLength: 8,

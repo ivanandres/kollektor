@@ -16,6 +16,8 @@ export const envSchema = z.object({
   CRON_SECRET: optional,
   DISCOGS_USER_TOKEN: optional,
   DISCOGS_USER_AGENT: optional,
+  GOOGLE_CLIENT_ID: optional,
+  GOOGLE_CLIENT_SECRET: optional,
   DISCOGS_CONSUMER_KEY: optional,
   DISCOGS_CONSUMER_SECRET: optional,
   /** 32 random bytes, base64 (`openssl rand -base64 32`). Encrypts linked-account tokens. */

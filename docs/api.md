@@ -32,6 +32,7 @@ Base: `/api` (local: `http://localhost:3001/api`). JSON en todo, salvo el export
 | `POST /auth/sign-up/email` | `{ name, email, password }` | Crea la cuenta y un perfil **privado** con username sugerido |
 | `POST /auth/sign-in/email` | `{ email, password }` | Cookie de sesión + header `set-auth-token` |
 | `POST /auth/sign-out` | — | |
+| `POST /auth/sign-in/social` | `{ provider: "google", callbackURL }` | Solo si están configuradas `GOOGLE_CLIENT_ID/SECRET`. Devuelve la URL de Google a la que hay que redirigir |
 | `GET /auth/get-session` | — | Sesión actual o `null` |
 | `POST /auth/request-password-reset` | `{ email, redirectTo }` | Envía un mail con un link; `redirectTo` es la pantalla web para elegir la contraseña nueva, que recibe `?token=` |
 | `POST /auth/reset-password` | `{ token, newPassword }` | Cierra las demás sesiones |
