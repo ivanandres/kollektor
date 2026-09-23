@@ -1,0 +1,106 @@
+[
+    {
+        "id": "ced78109-9e91-4947-bf75-45c64fabc366",
+        "type": "wishlist.added",
+        "createdAt": "2026-09-23T04:56:16.147Z",
+        "message": "Sumaste Bajo Belgrano — Spinetta Jade a tu wishlist.",
+        "title": "Bajo Belgrano",
+        "artist": "Spinetta Jade",
+        "coverImageUrl": null,
+        "collectionItemId": null,
+        "achievement": null
+    },
+    {
+        "id": "b0d3c7fd-7c6c-4e9c-a890-f1334bd8c340",
+        "type": "wishlist.added",
+        "createdAt": "2026-09-23T04:56:16.120Z",
+        "message": "Sumaste In a Silent Way — Miles Davis a tu wishlist.",
+        "title": "In a Silent Way",
+        "artist": "Miles Davis",
+        "coverImageUrl": null,
+        "collectionItemId": null,
+        "achievement": null
+    },
+    {
+        "id": "70ca12a5-a7db-4025-ab10-56e733128057",
+        "type": "wishlist.added",
+        "createdAt": "2026-09-23T04:56:16.097Z",
+        "message": "Sumaste Physical Graffiti — Led Zeppelin a tu wishlist.",
+        "title": "Physical Graffiti",
+        "artist": "Led Zeppelin",
+        "coverImageUrl": null,
+        "collectionItemId": null,
+        "achievement": null
+    },
+    {
+        "id": "0c74ba1d-1063-4bf5-b8a3-3c3f58d020ce",
+        "type": "wishlist.added",
+        "createdAt": "2026-09-23T04:56:16.070Z",
+        "message": "Sumaste Meddle — Pink Floyd a tu wishlist.",
+        "title": "Meddle",
+        "artist": "Pink Floyd",
+        "coverImageUrl": null,
+        "collectionItemId": null,
+        "achievement": null
+    },
+    {
+        "id": "0d8764dd-9829-43dc-931c-8350b257d30c",
+        "type": "achievement.unlocked",
+        "createdAt": "2026-09-23T04:56:16.043Z",
+        "message": "Desbloqueaste «Picture disc».",
+        "title": null,
+        "artist": null,
+        "coverImageUrl": null,
+        "collectionItemId": null,
+        "achievement": {
+            "code": "picture-disc",
+            "name": "Picture disc",
+            "icon": "image"
+        }
+    },
+    {
+        "id": "5f80658a-57a3-4654-b645-c0e1dccef879",
+        "type": "achievement.unlocked",
+        "createdAt": "2026-09-23T04:56:15.848Z",
+        "message": "Desbloqueaste «10 artistas».",
+        "title": null,
+        "artist": null,
+        "coverImageUrl": null,
+        "collectionItemId": null,
+        "achievement": {
+            "code": "artists-10",
+            "name": "10 artistas",
+            "icon": "mic"
+        }
+    },
+    {
+        "id": "8448885b-e98c-41a4-95fa-613ecd066125",
+        "type": "achievement.unlocked",
+        "createdAt": "2026-09-23T04:56:15.847Z",
+        "message": "Desbloqueaste «7 décadas».",
+        "title": null,
+        "artist": null,
+        "coverImageUrl": null,
+        "collectionItemId": null,
+        "achievement": {
+            "code": "decades-7",
+            "name": "7 décadas",
+            "icon": "hourglass"
+        }
+    },
+    {
+        "id": "b1e4ab80-9d6a-46be-9440-2120def35420",
+        "type": "achievement.unlocked",
+        "createdAt": "2026-09-23T04:56:15.680Z",
+        "message": "Desbloqueaste «6 décadas».",
+        "title": null,
+        "artist": null,
+        "coverImageUrl": null,
+        "collectionItemId": null,
+        "achievement": {
+            "code": "decades-6",
+            "name": "6 décadas",
+            "icon": "hourglass"
+        }
+    }
+]

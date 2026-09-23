@@ -1,0 +1,286 @@
+[
+    {
+        "listId": "35b75eea-32ca-4674-8c79-caad1fa5b767",
+        "code": "charly-garcia",
+        "name": "Charly García — trilogía de los 80 y más",
+        "artistId": "29a99691-bb59-4fb8-98bf-4673a638cca9",
+        "artistName": "Charly García",
+        "total": 4,
+        "owned": 2,
+        "missing": [
+            {
+                "albumId": "fd30abd1-41b6-4d29-b778-96e9d1788cd8",
+                "title": "Piano Bar",
+                "year": 1984
+            },
+            {
+                "albumId": "7c12008e-3ca6-4115-9776-36a16bf74453",
+                "title": "Parte de la Religión",
+                "year": 1987
+            }
+        ],
+        "complete": false
+    },
+    {
+        "listId": "6c9d25c5-a766-4be4-a1cd-96b6b603c451",
+        "code": "david-bowie",
+        "name": "David Bowie — esenciales",
+        "artistId": "66096392-602a-4f46-b590-de1488bc3695",
+        "artistName": "David Bowie",
+        "total": 8,
+        "owned": 3,
+        "missing": [
+            {
+                "albumId": "19cd46c2-670e-4044-88b6-2408289d770f",
+                "title": "Aladdin Sane",
+                "year": 1973
+            },
+            {
+                "albumId": "3fe37413-8e50-4f70-b25d-ed861bfd2f32",
+                "title": "Station to Station",
+                "year": 1976
+            },
+            {
+                "albumId": "d3738f87-25f3-4f11-9350-ad396763566f",
+                "title": "Low",
+                "year": 1977
+            },
+            {
+                "albumId": "4658e90c-58bf-4c65-b76d-02ae0e098a50",
+                "title": "\"Heroes\"",
+                "year": 1977
+            },
+            {
+                "albumId": "0cb6bba8-11ef-43fd-9718-fd68ea76dded",
+                "title": "Scary Monsters (And Super Creeps)",
+                "year": 1980
+            }
+        ],
+        "complete": false
+    },
+    {
+        "listId": "5f03fc0f-3a52-43d6-99ed-323ea8ef687d",
+        "code": "led-zeppelin",
+        "name": "Led Zeppelin — álbumes de estudio",
+        "artistId": "09ddc386-b254-4cd9-bd0e-da21d3e488a8",
+        "artistName": "Led Zeppelin",
+        "total": 8,
+        "owned": 3,
+        "missing": [
+            {
+                "albumId": "ad860587-8163-4d06-a83a-f482a84712dc",
+                "title": "Led Zeppelin",
+                "year": 1969
+            },
+            {
+                "albumId": "b1218b85-f47b-4b87-b9b9-a400833027f5",
+                "title": "Led Zeppelin III",
+                "year": 1970
+            },
+            {
+                "albumId": "a8b4e368-9fbb-4fb4-bdd0-c0aa1d3f9333",
+                "title": "Physical Graffiti",
+                "year": 1975
+            },
+            {
+                "albumId": "43ad0715-ab05-49c5-8e98-d016f03c75f6",
+                "title": "Presence",
+                "year": 1976
+            },
+            {
+                "albumId": "59820911-992c-44f7-af29-5f027a8e8475",
+                "title": "In Through the Out Door",
+                "year": 1979
+            }
+        ],
+        "complete": false
+    },
+    {
+        "listId": "6b2b805f-d001-4dae-9a36-ec1874ea1771",
+        "code": "miles-davis",
+        "name": "Miles Davis — esenciales",
+        "artistId": "34247da7-ccc7-48eb-9b14-304adb587138",
+        "artistName": "Miles Davis",
+        "total": 9,
+        "owned": 2,
+        "missing": [
+            {
+                "albumId": "e50eea67-08b8-40b1-bdb0-36b446cf82a8",
+                "title": "Birth of the Cool",
+                "year": 1957
+            },
+            {
+                "albumId": "27e9205c-77ac-4cb0-bda4-d5a3bf3abd77",
+                "title": "'Round About Midnight",
+                "year": 1957
+            },
+            {
+                "albumId": "91fec167-377d-4382-afdf-d3e651131bc9",
+                "title": "Milestones",
+                "year": 1958
+            },
+            {
+                "albumId": "9df7fa20-a14a-4529-8842-0e4e157e727f",
+                "title": "Sketches of Spain",
+                "year": 1960
+            },
+            {
+                "albumId": "46041bb0-50fd-4264-97b3-1c894fd67972",
+                "title": "E.S.P.",
+                "year": 1965
+            },
+            {
+                "albumId": "b04d2a09-08f1-48ad-a4cf-e44619421348",
+                "title": "Miles Smiles",
+                "year": 1967
+            },
+            {
+                "albumId": "2176f5ff-5d3b-42ac-a9c0-c48ecd2ae9c4",
+                "title": "In a Silent Way",
+                "year": 1969
+            }
+        ],
+        "complete": false
+    },
+    {
+        "listId": "852aed49-10ed-4fbc-9f7b-917eedfa1f1a",
+        "code": "pink-floyd",
+        "name": "Pink Floyd — esenciales",
+        "artistId": "519b5ad9-4b02-4608-9de4-3403a1c04ceb",
+        "artistName": "Pink Floyd",
+        "total": 8,
+        "owned": 4,
+        "missing": [
+            {
+                "albumId": "9d7f7004-33c4-4cc0-90c5-e2bb9bec20fc",
+                "title": "The Piper at the Gates of Dawn",
+                "year": 1967
+            },
+            {
+                "albumId": "4c42e920-ed16-49e7-a59e-799901256152",
+                "title": "A Saucerful of Secrets",
+                "year": 1968
+            },
+            {
+                "albumId": "f9f937e6-8eff-42ca-bb14-4aaaa7b72058",
+                "title": "Atom Heart Mother",
+                "year": 1970
+            },
+            {
+                "albumId": "5909c7e9-6175-43b4-9688-8f97405887e1",
+                "title": "Meddle",
+                "year": 1971
+            }
+        ],
+        "complete": false
+    },
+    {
+        "listId": "d7f4f301-da6e-470d-945b-bbeed775a188",
+        "code": "radiohead",
+        "name": "Radiohead — álbumes de estudio",
+        "artistId": "83b4f141-0395-4f83-bfa4-9f832690e79b",
+        "artistName": "Radiohead",
+        "total": 9,
+        "owned": 2,
+        "missing": [
+            {
+                "albumId": "e6cc7d25-6044-4c78-bf38-5f003c6e914a",
+                "title": "Pablo Honey",
+                "year": 1993
+            },
+            {
+                "albumId": "a3f16c35-a78e-4a7e-907a-f6742aed2dd8",
+                "title": "The Bends",
+                "year": 1995
+            },
+            {
+                "albumId": "2d21908b-d67c-4420-8e75-5d4c15976f59",
+                "title": "Kid A",
+                "year": 2000
+            },
+            {
+                "albumId": "583655c1-ff02-49e1-a4d5-f40f22f8dc81",
+                "title": "Amnesiac",
+                "year": 2001
+            },
+            {
+                "albumId": "a61ac400-d8e8-4bae-82df-ead9ece6ecef",
+                "title": "Hail to the Thief",
+                "year": 2003
+            },
+            {
+                "albumId": "b45bb94e-5a54-48da-a55d-bee78e7dc43d",
+                "title": "The King of Limbs",
+                "year": 2011
+            },
+            {
+                "albumId": "fd207ffc-0295-4c90-856a-9d0fc7c5ffe2",
+                "title": "A Moon Shaped Pool",
+                "year": 2016
+            }
+        ],
+        "complete": false
+    },
+    {
+        "listId": "be6a5a7f-e114-474a-b860-582627ace4c7",
+        "code": "the-beatles",
+        "name": "The Beatles — discografía británica",
+        "artistId": "01d1af85-223b-4822-af16-323c656dc88c",
+        "artistName": "The Beatles",
+        "total": 13,
+        "owned": 3,
+        "missing": [
+            {
+                "albumId": "0b2f1ee1-32fc-45e5-a93e-6a6581c9ea64",
+                "title": "Please Please Me",
+                "year": 1963
+            },
+            {
+                "albumId": "8826f5ac-497f-4492-aac2-c78c5283e84f",
+                "title": "With the Beatles",
+                "year": 1963
+            },
+            {
+                "albumId": "3aa073dc-9f29-4c0d-97d5-7b8d2ca14376",
+                "title": "A Hard Day's Night",
+                "year": 1964
+            },
+            {
+                "albumId": "e3658fc3-8bce-40a2-87ae-61ea7187fa67",
+                "title": "Beatles for Sale",
+                "year": 1964
+            },
+            {
+                "albumId": "051a2789-46dd-402a-97d9-3204cb387d8d",
+                "title": "Help!",
+                "year": 1965
+            },
+            {
+                "albumId": "fd42f6b2-1626-4d7d-b361-65a9d688ffdf",
+                "title": "Sgt. Pepper's Lonely Hearts Club Band",
+                "year": 1967
+            },
+            {
+                "albumId": "4696f5a8-b692-4160-913b-a789254e388c",
+                "title": "Magical Mystery Tour",
+                "year": 1967
+            },
+            {
+                "albumId": "20430095-c4f9-4647-93d4-9359854a4b61",
+                "title": "The Beatles",
+                "year": 1968
+            },
+            {
+                "albumId": "9e9b08a8-c9f1-40d1-9fab-bee936d1af51",
+                "title": "Yellow Submarine",
+                "year": 1969
+            },
+            {
+                "albumId": "08e0f57b-548e-4029-be9f-07d253384cfe",
+                "title": "Let It Be",
+                "year": 1970
+            }
+        ],
+        "complete": false
+    }
+]

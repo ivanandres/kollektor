@@ -1,27 +1,30 @@
 # Estado del backend — noche del 23/09/2026
 
-Resumen: el backend del MVP (fases 1 a 11 del roadmap) está implementado, con 100 tests pasando contra
+Resumen: el backend del MVP (fases 1 a 11 del roadmap) está implementado, con 103 tests pasando contra
 Postgres real. Falta todo lo visual: web (fase 12, espera las pantallas de diseño) y app móvil (fase 13).
 
 ## Por fase
 
 | Fase | Qué quedó | Dónde |
 |---|---|---|
-| 1. Setup + arquitectura + DB | Monorepo pnpm/Turborepo, TS estricto, esquema completo (35 tablas) con migraciones, `pg_trgm` + `unaccent`, Vitest, ESLint, Prettier, CI de GitHub Actions, Docker y config de Vercel | `packages/db`, `.github/workflows/ci.yml` |
-| 2. Auth + usuarios | Registro, login, logout, recuperación de contraseña por mail, sesión por cookie (web) o bearer (mobile). Perfil con username único, bio, avatar (subida prefirmada a R2/S3) y privacidad granular, **privado por default**. Borrado de cuenta con todos sus datos | `apps/api/src/auth.ts`, `modules/profiles` |
+| 1. Setup + arquitectura + DB | Monorepo pnpm/Turborepo, TS estricto, esquema completo (39 tablas) con migraciones, `pg_trgm` + `unaccent`, Vitest, ESLint, Prettier, CI de GitHub Actions, Docker y config de Vercel | `packages/db`, `.github/workflows/ci.yml` |
+| 2. Auth + usuarios | Registro, login (email o Google opcional), logout, recuperación de contraseña por mail, sesión por cookie (web) o bearer (mobile), límites contra fuerza bruta guardados en Postgres. Perfil con username único, bio, avatar (subida prefirmada a R2/S3) y privacidad granular, **privado por default**. Borrado de cuenta con todos sus datos | `apps/api/src/auth.ts`, `modules/profiles` |
 | 3. Artistas / álbumes / ediciones / temas | Modelo por edición: varios artistas por álbum, varios sellos y catálogos por edición, formatos estructurados (cantidad, tamaño, velocidad, color, descripciones), tracklist por lado, ids externos genéricos | `modules/catalog` |
 | 4. Colección | Alta, edición, baja lógica, tags, condición Goldmine, número de copia, precio en cualquier moneda convertido a la moneda base según la fecha de compra, valor estimado con fuente, fotos de la copia propia, export CSV | `modules/collection`, `modules/currency`, `modules/valuation` |
-| 5. Discogs | `DiscogsService` con rate limit (55/min), reintentos ante 429/5xx, búsqueda por texto, artista, título, catálogo, código de barras, país, año y formato. Ediciones de un master, importación idempotente y segura ante concurrencia, valores de mercado por condición con fallback, importación de colección pública | `packages/integrations/src/discogs`, `modules/imports` |
-| 6. Agregar vinilo | Manual (queda privada del usuario), desde Discogs y por foto: código de barras → catálogo → artista/título con Claude visión, siempre devolviendo **candidatos** para confirmar. Altas idempotentes para conexiones malas | `modules/recognition`, `integrations/src/vision` |
-| 7. Wishlist | Por álbum (cualquier edición) o por edición específica, prioridad, precio objetivo, estados, "Agregar a mi colección" que conserva el historial | `modules/wishlist` |
+| 5. Discogs | `DiscogsService` con rate limit (55/min), reintentos ante 429/5xx, búsqueda por texto, artista, título, catálogo, código de barras, país, año y formato. Ediciones de un master, importación idempotente y segura ante concurrencia, valores de mercado por condición con fallback. Importación de la colección (pública, o privada si el usuario **vincula su cuenta de Discogs por OAuth**) | `packages/integrations/src/discogs`, `modules/imports` |
+| 6. Agregar vinilo | Manual (queda privada del usuario), desde Discogs y por foto: código de barras → catálogo → artista/título con Claude visión, siempre devolviendo **candidatos** para confirmar, marcados con "ya lo tenés" / "en tu wishlist". Altas idempotentes para conexiones malas y vinculación posterior de una carga manual con su edición de Discogs | `modules/recognition`, `integrations/src/vision` |
+| 7. Wishlist | Por álbum (cualquier edición) o por edición específica, prioridad, precio objetivo, estados, "Agregar a mi colección" que conserva el historial. **Alerta de precio**: avisa cuando hay una copia a la venta por debajo del precio objetivo | `modules/wishlist` |
 | 8. Búsqueda + filtros | Búsqueda global agrupada (artistas, álbumes, ediciones, temas) tolerante a errores de tipeo. 17 filtros combinables con facetas, 8 ordenamientos, paginación | `modules/search`, `modules/collection/queries.ts` |
 | 9. Ficha + tracklist + links | Ficha completa con otras ediciones del álbum. Links de Spotify/YouTube y "Ver letra" (Genius): solo coincidencias verificadas, buscados la primera vez que se piden y cacheados | `modules/music`, `integrations/src/{spotify,youtube,lyrics}` |
 | 10. Dashboard + estadísticas | Totales, invertido vs. estimado, "Tu colección en números", 10 distribuciones, línea de tiempo de compras e historial de valor (snapshots diarios) | `modules/stats` |
-| 11. Logros + descubrir | Motor de reglas declarativo (conteos, diversidad, décadas, países, rarezas, discografías completas), 30 logros sembrados, 7 discografías esenciales curadas, mensajes de "descubrir" | `modules/achievements`, `modules/discovery`, `seed/` |
+| 11. Logros + descubrir | Motor de reglas declarativo (conteos, diversidad, décadas, países, rarezas, discografías completas), 30 logros sembrados, 7 discografías esenciales curadas, mensajes de "descubrir" y línea de tiempo "Tu actividad" | `modules/achievements`, `modules/discovery`, `seed/` |
 
 También quedó un **cliente tipado** (`packages/api-client`) que usan igual la web y la app móvil: tipos
 derivados del dominio, sesión por cookie o token, errores con mensajes en español y altas seguras ante
 reintentos.
+
+Operación: logs JSON con id de request, 3 rondas de revisión de código independiente con todos los
+hallazgos corregidos, y medición de rendimiento con una colección de 5.000 discos (ver abajo).
 
 También quedó una base para la V2 social: vistas públicas con proyecciones explícitas de privacidad y la
 tabla `activity_events`, que ya registra cada alta, compra y logro.
@@ -35,7 +38,7 @@ pnpm --filter @kollektor/api dev
 ```
 
 Las respuestas reales de cada pantalla están en [`api-examples/`](api-examples/): dashboard, colección,
-ficha, búsqueda "love", wishlist, estadísticas, logros y descubrir. **Sirven como datos de referencia
+ficha, búsqueda "love", wishlist, estadísticas, logros, discografías esenciales, descubrir y actividad. **Sirven como datos de referencia
 para el diseño.**
 
 ## Decisiones que tomé durante la implementación

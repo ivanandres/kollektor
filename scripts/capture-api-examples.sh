@@ -20,6 +20,8 @@ get /stats/timeline stats-timeline
 get /stats/breakdowns stats-breakdowns
 get /achievements achievements
 get /discover discover
+get "/me/activity?limit=8" activity
+get /achievements/essentials essentials
 TRACK=$(python3 -c "import json;print(json.load(open('$OUT/collection-item.json'))['release']['tracks'][0]['id'])")
 get "/catalog/tracks/$TRACK/links" track-links
 curl -s -X POST "$API/collection" -H "authorization: Bearer $TOKEN" -H 'content-type: application/json' \

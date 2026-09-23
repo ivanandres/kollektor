@@ -527,6 +527,9 @@ export async function seedDemo(db: Database, opts: { userId: string }) {
   // Spread "added" dates over the purchase dates so the timeline charts look real.
   await db.execute(sql`UPDATE ${schema.collectionItems} SET created_at = purchase_date::timestamptz + interval '18 hours'
     WHERE user_id = ${userId} AND purchase_date IS NOT NULL`);
+  await db.execute(sql`UPDATE ${schema.activityEvents} e SET created_at = ci.created_at
+    FROM ${schema.collectionItems} ci
+    WHERE e.subject_id = ci.id AND e.type = 'collection.added' AND ci.user_id = ${userId}`);
   for (const [i, [artist, title, year, country, genres, styles, priority]] of WISHLIST.entries()) {
     const ext = toRelease(100 + i, [artist, title, year, country, 'Demo', genres, styles, []]);
     const releaseId = await core.catalog.importExternalRelease(ext);

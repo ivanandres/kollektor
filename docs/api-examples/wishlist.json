@@ -41,6 +41,8 @@
         "notes": null,
         "collectionItemId": null,
         "ownedEditions": 0,
+        "market": null,
+        "belowTarget": false,
         "createdAt": "2026-09-23T04:56:16.068Z"
     },
     {
@@ -86,6 +88,8 @@
         "notes": null,
         "collectionItemId": null,
         "ownedEditions": 0,
+        "market": null,
+        "belowTarget": false,
         "createdAt": "2026-09-23T04:56:16.146Z"
     },
     {
@@ -130,6 +134,8 @@
         "notes": null,
         "collectionItemId": null,
         "ownedEditions": 0,
+        "market": null,
+        "belowTarget": false,
         "createdAt": "2026-09-23T04:56:16.095Z"
     },
     {
@@ -174,6 +180,8 @@
         "notes": null,
         "collectionItemId": null,
         "ownedEditions": 0,
+        "market": null,
+        "belowTarget": false,
         "createdAt": "2026-09-23T04:56:16.118Z"
     }
 ]
