@@ -38,11 +38,16 @@ describe('achievements', () => {
         'Desbloqueaste «Primer vinilo».',
       ]),
     );
-    const page2 = await ctx.core.activity.list(ctx.userId, {
-      limit: 1,
-      before: feed[0]!.createdAt,
-    });
-    expect(page2.length).toBeLessThanOrEqual(1);
+    // Keyset pagination walks every entry exactly once, even with equal timestamps.
+    const seen: string[] = [];
+    let cursor: { before?: string; beforeId?: string } = {};
+    for (;;) {
+      const page = await ctx.core.activity.list(ctx.userId, { limit: 1, ...cursor });
+      if (!page.length) break;
+      seen.push(page[0]!.id);
+      cursor = { before: page[0]!.createdAt, beforeId: page[0]!.id };
+    }
+    expect(seen.sort()).toEqual(feed.map((e) => e.id).sort());
   });
 
   it('never revokes unlocked achievements', async () => {

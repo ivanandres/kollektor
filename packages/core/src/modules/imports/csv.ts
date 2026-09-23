@@ -18,7 +18,8 @@ export function parseCsv(text: string): string[][] {
         i++;
       } else if (ch === '"') quoted = false;
       else cell += ch;
-    } else if (ch === '"') quoted = true;
+    } else if (ch === '"' && cell === '')
+      quoted = true; // quotes only open at the start of a cell (12" stays literal)
     else if (ch === delimiter) {
       row.push(cell);
       cell = '';
@@ -118,18 +119,26 @@ export function parseGrade(
   return null;
 }
 
-/** "$ 35.000,50" / "35000.5" / "USD 20" → number (Argentine and US separators). */
+const CURRENCY_SIGNS: [RegExp, string][] = [
+  [/U\$S|US\$|USD/i, 'USD'],
+  [/R\$|BRL/i, 'BRL'],
+  [/€|EUR/i, 'EUR'],
+  [/£|GBP/i, 'GBP'],
+  [/¥|JPY/i, 'JPY'],
+  [/ARS/i, 'ARS'],
+  [/UYU/i, 'UYU'],
+  [/CLP/i, 'CLP'],
+  [/MXN/i, 'MXN'],
+];
+
+/** "$ 35.000,50" / "35000.5" / "U$S 20" / "USD20" / "€ 20" → amount + currency if stated. */
 export function parsePrice(v: string | undefined): {
   amount: number | null;
   currency: string | null;
 } {
   const s = v?.trim();
   if (!s) return { amount: null, currency: null };
-  const cur =
-    /\b(USD|US\$|ARS|EUR|GBP|JPY|BRL|UYU|CLP|MXN)\b/i
-      .exec(s)?.[1]
-      ?.toUpperCase()
-      .replace('US$', 'USD') ?? null;
+  const currency = CURRENCY_SIGNS.find(([re]) => re.test(s))?.[1] ?? null;
   let num = s.replace(/[^\d.,-]/g, '');
   if (/,\d{1,2}$/.test(num))
     num = num.replace(/\./g, '').replace(',', '.'); // 35.000,50
@@ -137,16 +146,34 @@ export function parsePrice(v: string | undefined): {
     num = num.replace(/\./g, ''); // 45.000 (es-AR thousands)
   else num = num.replace(/,/g, ''); // 1,200.00
   const amount = Number(num);
-  return { amount: Number.isFinite(amount) && num !== '' ? amount : null, currency: cur };
+  return { amount: Number.isFinite(amount) && num !== '' && amount >= 0 ? amount : null, currency };
 }
+
+/** ISO 4217-looking code or null ("Pesos" → null). */
+export function parseCurrencyCode(v: string | undefined): string | null {
+  const s = v?.trim().toUpperCase();
+  if (!s) return null;
+  if (/^[A-Z]{3}$/.test(s)) return s;
+  return CURRENCY_SIGNS.find(([re]) => re.test(s))?.[1] ?? null;
+}
+
+const isRealDate = (y: number, m: number, d: number) => {
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+};
 
 /** "2024-03-12", "12/03/2024" (dd/mm), "2024-03-12 10:00:00" → YYYY-MM-DD. */
 export function parseDate(v: string | undefined): string | null {
   const s = v?.trim();
   if (!s) return null;
-  let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
-  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
-  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
-  if (m) return `${m[3]}-${m[2]!.padStart(2, '0')}-${m[1]!.padStart(2, '0')}`;
-  return null;
+  let y: number, m: number, d: number;
+  let match = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if (match) [y, m, d] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  else if ((match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s)))
+    [d, m, y] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  else return null;
+  // Invalid calendar dates (05/13/2024 read as dd/mm, 2024-02-31) are dropped, not guessed.
+  return isRealDate(y, m, d)
+    ? `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    : null;
 }

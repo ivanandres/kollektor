@@ -629,7 +629,7 @@ describe('MVP flow', () => {
       body: 'Artista,Álbum,Año\nSeru Giran,La grasa de las capitales,1979\n',
     });
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ total: 1, created: 1, errors: [] });
+    expect(await res.json()).toMatchObject({ total: 1, queued: 1, errors: [] });
   });
 
   it('validation errors are structured', async () => {

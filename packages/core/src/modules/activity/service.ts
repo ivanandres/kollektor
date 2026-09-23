@@ -45,7 +45,7 @@ export interface ActivityEntry {
 export async function listActivity(
   db: Db,
   userId: string,
-  opts: { limit?: number; before?: string } = {},
+  opts: { limit?: number; before?: string; beforeId?: string } = {},
 ): Promise<ActivityEntry[]> {
   const limit = Math.min(opts.limit ?? 30, 100);
   const rows = await db.execute<{
@@ -74,8 +74,15 @@ export async function listActivity(
       LEFT JOIN albums a ON a.id = coalesce(r.album_id, wi.album_id)
       LEFT JOIN achievements ach ON e.subject_type = 'achievement' AND ach.id = e.subject_id
      WHERE e.user_id = ${userId}
-       ${opts.before ? sql`AND e.created_at < ${opts.before}::timestamptz` : sql``}
-     ORDER BY e.created_at DESC, e.id
+       ${
+         opts.before && opts.beforeId
+           ? sql`AND (date_trunc('milliseconds', e.created_at), e.id) < (${opts.before}::timestamptz, ${opts.beforeId}::uuid)`
+           : opts.before
+             ? sql`AND e.created_at < ${opts.before}::timestamptz`
+             : sql``
+       }
+     -- Millisecond precision matches the ISO timestamps clients send back as cursors.
+     ORDER BY date_trunc('milliseconds', e.created_at) DESC, e.id DESC
      LIMIT ${limit}`);
   const what = (r: (typeof rows)[number]) =>
     r.title ? `${r.title}${r.artist ? ` — ${r.artist}` : ''}` : 'un disco';

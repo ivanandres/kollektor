@@ -1,17 +1,21 @@
 import { createHash } from 'node:crypto';
-import type { CollectionItemFields } from '@kollektor/schemas';
+import {
+  addToCollectionInput,
+  type AddToCollectionInput,
+  type CollectionItemFields,
+} from '@kollektor/schemas';
 import type { CoreDeps } from '../../context';
 import { DomainError } from '../../lib/errors';
 import type { AccountService } from '../accounts/service';
 import type { CollectionService } from '../collection/service';
 import type { JobService } from '../jobs/service';
 import type { ProfileService } from '../profiles/service';
-import { mapHeader, parseCsv, parseDate, parseGrade, parsePrice } from './csv';
+import { mapHeader, parseCsv, parseCurrencyCode, parseDate, parseGrade, parsePrice } from './csv';
 
 const MAX_CSV_ROWS = 5000;
-const MAX_MANUAL_ROWS_PER_REQUEST = 1000;
 
 const RELEASE_JOB = 'import.discogs_release';
+const MANUAL_JOB = 'import.manual_row';
 const PAGE_JOB = 'import.discogs_page';
 const MAX_PAGES = 50; // 5,000 records
 
@@ -83,11 +87,20 @@ export function importService(
     });
   };
 
+  const manualHandler = async (p: Record<string, unknown>) => {
+    await collection.add(String(p.userId), p.input as AddToCollectionInput);
+  };
+
   /**
-   * CSV import. Rows with a Discogs `release_id` (Discogs' own collection export) are queued like a
-   * Discogs import — works for private collections without OAuth. Other rows (a personal
-   * spreadsheet: artista, álbum, año, sello, precio…) become private manual entries right away.
-   * Re-uploading the same file never duplicates records.
+   * CSV import. Every row is validated now and queued as a job (processed by `runBatch`, like a
+   * Discogs import), so big files never block a request:
+   * - rows with a Discogs `release_id` (Discogs' collection export) import that edition — works
+   *   for private collections without OAuth;
+   * - other rows (a personal spreadsheet: artista, álbum, año, sello, precio…) become private
+   *   manual records.
+   * Re-uploading the same file never duplicates. Identical rows count as separate copies.
+   * Note: a Discogs CSV imported after a username import of the same collection creates
+   * duplicates (Discogs' export has no copy ids to match on).
    */
   async function importCsv(userId: string, text: string) {
     const rows = parseCsv(text);
@@ -104,91 +117,115 @@ export function importService(
     const result = {
       total: rows.length - 1,
       queued: 0,
-      created: 0,
       skipped: 0,
       errors: [] as { line: number; message: string }[],
+      warnings: [] as { line: number; message: string }[],
     };
-    let manualCount = 0;
+    const seen = new Map<string, number>();
 
     for (const [index, row] of rows.slice(1).entries()) {
       const line = index + 2;
       const get = (f: keyof typeof col) =>
         col[f] != null ? row[col[f]!]?.trim() || undefined : undefined;
-      const rowKey = createHash('sha1')
+      // Same content twice = two copies: the occurrence number keeps both.
+      const content = createHash('sha1')
         .update(`${userId}|${row.join('\u0001')}`)
         .digest('hex')
-        .slice(0, 24);
+        .slice(0, 20);
+      const occurrence = (seen.get(content) ?? 0) + 1;
+      seen.set(content, occurrence);
+      const rowKey = `${content}-${occurrence}`;
+
       const price = parsePrice(get('price'));
+      const rawDate = get('purchaseDate');
+      const purchaseDate = parseDate(rawDate);
+      if (rawDate && !purchaseDate)
+        result.warnings.push({ line, message: `Fecha no reconocida ("${rawDate}"), se omitió` });
+      const rawCurrency = get('currency');
+      const currencyCode = parseCurrencyCode(rawCurrency);
+      if (rawCurrency && !currencyCode)
+        result.warnings.push({
+          line,
+          message: `Moneda no reconocida ("${rawCurrency}"), se usó ${price.currency ?? baseCurrency}`,
+        });
       const fields: CollectionItemFields = {
         conditionMedia: parseGrade(get('mediaCondition')),
         conditionSleeve: parseGrade(get('sleeveCondition')),
-        purchaseDate: parseDate(get('purchaseDate')),
+        purchaseDate,
         purchasePrice: price.amount,
         purchaseCurrency:
-          price.amount != null
-            ? (get('currency')?.toUpperCase() ?? price.currency ?? baseCurrency)
-            : null,
-        purchasePlace: get('place') ?? null,
-        storageLocation: get('location') ?? null,
-        notes: get('notes') ?? null,
+          price.amount != null ? (currencyCode ?? price.currency ?? baseCurrency) : null,
+        purchasePlace: get('place')?.slice(0, 200) ?? null,
+        storageLocation: get('location')?.slice(0, 200) ?? null,
+        notes: get('notes')?.slice(0, 5000) ?? null,
       };
+
       const releaseId = get('releaseId');
+      let job: { type: string; payload: Record<string, unknown> };
       if (releaseId && /^\d+$/.test(releaseId)) {
-        const isNew = await jobs.enqueue(
-          RELEASE_JOB,
-          { userId, externalReleaseId: releaseId, instanceId: `csv-${rowKey}`, fields },
-          { dedupeKey: `import:${userId}:csv-${rowKey}` },
-        );
-        if (isNew) result.queued++;
-        else result.skipped++;
-        continue;
-      }
-      const artist = get('artist');
-      const title = get('title');
-      if (!artist || !title) {
-        result.errors.push({ line, message: 'Falta artista o álbum' });
-        continue;
-      }
-      if (++manualCount > MAX_MANUAL_ROWS_PER_REQUEST) {
-        result.errors.push({
-          line,
-          message: `Se importan hasta ${MAX_MANUAL_ROWS_PER_REQUEST} filas manuales por vez; subí el resto en otro archivo`,
-        });
-        continue;
-      }
-      const year = Number(get('year')?.slice(0, 4));
-      const editionYear = Number(get('editionYear')?.slice(0, 4));
-      const label = get('label');
-      try {
-        const r = await collection.add(userId, {
+        job = {
+          type: RELEASE_JOB,
+          payload: { userId, externalReleaseId: releaseId, instanceId: `csv-${rowKey}`, fields },
+        };
+      } else {
+        const artist = get('artist');
+        const title = get('title');
+        if (!artist || !title) {
+          result.errors.push({ line, message: 'Falta artista o álbum' });
+          continue;
+        }
+        const year = Number(get('year')?.slice(0, 4));
+        const editionYear = Number(get('editionYear')?.slice(0, 4));
+        const label = get('label');
+        const candidate = {
           ...fields,
           clientRequestId: `csv-${rowKey}`,
           manual: {
             album: {
               // Kept as one credit: "Simon & Garfunkel" or "Crosby, Stills & Nash" are single acts.
-              artists: [artist],
-              title,
-              originalReleaseYear: Number.isInteger(year) && year > 1877 ? year : null,
-              genres: get('genre') ? get('genre')!.split(/\s*[,/]\s*/) : [],
+              artists: [artist.slice(0, 200)],
+              title: title.slice(0, 300),
+              originalReleaseYear:
+                Number.isInteger(year) && year > 1877 && year <= 2100 ? year : null,
+              genres: get('genre')
+                ? get('genre')!
+                    .split(/\s*[,/]\s*/)
+                    .slice(0, 10)
+                : [],
               styles: [],
             },
             release: {
-              year: Number.isInteger(editionYear) && editionYear > 1877 ? editionYear : null,
-              country: get('country') ?? null,
-              labels: label ? [{ name: label, catalogNumber: get('catalogNumber') ?? null }] : [],
+              year:
+                Number.isInteger(editionYear) && editionYear > 1877 && editionYear <= 2100
+                  ? editionYear
+                  : null,
+              country: get('country')?.slice(0, 60) ?? null,
+              labels: label
+                ? [
+                    {
+                      name: label.slice(0, 200),
+                      catalogNumber: get('catalogNumber')?.slice(0, 100) ?? null,
+                    },
+                  ]
+                : [],
               formats: [],
             },
             tracks: [],
           },
-        });
-        if (r.replayed) result.skipped++;
-        else result.created++;
-      } catch (e) {
-        result.errors.push({
-          line,
-          message: e instanceof DomainError ? e.message : 'No se pudo importar la fila',
-        });
+        };
+        // Validate now so a bad row is reported, instead of failing later in a job.
+        const parsed = addToCollectionInput.safeParse(candidate);
+        if (!parsed.success) {
+          result.errors.push({ line, message: parsed.error.issues[0]?.message ?? 'Fila inválida' });
+          continue;
+        }
+        job = { type: MANUAL_JOB, payload: { userId, input: parsed.data } };
       }
+      const isNew = await jobs.enqueue(job.type, job.payload, {
+        dedupeKey: `import:${userId}:csv-${rowKey}`,
+      });
+      if (isNew) result.queued++;
+      else result.skipped++;
     }
     return { ...result, status: await status(userId) };
   }
@@ -198,18 +235,43 @@ export function importService(
   };
 
   async function status(userId: string) {
-    const [records, pages] = await Promise.all([
+    const [discogs, manual, pages] = await Promise.all([
       jobs.countsFor(RELEASE_JOB, userId),
+      jobs.countsFor(MANUAL_JOB, userId),
       jobs.countsFor(PAGE_JOB, userId),
     ]);
-    return { ...records, listing: pages.pending > 0 };
+    return {
+      pending: discogs.pending + manual.pending,
+      done: discogs.done + manual.done,
+      failed: discogs.failed + manual.failed,
+      listing: pages.pending > 0,
+    };
   }
 
   async function runBatch(userId: string, limit = 10) {
-    const handlers = { [PAGE_JOB]: pageHandler, [RELEASE_JOB]: releaseHandler };
+    const handlers = {
+      [PAGE_JOB]: pageHandler,
+      [RELEASE_JOB]: releaseHandler,
+      [MANUAL_JOB]: manualHandler,
+    };
     await jobs.runDue(handlers, 1, { type: PAGE_JOB, userId });
-    const result = await jobs.runDue(handlers, limit, { type: RELEASE_JOB, userId });
-    return { ...result, status: await status(userId) };
+    // Manual rows don't call Discogs, so a batch can take many more of them.
+    const manual = await jobs.runDue(handlers, limit * 5, {
+      type: MANUAL_JOB,
+      userId,
+      budgetMs: 20_000,
+    });
+    const discogs = await jobs.runDue(handlers, limit, {
+      type: RELEASE_JOB,
+      userId,
+      budgetMs: 40_000,
+    });
+    return {
+      done: manual.done + discogs.done,
+      failed: manual.failed + discogs.failed,
+      retried: manual.retried + discogs.retried,
+      status: await status(userId),
+    };
   }
 
   return {
@@ -217,7 +279,11 @@ export function importService(
     startDiscogsImport,
     runBatch,
     status,
-    handlers: { [RELEASE_JOB]: releaseHandler, [PAGE_JOB]: pageHandler },
+    handlers: {
+      [RELEASE_JOB]: releaseHandler,
+      [PAGE_JOB]: pageHandler,
+      [MANUAL_JOB]: manualHandler,
+    },
   };
 }
 

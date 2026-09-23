@@ -6,8 +6,8 @@ import { ACHIEVEMENTS } from './achievements';
 import { ESSENTIAL_LISTS, type EssentialListDef } from './essential-lists';
 
 /**
- * Code is the source of truth for definitions; `isActive` is left alone on existing rows so an
- * admin's deactivation survives re-seeding on deploy.
+ * Creates missing achievements only: once a row exists, the admin API owns it (edits and
+ * deactivations survive re-seeding on deploy). Change existing definitions via /api/admin.
  */
 export async function seedAchievements(
   db: Database,
@@ -31,18 +31,7 @@ export async function seedAchievements(
     await db
       .insert(schema.achievements)
       .values(values)
-      .onConflictDoUpdate({
-        target: schema.achievements.code,
-        set: {
-          name: values.name,
-          description: values.description,
-          icon: values.icon,
-          category: values.category,
-          tier: values.tier,
-          criteria: values.criteria,
-          sortOrder: values.sortOrder,
-        },
-      });
+      .onConflictDoNothing({ target: schema.achievements.code });
   }
   return defs.length;
 }

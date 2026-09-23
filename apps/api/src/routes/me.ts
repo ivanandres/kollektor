@@ -33,8 +33,13 @@ export function meRoutes({ core, storage }: AppDeps) {
         z.object({
           limit: z.coerce.number().int().min(1).max(100).optional(),
           before: z.iso.datetime({ offset: true }).optional(),
+          beforeId: z.uuid().optional(),
         }),
-        { limit: c.req.query('limit'), before: c.req.query('before') },
+        {
+          limit: c.req.query('limit'),
+          before: c.req.query('before'),
+          beforeId: c.req.query('beforeId'),
+        },
       );
       return c.json(await core.activity.list(c.get('userId'), q));
     })

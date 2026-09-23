@@ -43,5 +43,16 @@ describe('CSV helpers', () => {
     expect(parsePrice('12.99')).toEqual({ amount: 12.99, currency: null });
     expect(parseDate('12/03/2024')).toBe('2024-03-12');
     expect(parseDate('2024-03-12 10:00:00')).toBe('2024-03-12');
+    expect(parseDate('05/13/2024')).toBeNull();
+    expect(parseDate('2024-02-31')).toBeNull();
+    expect(parsePrice('US$ 20')).toEqual({ amount: 20, currency: 'USD' });
+    expect(parsePrice('U$S 20')).toEqual({ amount: 20, currency: 'USD' });
+    expect(parsePrice('USD20')).toEqual({ amount: 20, currency: 'USD' });
+    expect(parsePrice('€ 20')).toEqual({ amount: 20, currency: 'EUR' });
+    expect(parseCsv('a,b\nSoda,Maxi 12" vinilo\nCharly,Clics')).toEqual([
+      ['a', 'b'],
+      ['Soda', 'Maxi 12" vinilo'],
+      ['Charly', 'Clics'],
+    ]);
   });
 });

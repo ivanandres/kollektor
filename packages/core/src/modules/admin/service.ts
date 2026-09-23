@@ -62,9 +62,14 @@ export function adminService(deps: CoreDeps) {
   /** Creates or replaces a list (and its "<Artist> Complete" achievement). Users are re-evaluated lazily. */
   async function upsertEssential(code: string, input: z.infer<typeof essentialListInput>) {
     const def = { code, ...input };
-    await seedEssentialLists(db, [def]);
-    await db.update(essentialLists).set({ version: 1 }).where(eq(essentialLists.code, code));
-    await seedAchievements(db, [def]);
+    // Marked as admin-owned so the repo seed never overwrites it on deploy.
+    await seedEssentialLists(db, [def], { source: 'admin' });
+    await seedAchievements(db, [def], { onlyLists: true });
+    // Re-creating a previously deleted list reactivates its achievement.
+    await db
+      .update(achievements)
+      .set({ isActive: true })
+      .where(eq(achievements.code, `complete-${code}`));
     return (await listEssentials()).find((l) => l.code === code)!;
   }
 

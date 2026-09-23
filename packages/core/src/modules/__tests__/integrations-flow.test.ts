@@ -146,7 +146,7 @@ describe('CSV import', () => {
       'EKS-74013,Love,Forever Changes,Elektra,"LP, Album",,1967,2000003,Uncategorized,2025-01-02 09:00:00,Very Good (VG),Good (G),',
     ].join('\n');
     const r = await ctx.core.imports.importCsv(ctx.userId, csv);
-    expect(r).toMatchObject({ total: 2, queued: 2, created: 0, errors: [] });
+    expect(r).toMatchObject({ total: 2, queued: 2, errors: [] });
     await ctx.core.imports.runBatch(ctx.userId, 10);
     const list = await ctx.core.collection.list(
       ctx.userId,
@@ -164,22 +164,37 @@ describe('CSV import', () => {
     const csv =
       'Artista;Álbum;Año;Sello;Catálogo;Precio;Moneda;Estado;Fecha;Ubicación\n' +
       'Soda Stereo;Signos;1986;CBS;;$ 45.000;ARS;VG+;12/03/2024;Estante 1\n' +
-      'Simon & Garfunkel;Bookends;1968;Columbia;KCS 9529;20;;NM;;\n' +
-      ';Sin artista;;;;;;;;\n';
+      'Simon & Garfunkel;Bookends;1968;Columbia;KCS 9529;U$S 20;;NM;31/02/2024;\n' +
+      ';Sin artista;;;;;;;;\n' +
+      'Sumo;Maxi 12" Divididos;1986;;;;Pesos;;;\n' +
+      'Sumo;Maxi 12" Divididos;1986;;;;Pesos;;;\n';
     const r = await ctx.core.imports.importCsv(ctx.userId, csv);
     expect(r).toMatchObject({
-      total: 3,
-      created: 2,
+      total: 5,
+      queued: 4,
       errors: [{ line: 4, message: 'Falta artista o álbum' }],
     });
+    expect(r.warnings.map((w) => w.line)).toEqual([3, 5, 6]); // bad date, unknown currency ×2
+    await ctx.core.imports.runBatch(ctx.userId, 10);
+    expect(await ctx.core.imports.status(ctx.userId)).toMatchObject({ pending: 0, failed: 0 });
     const items = (
       await ctx.core.collection.list(ctx.userId, collectionQuery.parse({ sort: 'year_asc' }))
     ).items;
-    expect(items.map((i) => `${i.artist} — ${i.title}`)).toEqual([
+    // A stray " stays literal and identical rows are two copies.
+    expect(items.map((i) => `${i.artist} — ${i.title}`).sort()).toEqual([
       'Simon & Garfunkel — Bookends',
       'Soda Stereo — Signos',
+      'Sumo — Maxi 12" Divididos',
+      'Sumo — Maxi 12" Divididos',
     ]);
-    const signos = await ctx.core.collection.get(ctx.userId, items[1]!.id);
+    const byTitle = (t: string) => items.find((i) => i.title === t)!.id;
+    const bookends = await ctx.core.collection.get(ctx.userId, byTitle('Bookends'));
+    expect(bookends).toMatchObject({
+      purchasePrice: 20,
+      purchaseCurrency: 'USD',
+      purchaseDate: null,
+    });
+    const signos = await ctx.core.collection.get(ctx.userId, byTitle('Signos'));
     expect(signos).toMatchObject({
       purchasePrice: 45000,
       purchaseCurrency: 'ARS',
@@ -188,7 +203,8 @@ describe('CSV import', () => {
       conditionMedia: 'VG+',
     });
     expect(signos.release.isVerified).toBe(false);
-    expect((await ctx.core.imports.importCsv(ctx.userId, csv)).created).toBe(0);
+    const again = await ctx.core.imports.importCsv(ctx.userId, csv);
+    expect(again).toMatchObject({ queued: 0, skipped: 4 });
     await expect(ctx.core.imports.importCsv(ctx.userId, 'foo,bar\n1,2')).rejects.toMatchObject({
       code: 'VALIDATION',
     });

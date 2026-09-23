@@ -45,7 +45,7 @@ Base: `/api` (local: `http://localhost:3001/api`). JSON en todo, salvo el export
 | `GET /me/profile` | Perfil y ajustes de privacidad |
 | `PATCH /me/profile` | Campos opcionales: `username`, `displayName`, `bio`, `avatarUrl`, `profileVisibility`, `collectionVisibility`, `wishlistVisibility` (`private`/`public`), `showPrices`, `showValues`, `baseCurrency` (ISO 4217), `locale`. Cambiar `baseCurrency` recalcula toda la colección |
 | `GET /me/username-available?username=` | `{ username, available }` |
-| `GET /me/activity?limit=&before=` | "Tu actividad": entradas con `message` listo para mostrar ("Agregaste Animals — Pink Floyd a tu colección.", "Desbloqueaste «50 discos»."), portada y links. Para paginar, pasar como `before` el `createdAt` de la última entrada |
+| `GET /me/activity?limit=&before=` | "Tu actividad": entradas con `message` listo para mostrar ("Agregaste Animals — Pink Floyd a tu colección.", "Desbloqueaste «50 discos»."), portada y links. Para paginar, pasar `before` = `createdAt` y `beforeId` = `id` de la última entrada |
 | `POST /me/avatar-upload` | `{ contentType: image/jpeg\|png\|webp }` → `{ uploadUrl, publicUrl, method: "PUT", headers }`. El cliente hace `PUT` del archivo a `uploadUrl` y después `PATCH /me/profile { avatarUrl: publicUrl }`. Al registrarla se verifica que la imagen exista y pese menos de 5 MB (si pesa más, se borra) |
 
 ### Cuenta de Discogs vinculada (opcional)

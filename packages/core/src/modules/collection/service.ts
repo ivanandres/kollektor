@@ -346,40 +346,44 @@ export function collectionService(
   async function ownershipOf(
     userId: string,
     source: string,
-    candidates: { externalId: string; masterId: string | null }[],
+    candidates: { type: 'release' | 'master'; externalId: string; masterId: string | null }[],
   ) {
-    if (candidates.length === 0)
-      return new Map<
-        string,
-        { ownedCopies: number; ownedEditionsOfAlbum: number; inWishlist: boolean }
-      >();
-    const keys = candidates.map(
-      (c) =>
-        sql`(${c.externalId}, ${c.masterId ? `master:${c.masterId}` : `release:${c.externalId}`})`,
-    );
+    type Own = { ownedCopies: number; ownedEditionsOfAlbum: number; inWishlist: boolean };
+    if (candidates.length === 0) return new Map<string, Own>();
+    // Master results only match an album; release ids and master ids overlap numerically.
+    const keys = candidates.map((c) => {
+      const releaseExt = c.type === 'release' ? c.externalId : null;
+      const albumKey =
+        c.type === 'master'
+          ? `master:${c.externalId}`
+          : c.masterId
+            ? `master:${c.masterId}`
+            : `release:${c.externalId}`;
+      return sql`(${`${c.type}:${c.externalId}`}, ${releaseExt}::text, ${albumKey})`;
+    });
     const rows = await db.execute<{
-      external_id: string;
+      key: string;
       owned_copies: number;
       owned_album: number;
       wished: boolean;
     }>(sql`
-      WITH wanted(external_id, album_key) AS (VALUES ${sql.join(keys, sql`, `)}),
+      WITH wanted(key, release_ext, album_key) AS (VALUES ${sql.join(keys, sql`, `)}),
       rel AS (
-        SELECT w.external_id, er.entity_id AS release_id, ea.entity_id AS album_id
+        SELECT w.key, er.entity_id AS release_id, ea.entity_id AS album_id
           FROM wanted w
-          LEFT JOIN external_ids er ON er.entity_type = 'release' AND er.source = ${source} AND er.external_id = w.external_id
+          LEFT JOIN external_ids er ON w.release_ext IS NOT NULL AND er.entity_type = 'release' AND er.source = ${source} AND er.external_id = w.release_ext
           LEFT JOIN external_ids ea ON ea.entity_type = 'album' AND ea.source = ${source} AND ea.external_id = w.album_key
       )
-      SELECT rel.external_id,
+      SELECT rel.key,
              (SELECT count(*) FROM collection_items ci WHERE ci.user_id = ${userId} AND ci.deleted_at IS NULL AND ci.release_id = rel.release_id)::int AS owned_copies,
              (SELECT count(*) FROM collection_items ci JOIN releases r ON r.id = ci.release_id
                WHERE ci.user_id = ${userId} AND ci.deleted_at IS NULL AND r.album_id = coalesce(rel.album_id, (SELECT album_id FROM releases WHERE id = rel.release_id)))::int AS owned_album,
              EXISTS (SELECT 1 FROM wishlist_items wi WHERE wi.user_id = ${userId} AND wi.status <> 'purchased'
                AND (wi.release_id = rel.release_id OR (wi.release_id IS NULL AND wi.album_id = rel.album_id))) AS wished
         FROM rel`);
-    return new Map(
+    return new Map<string, Own>(
       rows.map((r) => [
-        r.external_id,
+        r.key,
         { ownedCopies: r.owned_copies, ownedEditionsOfAlbum: r.owned_album, inWishlist: r.wished },
       ]),
     );

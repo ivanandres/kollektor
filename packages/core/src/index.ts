@@ -144,7 +144,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
     accounts,
     admin: adminService(deps),
     activity: {
-      list: (userId: string, opts?: { limit?: number; before?: string }) =>
+      list: (userId: string, opts?: { limit?: number; before?: string; beforeId?: string }) =>
         listActivity(deps.db, userId, opts),
     },
     publicViews,

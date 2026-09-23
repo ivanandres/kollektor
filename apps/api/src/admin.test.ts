@@ -103,6 +103,29 @@ describe('admin curation', () => {
       ).status,
     ).toBe(400);
 
+    // Editing a *curated* list (from the repo seed) also survives re-seeding, and a list PUT
+    // doesn't revert earlier achievement edits.
+    await req('/admin/essential-lists/radiohead', adminCookie, 'PUT', {
+      artist: 'Radiohead',
+      name: 'Radiohead — mi selección',
+      albums: [{ title: 'OK Computer', year: 1997 }],
+    });
+    await seedAll(handle.db);
+    const rh = (
+      (await (await req('/admin/essential-lists', adminCookie)).json()) as {
+        code: string;
+        name: string;
+        albums: unknown[];
+      }[]
+    ).find((l) => l.code === 'radiohead');
+    expect(rh).toMatchObject({ name: 'Radiohead — mi selección' });
+    expect(rh!.albums).toHaveLength(1);
+    const kept = (await (await req('/admin/achievements', adminCookie)).json()) as {
+      code: string;
+      name: string;
+    }[];
+    expect(kept.find((a) => a.code === 'count-500')?.name).toBe('Medio millar');
+
     // Re-seeding on deploy keeps admin edits: the admin list stays, the deactivated badge stays off.
     await seedAll(handle.db);
     const lists = (await (await req('/admin/essential-lists', adminCookie)).json()) as {

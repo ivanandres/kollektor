@@ -25,14 +25,13 @@ export function catalogRoutes({ core }: AppDeps) {
   const attribution = { attribution: 'Datos provistos por Discogs' };
 
   /** Adds "¿ya lo tengo?" flags to every external candidate. */
-  async function withOwnership<T extends { externalId: string; masterId: string | null }>(
-    userId: string,
-    items: T[],
-  ) {
+  async function withOwnership<
+    T extends { type: 'release' | 'master'; externalId: string; masterId: string | null },
+  >(userId: string, items: T[]) {
     const source = core.deps.catalogProvider?.source ?? 'discogs';
     const owned = await core.collection.ownershipOf(userId, source, items);
     const none = { ownedCopies: 0, ownedEditionsOfAlbum: 0, inWishlist: false };
-    return items.map((i) => ({ ...i, ...(owned.get(i.externalId) ?? none) }));
+    return items.map((i) => ({ ...i, ...(owned.get(`${i.type}:${i.externalId}`) ?? none) }));
   }
 
   return (
