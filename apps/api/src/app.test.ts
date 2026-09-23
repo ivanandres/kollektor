@@ -37,7 +37,22 @@ const core = createCore({
   ],
   recognizer: new FakeRecognizer({ artist: 'Pink Floyd', title: 'The Dark Side of the Moon' }),
 });
-const app = createApp({ core, auth: createAuth({ db: handle.db, core, email, env }), env });
+const storage = {
+  createUpload: async (key: string, contentType: string) => ({
+    uploadUrl: `https://upload.example.com/${key}?sig=1`,
+    publicUrl: `https://media.example.com/${key}`,
+    method: 'PUT' as const,
+    headers: { 'Content-Type': contentType },
+    expiresIn: 600,
+  }),
+  isOwnPublicUrl: (url: string) => url.startsWith('https://media.example.com/'),
+};
+const app = createApp({
+  core,
+  auth: createAuth({ db: handle.db, core, email, env }),
+  env,
+  storage,
+});
 
 const ORIGIN = 'http://localhost:3000';
 type Session = { cookie: string; token: string | null };
@@ -311,6 +326,71 @@ describe('MVP flow', () => {
     const b = await call('/collection', { method: 'POST', session: ivan, body, headers });
     expect([a.status, b.status]).toEqual([201, 200]);
     expect(b.json.item.id).toBe(a.json.item.id);
+  });
+
+  it('exports the collection as CSV (owner only, formula-safe)', async () => {
+    await call(`/collection/${itemId}`, {
+      method: 'PATCH',
+      session: ivan,
+      body: { notes: '=HYPERLINK("x")' },
+    });
+    const res = await app.request('/api/collection/export.csv', {
+      headers: { cookie: ivan.cookie, origin: ORIGIN },
+    });
+    expect(res.headers.get('content-type')).toContain('text/csv');
+    const text = await res.text();
+    expect(text.split('\r\n')[0]).toContain('artista,album');
+    expect(text).toContain('Disquería del centro');
+    expect(text).toContain(`"'=HYPERLINK(""x"")"`);
+  });
+
+  it('public profile endpoints respect privacy settings', async () => {
+    expect((await call('/public/users/ivan')).status).toBe(404);
+    await call('/me/profile', {
+      method: 'PATCH',
+      session: ivan,
+      body: { profileVisibility: 'public', collectionVisibility: 'public' },
+    });
+    const pub = await call('/public/users/ivan/collection');
+    expect(pub.status).toBe(200);
+    expect(JSON.stringify(pub.json)).not.toMatch(/Disquería|purchasePrice/);
+    expect((await call('/public/users/ivan/wishlist')).status).toBe(404);
+  });
+
+  it('avatar upload returns a presigned target and only accepts our own URLs', async () => {
+    const up = await call('/me/avatar-upload', {
+      method: 'POST',
+      session: ivan,
+      body: { contentType: 'image/png' },
+    });
+    expect(up.json.publicUrl).toMatch(/^https:\/\/media\.example\.com\/avatars\/.+\.png$/);
+    expect(
+      (
+        await call('/me/profile', {
+          method: 'PATCH',
+          session: ivan,
+          body: { avatarUrl: up.json.publicUrl },
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await call('/me/profile', {
+          method: 'PATCH',
+          session: ivan,
+          body: { avatarUrl: 'https://tracker.example.com/p.png' },
+        })
+      ).status,
+    ).toBe(400);
+  });
+
+  it('rate-limits external lookups per user', async () => {
+    const eve2 = await signUp('Rate', 'rate@example.com');
+    const statuses: number[] = [];
+    for (let i = 0; i < 31; i++)
+      statuses.push((await call('/catalog/external/search?q=pink', { session: eve2 })).status);
+    expect(statuses.slice(0, 30).every((s) => s === 200)).toBe(true);
+    expect(statuses[30]).toBe(429);
   });
 
   it('validation errors are structured', async () => {

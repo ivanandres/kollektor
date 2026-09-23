@@ -4,6 +4,7 @@ import { ConsoleEmailService, ResendEmailService, type EmailService } from './em
 import { ChainFx, CurrencyApiFx, FrankfurterFx } from './fx/providers';
 import { GeniusLyricsService } from './lyrics/genius';
 import { SpotifyService } from './spotify/service';
+import { S3StorageService, type StorageService } from './storage/s3';
 import { ClaudeCoverRecognizer } from './vision/claude';
 import { YouTubeService } from './youtube/service';
 
@@ -23,6 +24,7 @@ export {
 } from './email/resend';
 export { scoreMatch, coreTitle } from './matching';
 export { HttpError } from './http/fetch-json';
+export { S3StorageService, type StorageService, type UploadTarget } from './storage/s3';
 
 export interface IntegrationEnv {
   DISCOGS_USER_TOKEN?: string;
@@ -35,12 +37,17 @@ export interface IntegrationEnv {
   GENIUS_ACCESS_TOKEN?: string;
   RESEND_API_KEY?: string;
   EMAIL_FROM?: string;
+  STORAGE_ENDPOINT?: string;
+  STORAGE_BUCKET?: string;
+  STORAGE_ACCESS_KEY_ID?: string;
+  STORAGE_SECRET_ACCESS_KEY?: string;
+  STORAGE_PUBLIC_BASE_URL?: string;
 }
 
 /** Builds adapters from env. Anything not configured is simply left out (features degrade gracefully). */
 export function integrationsFromEnv(
   env: IntegrationEnv,
-): Omit<CoreDeps, 'db' | 'now' | 'config'> & { email: EmailService } {
+): Omit<CoreDeps, 'db' | 'now' | 'config'> & { email: EmailService; storage?: StorageService } {
   const discogs = env.DISCOGS_USER_TOKEN
     ? new DiscogsService({
         token: env.DISCOGS_USER_TOKEN,
@@ -76,5 +83,19 @@ export function integrationsFromEnv(
       env.RESEND_API_KEY && env.EMAIL_FROM
         ? new ResendEmailService({ apiKey: env.RESEND_API_KEY, from: env.EMAIL_FROM })
         : new ConsoleEmailService(),
+    storage:
+      env.STORAGE_ENDPOINT &&
+      env.STORAGE_BUCKET &&
+      env.STORAGE_ACCESS_KEY_ID &&
+      env.STORAGE_SECRET_ACCESS_KEY &&
+      env.STORAGE_PUBLIC_BASE_URL
+        ? new S3StorageService({
+            endpoint: env.STORAGE_ENDPOINT,
+            bucket: env.STORAGE_BUCKET,
+            accessKeyId: env.STORAGE_ACCESS_KEY_ID,
+            secretAccessKey: env.STORAGE_SECRET_ACCESS_KEY,
+            publicBaseUrl: env.STORAGE_PUBLIC_BASE_URL,
+          })
+        : undefined,
   };
 }

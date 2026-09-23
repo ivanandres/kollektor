@@ -25,6 +25,13 @@ export const envSchema = z.object({
   GENIUS_ACCESS_TOKEN: optional,
   RESEND_API_KEY: optional,
   EMAIL_FROM: optional,
+  STORAGE_ENDPOINT: optional,
+  STORAGE_BUCKET: optional,
+  STORAGE_ACCESS_KEY_ID: optional,
+  STORAGE_SECRET_ACCESS_KEY: optional,
+  STORAGE_PUBLIC_BASE_URL: optional,
+  /** Per-user requests per minute to endpoints that hit external APIs (Discogs, vision). */
+  EXTERNAL_RATE_LIMIT_PER_MIN: z.coerce.number().int().positive().default(30),
 });
 
 export type Env = z.infer<typeof envSchema>;

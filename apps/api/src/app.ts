@@ -6,6 +6,8 @@ import { catalogRoutes } from './routes/catalog';
 import { collectionRoutes } from './routes/collection';
 import { insightRoutes } from './routes/insights';
 import { meRoutes } from './routes/me';
+import { publicRoutes } from './routes/public';
+import { perUserRateLimit } from './lib/rate-limit';
 import { wishlistRoutes } from './routes/wishlist';
 import type { AppDeps, AppEnv } from './types';
 
@@ -38,6 +40,8 @@ export function createApp(deps: AppDeps) {
     return c.json(await core.runJobs(40, 45_000));
   });
 
+  app.route('/public', publicRoutes(deps));
+
   // Everything below requires a session (cookie on web, bearer token on mobile).
   const authed = new Hono<AppEnv>();
   authed.use('*', async (c, next) => {
@@ -50,6 +54,10 @@ export function createApp(deps: AppDeps) {
     c.set('userId', session.user.id);
     await next();
   });
+  const limit = perUserRateLimit(env.EXTERNAL_RATE_LIMIT_PER_MIN);
+  authed.use('/catalog/external/*', limit);
+  authed.use('/catalog/identify/*', limit);
+  authed.use('/imports/*', limit);
   authed.route('/me', meRoutes(deps));
   authed.route('/collection', collectionRoutes(deps));
   authed.route('/wishlist', wishlistRoutes(deps));

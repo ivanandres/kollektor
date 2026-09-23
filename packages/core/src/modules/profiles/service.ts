@@ -83,21 +83,17 @@ export function profileService(
     return updated!;
   }
 
-  /**
-   * What other users may see (V2). Private fields (storage location, purchase place) never
-   * leave the owner; prices/values only if the owner opted in.
-   */
-  async function getPublicProfile(username: string) {
-    const [p] = await db.select().from(profiles).where(eq(profiles.username, username));
+  /** Resolves a public profile to its owner id, only when the requested section is public. */
+  async function publicOwner(username: string, section: 'profile' | 'collection' | 'wishlist') {
+    const [p] = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.username, username.toLowerCase()));
     if (!p || p.profileVisibility !== 'public') throw notFound('Perfil');
-    return {
-      username: p.username,
-      displayName: p.displayName,
-      avatarUrl: p.avatarUrl,
-      bio: p.bio,
-      collectionVisible: p.collectionVisibility === 'public',
-      wishlistVisible: p.wishlistVisibility === 'public',
-    };
+    if (section === 'collection' && p.collectionVisibility !== 'public')
+      throw notFound('Colección');
+    if (section === 'wishlist' && p.wishlistVisibility !== 'public') throw notFound('Wishlist');
+    return p;
   }
 
   async function userIdByEmail(email: string): Promise<string | null> {
@@ -109,13 +105,13 @@ export function profileService(
   }
 
   return {
+    publicOwner,
     userIdByEmail,
     isUsernameAvailable,
     suggestUsername,
     ensureProfile,
     getProfile,
     updateProfile,
-    getPublicProfile,
   };
 }
 

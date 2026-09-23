@@ -9,6 +9,7 @@ import { importService } from './modules/imports/service';
 import { jobService } from './modules/jobs/service';
 import { musicLinkService } from './modules/music/service';
 import { profileService } from './modules/profiles/service';
+import { publicService } from './modules/public/service';
 import { recognitionService } from './modules/recognition/service';
 import { postgresSearchProvider, type SearchProvider } from './modules/search/service';
 import { statsService } from './modules/stats/service';
@@ -44,6 +45,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
   const recognition = recognitionService(deps);
   const jobs = jobService(deps);
   const imports = importService(deps, collection, jobs);
+  const publicViews = publicService(deps, profiles, collection, wishlist, stats);
 
   /** Periodic maintenance: daily value snapshots and weekly market refresh (rate-limit friendly). */
   async function scheduleMaintenance() {
@@ -116,6 +118,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
     recognition,
     jobs,
     imports,
+    publicViews,
     scheduleMaintenance,
     runJobs: (limit?: number, budgetMs?: number) => jobs.runDue(jobHandlers, limit, { budgetMs }),
   };

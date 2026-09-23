@@ -144,23 +144,53 @@ describe('profiles', () => {
     ).rejects.toMatchObject({ code: 'CONFLICT' });
   });
 
-  it('public profile hides everything until the owner opts in', async () => {
+  it('public views hide everything until the owner opts in, and never expose private fields', async () => {
     const p = await ctx.core.profiles.getProfile(ctx.userId);
-    await expect(ctx.core.profiles.getPublicProfile(p.username)).rejects.toMatchObject({
+    await ctx.core.collection.add(
+      ctx.userId,
+      addToCollectionInput.parse({
+        discogsReleaseId: 1873013,
+        purchasePrice: 50,
+        purchaseCurrency: 'USD',
+        purchasePlace: 'Feria',
+        storageLocation: 'Casa, estante 3',
+      }),
+    );
+    await expect(ctx.core.publicViews.profile(p.username)).rejects.toMatchObject({
       code: 'NOT_FOUND',
     });
     await ctx.core.profiles.updateProfile(ctx.userId, {
       profileVisibility: 'public',
       bio: 'Coleccionista de prog',
     });
-    const pub = await ctx.core.profiles.getPublicProfile(p.username);
-    expect(pub).toEqual({
+    const pub = await ctx.core.publicViews.profile(p.username);
+    expect(pub).toMatchObject({
       username: p.username,
-      displayName: 'Test User',
-      avatarUrl: null,
       bio: 'Coleccionista de prog',
       collectionVisible: false,
-      wishlistVisible: false,
+      stats: null,
     });
+    await expect(
+      ctx.core.publicViews.collectionOf(p.username, collectionQuery.parse({})),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+
+    await ctx.core.profiles.updateProfile(ctx.userId, { collectionVisibility: 'public' });
+    const col = await ctx.core.publicViews.collectionOf(p.username, collectionQuery.parse({}));
+    const json = JSON.stringify(col);
+    expect(col.total).toBe(1);
+    expect(json).not.toMatch(/Feria|estante|purchasePrice|estimatedValue/);
+    expect((await ctx.core.publicViews.profile(p.username)).stats).toEqual({
+      items: 1,
+      artists: 1,
+      albums: 1,
+    });
+
+    await ctx.core.profiles.updateProfile(ctx.userId, { showPrices: true });
+    const withPrices = await ctx.core.publicViews.collectionOf(
+      p.username,
+      collectionQuery.parse({}),
+    );
+    expect(withPrices.items[0]).toMatchObject({ purchasePriceBase: 50, currency: 'USD' });
+    expect(JSON.stringify(withPrices)).not.toMatch(/Feria|estante/);
   });
 });
