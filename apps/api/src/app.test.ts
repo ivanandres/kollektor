@@ -540,32 +540,70 @@ describe('MVP flow', () => {
     expect(statuses[30]).toBe(429);
   });
 
-  it('links a Discogs account through the OAuth callback (no open redirects)', async () => {
+  it('links a Discogs account: callback hands back the verifier, only the initiator can complete', async () => {
     const start = await call('/me/discogs/connect', {
       method: 'POST',
       session: ivan,
       body: { returnTo: 'http://localhost:3000/perfil' },
     });
     const authorize = new URL(start.json.authorizeUrl);
-    expect(authorize.searchParams.get('cb')).toBe('http://localhost:3001/api/discogs/callback');
+    const callbackUrl = new URL(authorize.searchParams.get('cb')!);
+    expect(callbackUrl.origin + callbackUrl.pathname).toBe(
+      'http://localhost:3001/api/discogs/callback',
+    );
     const token = authorize.searchParams.get('oauth_token')!;
-    const cb = await app.request(`/api/discogs/callback?oauth_token=${token}&oauth_verifier=ok`);
-    expect(cb.status).toBe(302);
-    expect(cb.headers.get('location')).toBe('http://localhost:3000/perfil?discogs=connected');
-    expect((await call('/me/discogs', { session: ivan })).json).toMatchObject({
-      connected: true,
-      username: 'ivan_vinilos',
-    });
 
-    // Foreign returnTo falls back to the web app; bad verifier → error.
+    // Discogs redirects the browser to the callback, which links nothing by itself.
+    const cb = await app.request(
+      `/api/discogs/callback${callbackUrl.search}&oauth_token=${token}&oauth_verifier=ok`,
+    );
+    expect(cb.status).toBe(302);
+    const back = new URL(cb.headers.get('location')!);
+    expect(back.origin + back.pathname).toBe('http://localhost:3000/perfil');
+    expect(back.searchParams.get('discogs')).toBe('authorized');
+    expect((await call('/me/discogs', { session: ivan })).json.connected).toBe(false);
+
+    // An attacker who started the flow can't be completed by someone else (and vice versa).
+    const mallory = await signUp('Mallory', 'mallory@example.com');
+    const hijack = await call('/me/discogs/complete', {
+      method: 'POST',
+      session: mallory,
+      body: { oauthToken: token, oauthVerifier: 'ok' },
+    });
+    expect(hijack.status).toBe(400);
+
+    const done = await call('/me/discogs/complete', {
+      method: 'POST',
+      session: ivan,
+      body: {
+        oauthToken: back.searchParams.get('oauth_token'),
+        oauthVerifier: back.searchParams.get('oauth_verifier'),
+      },
+    });
+    expect(done.json).toEqual({ connected: true, username: 'ivan_vinilos' });
+    expect((await call('/me/discogs', { session: ivan })).json).toMatchObject({ connected: true });
+
+    // Tokens are single-use.
+    const replay = await call('/me/discogs/complete', {
+      method: 'POST',
+      session: ivan,
+      body: { oauthToken: token, oauthVerifier: 'ok' },
+    });
+    expect(replay.status).toBe(400);
+
+    // Foreign return URLs fall back to the web app; a denied authorization says so.
     const evil = await call('/me/discogs/connect', {
       method: 'POST',
       session: ivan,
       body: { returnTo: 'https://evil.example.com/' },
     });
-    const t2 = new URL(evil.json.authorizeUrl).searchParams.get('oauth_token')!;
-    const bad = await app.request(`/api/discogs/callback?oauth_token=${t2}&oauth_verifier=nope`);
-    expect(bad.headers.get('location')).toBe('http://localhost:3000?discogs=error');
+    expect(new URL(evil.json.authorizeUrl).searchParams.get('cb')).toContain(
+      encodeURIComponent('http://localhost:3000'),
+    );
+    const forged = await app.request(
+      '/api/discogs/callback?return_to=https%3A%2F%2Fevil.example.com&oauth_token=a&oauth_verifier=b',
+    );
+    expect(forged.headers.get('location')).toMatch(/^http:\/\/localhost:3000\?/);
     const cancelled = await app.request('/api/discogs/callback?denied=1');
     expect(cancelled.headers.get('location')).toBe('http://localhost:3000?discogs=cancelled');
     expect((await call('/me/discogs', { method: 'DELETE', session: ivan })).status).toBe(204);

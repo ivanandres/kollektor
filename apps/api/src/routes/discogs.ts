@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { DomainError } from '@kollektor/core';
 import { jsonBody, parse } from '../lib/http';
 import type { AppDeps, AppEnv } from '../types';
 
@@ -21,7 +20,11 @@ function withParam(url: string, key: string, value: string) {
   return `${url}${url.includes('?') ? '&' : '?'}${key}=${encodeURIComponent(value)}`;
 }
 
-/** Authenticated: connect / status / disconnect the user's Discogs account. */
+/**
+ * Authenticated: connect / complete / status / disconnect the user's Discogs account.
+ * Flow: POST /connect → open authorizeUrl → Discogs → GET /api/discogs/callback → redirected to
+ * returnTo with oauth_token + oauth_verifier → the signed-in app calls POST /complete.
+ */
 export function discogsAccountRoutes({ core, env }: AppDeps) {
   return new Hono<AppEnv>()
     .get('/', async (c) => c.json(await core.accounts.discogsStatus(c.get('userId'))))
@@ -30,14 +33,25 @@ export function discogsAccountRoutes({ core, env }: AppDeps) {
         z.object({ returnTo: z.string().max(500).optional() }),
         await jsonBody(c),
       );
-      const callback = `${env.BETTER_AUTH_URL.replace(/\/$/, '')}/api/discogs/callback`;
-      return c.json(
-        await core.accounts.startDiscogsConnect(
-          c.get('userId'),
-          callback,
-          safeReturnTo(env, returnTo),
-        ),
+      const to = safeReturnTo(env, returnTo);
+      // Discogs appends oauth_token/oauth_verifier to this URL; return_to is re-validated there.
+      const callback = `${env.BETTER_AUTH_URL.replace(/\/$/, '')}/api/discogs/callback?return_to=${encodeURIComponent(to)}`;
+      return c.json(await core.accounts.startDiscogsConnect(c.get('userId'), callback, to));
+    })
+    .post('/complete', async (c) => {
+      const { oauthToken, oauthVerifier } = parse(
+        z.object({
+          oauthToken: z.string().min(1).max(200),
+          oauthVerifier: z.string().min(1).max(200),
+        }),
+        await jsonBody(c),
       );
+      const r = await core.accounts.completeDiscogsConnect(
+        c.get('userId'),
+        oauthToken,
+        oauthVerifier,
+      );
+      return c.json({ connected: true, username: r.username });
     })
     .delete('/', async (c) => {
       await core.accounts.disconnectDiscogs(c.get('userId'));
@@ -45,19 +59,23 @@ export function discogsAccountRoutes({ core, env }: AppDeps) {
     });
 }
 
-/** Public: Discogs redirects the browser here after the user authorizes (or denies). */
-export function discogsCallbackRoutes({ core, env }: AppDeps) {
-  return new Hono().get('/callback', async (c) => {
+/**
+ * Public: Discogs redirects the browser here. It does NOT link anything by itself: it hands the
+ * token + verifier back to the app, which completes the link with the signed-in user's session.
+ */
+export function discogsCallbackRoutes({ env }: AppDeps) {
+  return new Hono().get('/callback', (c) => {
     const token = c.req.query('oauth_token');
     const verifier = c.req.query('oauth_verifier');
-    if (!token || !verifier)
-      return c.redirect(withParam(safeReturnTo(env), 'discogs', 'cancelled'));
-    try {
-      const r = await core.accounts.completeDiscogsConnect(token, verifier);
-      return c.redirect(withParam(safeReturnTo(env, r.returnTo), 'discogs', 'connected'));
-    } catch (e) {
-      if (!(e instanceof DomainError)) console.error(e);
-      return c.redirect(withParam(safeReturnTo(env), 'discogs', 'error'));
-    }
+    const to = safeReturnTo(env, c.req.query('return_to'));
+    if (!token || !verifier) return c.redirect(withParam(to, 'discogs', 'cancelled'));
+    c.header('Referrer-Policy', 'no-referrer');
+    return c.redirect(
+      withParam(
+        withParam(withParam(to, 'discogs', 'authorized'), 'oauth_token', token),
+        'oauth_verifier',
+        verifier,
+      ),
+    );
   });
 }

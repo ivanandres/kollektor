@@ -157,7 +157,23 @@ describe('linked Discogs account', () => {
       'https://app.test/perfil',
     );
     const token = new URL(authorizeUrl).searchParams.get('oauth_token')!;
-    await expect(ctx.core.accounts.completeDiscogsConnect(token, 'wrong')).rejects.toThrow();
+    await expect(
+      ctx.core.accounts.completeDiscogsConnect(ctx.userId, token, 'wrong'),
+    ).rejects.toThrow();
+    // Another user can never complete someone else's handshake.
+    const intruder = await createUser(h.db);
+    const other = await ctx.core.accounts.startDiscogsConnect(
+      ctx.userId,
+      'https://api.test/cb',
+      null,
+    );
+    await expect(
+      ctx.core.accounts.completeDiscogsConnect(
+        intruder,
+        new URL(other.authorizeUrl).searchParams.get('oauth_token')!,
+        'ok',
+      ),
+    ).rejects.toMatchObject({ code: 'VALIDATION' });
     // A failed exchange consumes the handshake: the user must start again.
     const retry = await ctx.core.accounts.startDiscogsConnect(
       ctx.userId,
@@ -165,6 +181,7 @@ describe('linked Discogs account', () => {
       null,
     );
     const done = await ctx.core.accounts.completeDiscogsConnect(
+      ctx.userId,
       new URL(retry.authorizeUrl).searchParams.get('oauth_token')!,
       'ok',
     );

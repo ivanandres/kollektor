@@ -52,7 +52,8 @@ Base: `/api` (local: `http://localhost:3001/api`). JSON en todo, salvo el export
 | Método y ruta | Descripción |
 |---|---|
 | `GET /me/discogs` | `{ connected, username, connectedAt }` |
-| `POST /me/discogs/connect` | `{ returnTo? }` → `{ authorizeUrl }`. El cliente abre esa URL; después de autorizar, Discogs vuelve a `/api/discogs/callback`, que redirige a `returnTo` (la web o un deep link configurado en `DISCOGS_CONNECT_RETURN_URL`) con `?discogs=connected`, `?discogs=error` o `?discogs=cancelled` |
+| `POST /me/discogs/connect` | `{ returnTo? }` → `{ authorizeUrl }`. El cliente abre esa URL. Al autorizar, Discogs pasa por `/api/discogs/callback`, que **no vincula nada**: redirige a `returnTo` (la web o el deep link de `DISCOGS_CONNECT_RETURN_URL`) con `?discogs=authorized&oauth_token=…&oauth_verifier=…`, o con `?discogs=cancelled` si se rechazó |
+| `POST /me/discogs/complete` | `{ oauthToken, oauthVerifier }` desde esa pantalla, **con la sesión del usuario**. Solo quien inició la conexión puede completarla, y cada token se usa una sola vez |
 | `DELETE /me/discogs` | Desvincula la cuenta y borra los tokens, que se guardan cifrados |
 
 Con la cuenta vinculada, `POST /imports/discogs` sin `username` importa **tu** colección, aunque sea privada.

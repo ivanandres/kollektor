@@ -42,17 +42,28 @@ export function accountService(deps: CoreDeps) {
     return { authorizeUrl: req.authorizeUrl };
   }
 
-  /** Step 2 (callback): exchanges the verifier for the user's tokens. */
-  async function completeDiscogsConnect(requestToken: string, verifier: string) {
+  /**
+   * Step 2: the signed-in user who started the handshake exchanges the verifier for tokens.
+   * Binding completion to the initiator's session prevents linking someone else's Discogs
+   * account (a victim authorizing an attacker's link) to the wrong Kollektor user.
+   */
+  async function completeDiscogsConnect(userId: string, requestToken: string, verifier: string) {
     const { oauth, cipher } = setup();
     const [req] = await db
       .delete(oauthRequests)
       .where(
-        and(eq(oauthRequests.requestToken, requestToken), eq(oauthRequests.provider, PROVIDER)),
+        and(
+          eq(oauthRequests.requestToken, requestToken),
+          eq(oauthRequests.provider, PROVIDER),
+          eq(oauthRequests.userId, userId),
+        ),
       )
       .returning();
     if (!req || req.expiresAt < nowOf(deps))
-      throw new DomainError('VALIDATION', 'La conexión con Discogs expiró. Probá de nuevo.');
+      throw new DomainError(
+        'VALIDATION',
+        'La conexión con Discogs expiró o no es tuya. Probá de nuevo.',
+      );
     const access = await oauth.accessToken(requestToken, cipher.decrypt(req.secretEnc), verifier);
     const me = await oauth.identity(access.token, access.secret);
     const values = {

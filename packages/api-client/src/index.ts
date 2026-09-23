@@ -168,6 +168,12 @@ export function createApiClient(opts: ApiClientOptions) {
         /** Open `authorizeUrl` in the browser; Discogs sends the user back to `returnTo?discogs=connected`. */
         connect: (returnTo?: string) =>
           post<{ authorizeUrl: string }>('/me/discogs/connect', { returnTo }),
+        /** Call from the returnTo page with the `oauth_token` and `oauth_verifier` query params. */
+        complete: (oauthToken: string, oauthVerifier: string) =>
+          post<{ connected: true; username: string }>('/me/discogs/complete', {
+            oauthToken,
+            oauthVerifier,
+          }),
         disconnect: () => del('/me/discogs'),
       },
     },
