@@ -429,6 +429,33 @@ export function collectionService(
     };
   }
 
+  /**
+   * Points a copy to another edition — typically a manual entry made offline, later matched to
+   * its Discogs release. The old private edition is removed if nothing else uses it.
+   */
+  async function relink(
+    userId: string,
+    itemId: string,
+    target: { releaseId?: string; discogsReleaseId?: number },
+  ) {
+    const row = await getOwnedRow(userId, itemId);
+    let releaseId = target.releaseId;
+    if (releaseId) await catalog.assertReleaseVisible(userId, releaseId);
+    else if (target.discogsReleaseId != null)
+      releaseId = await catalog.importFromProvider(String(target.discogsReleaseId));
+    if (!releaseId) throw invalid('Indicá la edición a vincular');
+    if (releaseId !== row.releaseId) {
+      await db
+        .update(collectionItems)
+        .set({ releaseId, updatedAt: nowOf(deps) })
+        .where(eq(collectionItems.id, itemId));
+      await catalog.deleteOrphanPrivateRelease(userId, row.releaseId);
+      await valuation.recomputeItem(itemId);
+    }
+    const unlocked = (await hooks.afterChange?.(userId)) ?? [];
+    return { item: await get(userId, itemId), unlockedAchievements: unlocked };
+  }
+
   async function addPhoto(userId: string, itemId: string, url: string, caption?: string | null) {
     await getOwnedRow(userId, itemId);
     const [{ n } = { n: 0 }] = await db
@@ -461,7 +488,7 @@ export function collectionService(
     if (!deleted.length) throw notFound('Foto');
   }
 
-  return { add, update, remove, get, list, facets, getOwnedRow, addPhoto, removePhoto };
+  return { add, update, remove, get, list, facets, getOwnedRow, addPhoto, removePhoto, relink };
 }
 
 export interface CollectionItemDetail {

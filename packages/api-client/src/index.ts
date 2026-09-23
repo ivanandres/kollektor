@@ -172,6 +172,9 @@ export function createApiClient(opts: ApiClientOptions) {
       update: (itemId: string, body: UpdateCollectionItemInput) =>
         patch<Omit<T.AddResult, 'replayed'>>(`/collection/${id(itemId)}`, body),
       remove: (itemId: string) => del(`/collection/${id(itemId)}`),
+      /** Match a record (e.g. entered manually offline) to its Discogs edition. */
+      link: (itemId: string, target: { discogsReleaseId: number } | { releaseId: string }) =>
+        post<Omit<T.AddResult, 'replayed'>>(`/collection/${id(itemId)}/link`, target),
       photoUpload: (itemId: string, contentType: 'image/jpeg' | 'image/png' | 'image/webp') =>
         post<T.UploadTarget>(`/collection/${id(itemId)}/photos/upload`, { contentType }),
       addPhoto: (itemId: string, url: string, caption?: string) =>

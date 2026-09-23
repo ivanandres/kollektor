@@ -56,6 +56,7 @@ Base: `/api` (local: `http://localhost:3001/api`). JSON en todo, salvo el export
 | `GET /collection/:id` | Ficha completa: edición, álbum, sellos, formatos, tracklist, imágenes, valor, tags |
 | `PATCH /collection/:id` | Campos de la copia (mismos que al agregar). `tags` reemplaza la lista completa |
 | `DELETE /collection/:id` | Borrado lógico. Los logros ya desbloqueados se conservan |
+| `POST /collection/:id/link` | `{ discogsReleaseId }` o `{ releaseId }`: vincula un disco (por ejemplo, cargado a mano sin conexión) con su edición real. Conserva precio, notas y fotos, y trae tracklist, portada y valor. La edición manual se borra si ya no la usa nada |
 | `POST /collection/:id/photos/upload` | `{ contentType }` → URL prefirmada para subir una foto **de tu copia** (etiqueta, tapa gastada…) |
 | `POST /collection/:id/photos` | `{ url, caption? }` registra la foto subida (máximo 10 por disco). Aparecen en `photos` de la ficha |
 | `DELETE /collection/:id/photos/:photoId` | |

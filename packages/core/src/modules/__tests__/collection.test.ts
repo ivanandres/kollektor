@@ -130,6 +130,31 @@ describe('collection', () => {
     expect((await ctx.core.collection.list(ctx.userId, q())).total).toBe(1);
   });
 
+  it('links a manual record to its Discogs edition and cleans up the private one', async () => {
+    const { item } = await add({
+      manual: {
+        album: { artists: ['Pink Floyd'], title: 'Dark Side' },
+        release: { country: 'Argentina' },
+      },
+      purchasePrice: 20,
+      purchaseCurrency: 'USD',
+      notes: 'Cargado en la disquería',
+    });
+    const oldRelease = item.release.id;
+    const { item: linked } = await ctx.core.collection.relink(ctx.userId, item.id, {
+      discogsReleaseId: 1873013,
+    });
+    expect(linked).toMatchObject({
+      notes: 'Cargado en la disquería',
+      value: { paid: 20, estimated: 300 },
+    });
+    expect(linked.release).toMatchObject({ country: 'UK', isVerified: true });
+    expect(linked.release.tracks.length).toBe(10);
+    await expect(ctx.core.catalog.getReleaseDetail(ctx.userId, oldRelease)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    });
+  });
+
   it('rejects a price without currency', () => {
     expect(() => addToCollectionInput.parse({ discogsReleaseId: 1, purchasePrice: 10 })).toThrow();
   });

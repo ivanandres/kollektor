@@ -123,6 +123,25 @@ export function collectionRoutes({ core, storage }: AppDeps) {
         await core.collection.remove(c.get('userId'), c.req.param('id'));
         return c.body(null, 204);
       })
+      // Match a (manual) record to another edition, e.g. its Discogs release.
+      .post(`/:id{${ID}}/link`, async (c) => {
+        const target = parse(
+          z
+            .object({
+              releaseId: z.uuid().optional(),
+              discogsReleaseId: z.coerce.number().int().positive().optional(),
+            })
+            .refine((v) => (v.releaseId == null) !== (v.discogsReleaseId == null), {
+              message: 'Indicá releaseId o discogsReleaseId',
+            }),
+          await jsonBody(c),
+        );
+        return c.json(
+          await withAchievements(
+            await core.collection.relink(c.get('userId'), c.req.param('id'), target),
+          ),
+        );
+      })
       // Photos of my copy: 1) get a presigned upload, 2) PUT the file, 3) register its public URL.
       .post(`/:id{${ID}}/photos/upload`, async (c) => {
         const s = requireStorage();

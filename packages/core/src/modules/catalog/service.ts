@@ -579,6 +579,34 @@ export function catalogService(deps: CoreDeps) {
       .orderBy(asc(releases.releaseYear));
   }
 
+  /** Removes a user's private release (and its album, if empty) once nothing references it. */
+  async function deleteOrphanPrivateRelease(userId: string, releaseId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      const [rel] = await tx
+        .select({ albumId: releases.albumId, owner: releases.createdByUserId })
+        .from(releases)
+        .where(eq(releases.id, releaseId));
+      if (!rel || rel.owner !== userId) return;
+      const [{ used } = { used: 0 }] = await tx.execute<{ used: number }>(sql`
+        SELECT ((SELECT count(*) FROM collection_items WHERE release_id = ${releaseId})
+              + (SELECT count(*) FROM wishlist_items WHERE release_id = ${releaseId}))::int AS used`);
+      if (used > 0) return;
+      await tx
+        .update(albums)
+        .set({ mainReleaseId: null })
+        .where(eq(albums.mainReleaseId, releaseId));
+      await tx.delete(releases).where(eq(releases.id, releaseId));
+      const [{ left } = { left: 0 }] = await tx.execute<{ left: number }>(sql`
+        SELECT ((SELECT count(*) FROM releases WHERE album_id = ${rel.albumId})
+              + (SELECT count(*) FROM wishlist_items WHERE album_id = ${rel.albumId})
+              + (SELECT count(*) FROM essential_list_items WHERE album_id = ${rel.albumId}))::int AS left`);
+      if (left === 0)
+        await tx
+          .delete(albums)
+          .where(and(eq(albums.id, rel.albumId), eq(albums.createdByUserId, userId)));
+    });
+  }
+
   /** All editions of an album in the external catalog ("otras ediciones"), when it has a master. */
   async function externalVersions(userId: string, albumId: string, page = 1) {
     await assertAlbumVisible(userId, albumId);
@@ -598,6 +626,7 @@ export function catalogService(deps: CoreDeps) {
   }
 
   return {
+    deleteOrphanPrivateRelease,
     externalVersions,
     importExternalRelease,
     importFromProvider,
