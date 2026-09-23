@@ -1,0 +1,422 @@
+[
+    {
+        "code": "artists-10",
+        "name": "10 artistas",
+        "description": "Tenés discos de 10 artistas distintos.",
+        "icon": "mic",
+        "category": "artistas",
+        "tier": 1,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:15.845Z",
+        "progress": {
+            "current": 10,
+            "target": 10
+        }
+    },
+    {
+        "code": "artists-50",
+        "name": "50 artistas",
+        "description": "Tenés discos de 50 artistas distintos.",
+        "icon": "mic",
+        "category": "artistas",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 13,
+            "target": 50
+        }
+    },
+    {
+        "code": "count-1",
+        "name": "Primer vinilo",
+        "description": "Agregaste tu primer disco.",
+        "icon": "disc",
+        "category": "coleccion",
+        "tier": 1,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:14.510Z",
+        "progress": {
+            "current": 1,
+            "target": 1
+        }
+    },
+    {
+        "code": "count-10",
+        "name": "10 discos",
+        "description": "Llegaste a 10 vinilos.",
+        "icon": "disc",
+        "category": "coleccion",
+        "tier": 2,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:15.160Z",
+        "progress": {
+            "current": 10,
+            "target": 10
+        }
+    },
+    {
+        "code": "count-50",
+        "name": "50 discos",
+        "description": "Llegaste a 50 vinilos.",
+        "icon": "disc",
+        "category": "coleccion",
+        "tier": 3,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 26,
+            "target": 50
+        }
+    },
+    {
+        "code": "count-100",
+        "name": "100 discos",
+        "description": "Llegaste a 100 vinilos.",
+        "icon": "disc",
+        "category": "coleccion",
+        "tier": 4,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 26,
+            "target": 100
+        }
+    },
+    {
+        "code": "count-250",
+        "name": "250 discos",
+        "description": "Llegaste a 250 vinilos.",
+        "icon": "disc",
+        "category": "coleccion",
+        "tier": 5,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 26,
+            "target": 250
+        }
+    },
+    {
+        "code": "count-500",
+        "name": "500 discos",
+        "description": "Llegaste a 500 vinilos.",
+        "icon": "disc",
+        "category": "coleccion",
+        "tier": 6,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 26,
+            "target": 500
+        }
+    },
+    {
+        "code": "completist-1",
+        "name": "Completista",
+        "description": "Completaste la discografía esencial de un artista.",
+        "icon": "trophy",
+        "category": "discografias",
+        "tier": 1,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 0,
+            "target": 1
+        }
+    },
+    {
+        "code": "completist-3",
+        "name": "Completista serial",
+        "description": "Completaste 3 discografías esenciales.",
+        "icon": "trophy",
+        "category": "discografias",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 0,
+            "target": 3
+        }
+    },
+    {
+        "code": "complete-led-zeppelin",
+        "name": "Led Zeppelin Complete",
+        "description": "Tenés todos los discos esenciales de Led Zeppelin.",
+        "icon": "trophy",
+        "category": "discografias",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 3,
+            "target": 8
+        }
+    },
+    {
+        "code": "complete-pink-floyd",
+        "name": "Pink Floyd Complete",
+        "description": "Tenés todos los discos esenciales de Pink Floyd.",
+        "icon": "trophy",
+        "category": "discografias",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 4,
+            "target": 8
+        }
+    },
+    {
+        "code": "complete-the-beatles",
+        "name": "The Beatles Complete",
+        "description": "Tenés todos los discos esenciales de The Beatles.",
+        "icon": "trophy",
+        "category": "discografias",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 3,
+            "target": 13
+        }
+    },
+    {
+        "code": "complete-david-bowie",
+        "name": "David Bowie Complete",
+        "description": "Tenés todos los discos esenciales de David Bowie.",
+        "icon": "trophy",
+        "category": "discografias",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 3,
+            "target": 8
+        }
+    },
+    {
+        "code": "complete-miles-davis",
+        "name": "Miles Davis Complete",
+        "description": "Tenés todos los discos esenciales de Miles Davis.",
+        "icon": "trophy",
+        "category": "discografias",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 2,
+            "target": 9
+        }
+    },
+    {
+        "code": "complete-radiohead",
+        "name": "Radiohead Complete",
+        "description": "Tenés todos los discos esenciales de Radiohead.",
+        "icon": "trophy",
+        "category": "discografias",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 2,
+            "target": 9
+        }
+    },
+    {
+        "code": "complete-charly-garcia",
+        "name": "Charly García Complete",
+        "description": "Tenés todos los discos esenciales de Charly García.",
+        "icon": "trophy",
+        "category": "discografias",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 2,
+            "target": 4
+        }
+    },
+    {
+        "code": "genres-5",
+        "name": "5 géneros",
+        "description": "Tu colección abarca 5 géneros distintos.",
+        "icon": "shapes",
+        "category": "diversidad",
+        "tier": 1,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 4,
+            "target": 5
+        }
+    },
+    {
+        "code": "genres-10",
+        "name": "10 géneros",
+        "description": "Tu colección abarca 10 géneros distintos.",
+        "icon": "shapes",
+        "category": "diversidad",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 4,
+            "target": 10
+        }
+    },
+    {
+        "code": "genres-20",
+        "name": "20 géneros",
+        "description": "Tu colección abarca 20 géneros distintos.",
+        "icon": "shapes",
+        "category": "diversidad",
+        "tier": 3,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 4,
+            "target": 20
+        }
+    },
+    {
+        "code": "countries-5",
+        "name": "5 países",
+        "description": "Tenés ediciones de 5 países distintos.",
+        "icon": "globe",
+        "category": "paises",
+        "tier": 1,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:15.334Z",
+        "progress": {
+            "current": 5,
+            "target": 5
+        }
+    },
+    {
+        "code": "countries-10",
+        "name": "10 países",
+        "description": "Tenés ediciones de 10 países distintos.",
+        "icon": "globe",
+        "category": "paises",
+        "tier": 2,
+        "unlocked": false,
+        "unlockedAt": null,
+        "progress": {
+            "current": 5,
+            "target": 10
+        }
+    },
+    {
+        "code": "first-pressing",
+        "name": "Primera edición",
+        "description": "Tenés una primera edición.",
+        "icon": "star",
+        "category": "rareza",
+        "tier": 1,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:14.510Z",
+        "progress": {
+            "current": 1,
+            "target": 1
+        }
+    },
+    {
+        "code": "japanese-edition",
+        "name": "Edición japonesa",
+        "description": "Tenés una edición japonesa.",
+        "icon": "sun",
+        "category": "rareza",
+        "tier": 1,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:14.972Z",
+        "progress": {
+            "current": 1,
+            "target": 1
+        }
+    },
+    {
+        "code": "limited-edition",
+        "name": "Edición limitada",
+        "description": "Tenés una edición limitada.",
+        "icon": "hash",
+        "category": "rareza",
+        "tier": 1,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:15.558Z",
+        "progress": {
+            "current": 1,
+            "target": 1
+        }
+    },
+    {
+        "code": "picture-disc",
+        "name": "Picture disc",
+        "description": "Tenés un picture disc.",
+        "icon": "image",
+        "category": "rareza",
+        "tier": 1,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:16.041Z",
+        "progress": {
+            "current": 1,
+            "target": 1
+        }
+    },
+    {
+        "code": "colored-vinyl",
+        "name": "Vinilo de color",
+        "description": "Tenés un vinilo de color.",
+        "icon": "palette",
+        "category": "rareza",
+        "tier": 1,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:14.972Z",
+        "progress": {
+            "current": 1,
+            "target": 1
+        }
+    },
+    {
+        "code": "decades-5",
+        "name": "5 décadas",
+        "description": "Tenés discos de 5 décadas distintas.",
+        "icon": "hourglass",
+        "category": "tiempo",
+        "tier": 1,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:15.610Z",
+        "progress": {
+            "current": 5,
+            "target": 5
+        }
+    },
+    {
+        "code": "decades-6",
+        "name": "6 décadas",
+        "description": "Tenés discos de 6 décadas distintas.",
+        "icon": "hourglass",
+        "category": "tiempo",
+        "tier": 2,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:15.678Z",
+        "progress": {
+            "current": 6,
+            "target": 6
+        }
+    },
+    {
+        "code": "decades-7",
+        "name": "7 décadas",
+        "description": "Tenés discos de 7 décadas distintas.",
+        "icon": "hourglass",
+        "category": "tiempo",
+        "tier": 3,
+        "unlocked": true,
+        "unlockedAt": "2026-09-23T04:56:15.845Z",
+        "progress": {
+            "current": 7,
+            "target": 7
+        }
+    }
+]

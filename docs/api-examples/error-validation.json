@@ -1,0 +1,16 @@
+{
+    "error": {
+        "code": "VALIDATION",
+        "message": "Datos inválidos",
+        "issues": [
+            {
+                "path": "purchaseCurrency",
+                "message": "La moneda es obligatoria si hay precio"
+            },
+            {
+                "path": "",
+                "message": "Indicá exactamente una fuente: releaseId, discogsReleaseId o manual"
+            }
+        ]
+    }
+}

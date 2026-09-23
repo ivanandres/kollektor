@@ -1,0 +1,179 @@
+[
+    {
+        "id": "a12d4ed6-353b-40d7-ae31-10aba5deac6a",
+        "album": {
+            "id": "3cb2aae1-ab45-498c-bf5a-11d671b14390",
+            "title": "Meddle",
+            "originalReleaseYear": 1971,
+            "description": null,
+            "coverImageUrl": null,
+            "mainReleaseId": "4b51ff09-1477-41fe-85d7-b136cbd6f6a5",
+            "isVerified": true,
+            "artists": [
+                {
+                    "id": "1b054259-1a9d-48be-9693-f61e6fbcbbbb",
+                    "name": "Pink Floyd",
+                    "joinPhrase": null
+                }
+            ],
+            "artistDisplay": "Pink Floyd",
+            "genres": [
+                "Rock"
+            ],
+            "styles": [
+                "Prog Rock"
+            ]
+        },
+        "release": {
+            "id": "4b51ff09-1477-41fe-85d7-b136cbd6f6a5",
+            "releaseYear": 1971,
+            "country": "UK",
+            "formatSummary": "Vinyl, LP, Album",
+            "editionType": "original",
+            "catalogNumbers": [
+                "NULL"
+            ]
+        },
+        "targetPrice": 60,
+        "targetCurrency": "USD",
+        "priority": 1,
+        "status": "wanted",
+        "notes": null,
+        "collectionItemId": null,
+        "ownedEditions": 0,
+        "createdAt": "2026-09-23T04:56:16.068Z"
+    },
+    {
+        "id": "6bee1fe8-f70e-41d7-bfd4-269103201e15",
+        "album": {
+            "id": "050ec6ee-6972-4842-914b-ff87435249f5",
+            "title": "Bajo Belgrano",
+            "originalReleaseYear": 1983,
+            "description": null,
+            "coverImageUrl": null,
+            "mainReleaseId": "351c1d0d-804e-4c74-acd0-2c2c78a8c568",
+            "isVerified": true,
+            "artists": [
+                {
+                    "id": "a12135aa-7edf-4130-8f62-335097a41864",
+                    "name": "Spinetta Jade",
+                    "joinPhrase": null
+                }
+            ],
+            "artistDisplay": "Spinetta Jade",
+            "genres": [
+                "Jazz",
+                "Rock"
+            ],
+            "styles": [
+                "Fusion"
+            ]
+        },
+        "release": {
+            "id": "351c1d0d-804e-4c74-acd0-2c2c78a8c568",
+            "releaseYear": 1983,
+            "country": "Argentina",
+            "formatSummary": "Vinyl, LP, Album",
+            "editionType": "original",
+            "catalogNumbers": [
+                "NULL"
+            ]
+        },
+        "targetPrice": 60,
+        "targetCurrency": "USD",
+        "priority": 1,
+        "status": "wanted",
+        "notes": null,
+        "collectionItemId": null,
+        "ownedEditions": 0,
+        "createdAt": "2026-09-23T04:56:16.146Z"
+    },
+    {
+        "id": "35236a59-c8a7-4126-976f-265d49499d1e",
+        "album": {
+            "id": "06f1a740-19c2-4455-836e-a83a704f1906",
+            "title": "Physical Graffiti",
+            "originalReleaseYear": 1975,
+            "description": null,
+            "coverImageUrl": null,
+            "mainReleaseId": "e76db965-c699-4984-9316-7c6fe3753902",
+            "isVerified": true,
+            "artists": [
+                {
+                    "id": "30800fcd-9f05-4350-8042-f4b86e72b08c",
+                    "name": "Led Zeppelin",
+                    "joinPhrase": null
+                }
+            ],
+            "artistDisplay": "Led Zeppelin",
+            "genres": [
+                "Rock"
+            ],
+            "styles": [
+                "Hard Rock"
+            ]
+        },
+        "release": {
+            "id": "e76db965-c699-4984-9316-7c6fe3753902",
+            "releaseYear": 1975,
+            "country": "UK",
+            "formatSummary": "Vinyl, LP, Album",
+            "editionType": "original",
+            "catalogNumbers": [
+                "NULL"
+            ]
+        },
+        "targetPrice": 60,
+        "targetCurrency": "USD",
+        "priority": 2,
+        "status": "wanted",
+        "notes": null,
+        "collectionItemId": null,
+        "ownedEditions": 0,
+        "createdAt": "2026-09-23T04:56:16.095Z"
+    },
+    {
+        "id": "30f5a5d5-a9cf-4e00-b1b0-72355933f57c",
+        "album": {
+            "id": "3d4d046e-ab3c-492f-b305-84fa27edb3ff",
+            "title": "In a Silent Way",
+            "originalReleaseYear": 1969,
+            "description": null,
+            "coverImageUrl": null,
+            "mainReleaseId": "fa36e5d5-1352-483f-beec-5ac4877a37b0",
+            "isVerified": true,
+            "artists": [
+                {
+                    "id": "611b42e6-820e-4f6b-9f10-f322ab7e2649",
+                    "name": "Miles Davis",
+                    "joinPhrase": null
+                }
+            ],
+            "artistDisplay": "Miles Davis",
+            "genres": [
+                "Jazz"
+            ],
+            "styles": [
+                "Fusion"
+            ]
+        },
+        "release": {
+            "id": "fa36e5d5-1352-483f-beec-5ac4877a37b0",
+            "releaseYear": 1969,
+            "country": "US",
+            "formatSummary": "Vinyl, LP, Album",
+            "editionType": "original",
+            "catalogNumbers": [
+                "NULL"
+            ]
+        },
+        "targetPrice": 60,
+        "targetCurrency": "USD",
+        "priority": 2,
+        "status": "wanted",
+        "notes": null,
+        "collectionItemId": null,
+        "ownedEditions": 0,
+        "createdAt": "2026-09-23T04:56:16.118Z"
+    }
+]

@@ -1,0 +1,149 @@
+{
+    "id": "8a59d6d1-3fbf-4744-b950-cdf732caf8c9",
+    "release": {
+        "id": "9cc8bfa9-66fe-4aef-8842-de5d51c7210a",
+        "album": {
+            "id": "65a6d3d3-3bb2-4d6c-b595-57eda823c2d6",
+            "title": "Kind of Blue",
+            "originalReleaseYear": 1959,
+            "description": null,
+            "coverImageUrl": null,
+            "mainReleaseId": "9cc8bfa9-66fe-4aef-8842-de5d51c7210a",
+            "isVerified": true,
+            "artists": [
+                {
+                    "id": "611b42e6-820e-4f6b-9f10-f322ab7e2649",
+                    "name": "Miles Davis",
+                    "joinPhrase": null
+                }
+            ],
+            "artistDisplay": "Miles Davis",
+            "genres": [
+                "Jazz"
+            ],
+            "styles": [
+                "Cool Jazz",
+                "Modal"
+            ]
+        },
+        "title": "Kind of Blue",
+        "releaseYear": 1959,
+        "releaseDate": null,
+        "country": "US",
+        "editionType": "original",
+        "formatSummary": "Vinyl, LP, Album",
+        "barcode": null,
+        "notes": "Datos de demostración.",
+        "isVerified": true,
+        "community": {
+            "have": null,
+            "want": null
+        },
+        "labels": [
+            {
+                "id": "b53df6b6-f74b-4592-9096-d6fedc7c2ddc",
+                "name": "Columbia",
+                "catalogNumber": null
+            }
+        ],
+        "formats": [
+            {
+                "name": "Vinyl",
+                "qty": 1,
+                "size": "12\"",
+                "speed": "33 ⅓ RPM",
+                "color": null,
+                "descriptions": [
+                    "LP",
+                    "Album"
+                ]
+            }
+        ],
+        "images": [],
+        "coverImageUrl": null,
+        "tracks": [
+            {
+                "id": "ebff9382-6667-4c37-8717-ad9eb8f54390",
+                "position": "A1",
+                "side": "A",
+                "discNumber": 1,
+                "title": "So What",
+                "durationSeconds": null,
+                "artistCredit": null
+            },
+            {
+                "id": "ce53cecc-03f1-438e-b8df-0c141fc74986",
+                "position": "A2",
+                "side": "A",
+                "discNumber": 1,
+                "title": "Freddie Freeloader",
+                "durationSeconds": null,
+                "artistCredit": null
+            },
+            {
+                "id": "708605d8-ee15-45b1-8e52-bb70cf88f805",
+                "position": "A3",
+                "side": "A",
+                "discNumber": 1,
+                "title": "Blue in Green",
+                "durationSeconds": null,
+                "artistCredit": null
+            },
+            {
+                "id": "c7be430d-2ed0-40d4-9f96-26e3f283c61d",
+                "position": "B1",
+                "side": "B",
+                "discNumber": 1,
+                "title": "All Blues",
+                "durationSeconds": null,
+                "artistCredit": null
+            },
+            {
+                "id": "eb78f7a7-09f4-4318-a198-02286efacb0b",
+                "position": "B2",
+                "side": "B",
+                "discNumber": 1,
+                "title": "Flamenco Sketches",
+                "durationSeconds": null,
+                "artistCredit": null
+            }
+        ],
+        "external": [
+            {
+                "source": "demo",
+                "externalId": "demo-r13",
+                "url": null,
+                "lastSyncedAt": "2026-09-23T04:56:23.295Z"
+            }
+        ]
+    },
+    "conditionMedia": "VG",
+    "conditionSleeve": "VG",
+    "copyNumber": null,
+    "isFirstPressing": null,
+    "purchaseDate": "2024-12-24",
+    "purchasePrice": 200,
+    "purchaseCurrency": "USD",
+    "purchasePlace": null,
+    "storageLocation": "Estante 2",
+    "notes": null,
+    "tags": [],
+    "value": {
+        "baseCurrency": "USD",
+        "paid": 200,
+        "estimated": 420,
+        "difference": 220,
+        "estimate": {
+            "amount": 420,
+            "currency": "USD",
+            "source": "demo",
+            "kind": "median",
+            "capturedAt": "2026-09-23T04:56:23.297Z"
+        },
+        "override": null,
+        "disclaimer": "Valor estimado: no es una tasación garantizada."
+    },
+    "otherCopiesCount": 0,
+    "createdAt": "2024-12-24T18:00:00.000Z",
+    "updatedAt": "2026-09-23T04:56:15.363Z"
+}

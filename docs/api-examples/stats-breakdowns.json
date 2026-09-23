@@ -1,0 +1,492 @@
+{
+    "byArtist": [
+        {
+            "key": "1b054259-1a9d-48be-9693-f61e6fbcbbbb",
+            "label": "Pink Floyd",
+            "count": 4
+        },
+        {
+            "key": "fc443b36-b754-49ae-a04d-24aea65a62b6",
+            "label": "The Beatles",
+            "count": 3
+        },
+        {
+            "key": "c17cb2db-e918-4da5-9cbc-03527a1178c4",
+            "label": "David Bowie",
+            "count": 3
+        },
+        {
+            "key": "30800fcd-9f05-4350-8042-f4b86e72b08c",
+            "label": "Led Zeppelin",
+            "count": 3
+        },
+        {
+            "key": "a44960ef-a8ff-4b59-a07e-1e66222df8df",
+            "label": "Charly García",
+            "count": 2
+        },
+        {
+            "key": "9b327aa2-dbca-43f3-ac39-29ec4f28da3f",
+            "label": "John Coltrane",
+            "count": 2
+        },
+        {
+            "key": "611b42e6-820e-4f6b-9f10-f322ab7e2649",
+            "label": "Miles Davis",
+            "count": 2
+        },
+        {
+            "key": "651acae3-7931-4a1f-9714-477c42b4d7b6",
+            "label": "Radiohead",
+            "count": 2
+        },
+        {
+            "key": "2024be82-eecd-4191-8111-fa4b9fda4a4b",
+            "label": "Fleetwood Mac",
+            "count": 1
+        },
+        {
+            "key": "c444b0b9-91e5-435e-aabb-56e1f18dc1ee",
+            "label": "Love",
+            "count": 1
+        },
+        {
+            "key": "a2015484-b0da-43ec-91cc-41b6eb5314f2",
+            "label": "Nirvana",
+            "count": 1
+        },
+        {
+            "key": "4bce1d3b-1d6a-4513-8b88-3fbc4e85ab75",
+            "label": "Soda Stereo",
+            "count": 1
+        },
+        {
+            "key": "746f7b2e-d8c8-4dd0-bab9-b9ea4398f2dd",
+            "label": "Sui Generis",
+            "count": 1
+        }
+    ],
+    "byGenre": [
+        {
+            "key": "Rock",
+            "label": "Rock",
+            "count": 22
+        },
+        {
+            "key": "Jazz",
+            "label": "Jazz",
+            "count": 5
+        },
+        {
+            "key": "Pop",
+            "label": "Pop",
+            "count": 4
+        },
+        {
+            "key": "Electronic",
+            "label": "Electronic",
+            "count": 2
+        }
+    ],
+    "byStyle": [
+        {
+            "key": "Pop Rock",
+            "label": "Pop Rock",
+            "count": 7
+        },
+        {
+            "key": "Art Rock",
+            "label": "Art Rock",
+            "count": 4
+        },
+        {
+            "key": "Prog Rock",
+            "label": "Prog Rock",
+            "count": 4
+        },
+        {
+            "key": "Folk Rock",
+            "label": "Folk Rock",
+            "count": 3
+        },
+        {
+            "key": "Hard Rock",
+            "label": "Hard Rock",
+            "count": 3
+        },
+        {
+            "key": "Psychedelic Rock",
+            "label": "Psychedelic Rock",
+            "count": 3
+        },
+        {
+            "key": "Alternative Rock",
+            "label": "Alternative Rock",
+            "count": 2
+        },
+        {
+            "key": "Glam",
+            "label": "Glam",
+            "count": 2
+        },
+        {
+            "key": "Modal",
+            "label": "Modal",
+            "count": 2
+        },
+        {
+            "key": "Blues Rock",
+            "label": "Blues Rock",
+            "count": 1
+        },
+        {
+            "key": "Cool Jazz",
+            "label": "Cool Jazz",
+            "count": 1
+        },
+        {
+            "key": "Experimental",
+            "label": "Experimental",
+            "count": 1
+        },
+        {
+            "key": "Free Jazz",
+            "label": "Free Jazz",
+            "count": 1
+        },
+        {
+            "key": "Fusion",
+            "label": "Fusion",
+            "count": 1
+        },
+        {
+            "key": "Grunge",
+            "label": "Grunge",
+            "count": 1
+        },
+        {
+            "key": "Hard Bop",
+            "label": "Hard Bop",
+            "count": 1
+        },
+        {
+            "key": "New Wave",
+            "label": "New Wave",
+            "count": 1
+        },
+        {
+            "key": "Soft Rock",
+            "label": "Soft Rock",
+            "count": 1
+        }
+    ],
+    "byDecade": [
+        {
+            "key": "1950",
+            "label": "1950s",
+            "count": 2
+        },
+        {
+            "key": "1960",
+            "label": "1960s",
+            "count": 6
+        },
+        {
+            "key": "1970",
+            "label": "1970s",
+            "count": 11
+        },
+        {
+            "key": "1980",
+            "label": "1980s",
+            "count": 2
+        },
+        {
+            "key": "1990",
+            "label": "1990s",
+            "count": 3
+        },
+        {
+            "key": "2000",
+            "label": "2000s",
+            "count": 1
+        },
+        {
+            "key": "2010",
+            "label": "2010s",
+            "count": 1
+        }
+    ],
+    "byYear": [
+        {
+            "key": "1957",
+            "label": "1957",
+            "count": 1
+        },
+        {
+            "key": "1959",
+            "label": "1959",
+            "count": 1
+        },
+        {
+            "key": "1965",
+            "label": "1965",
+            "count": 2
+        },
+        {
+            "key": "1966",
+            "label": "1966",
+            "count": 1
+        },
+        {
+            "key": "1967",
+            "label": "1967",
+            "count": 1
+        },
+        {
+            "key": "1969",
+            "label": "1969",
+            "count": 2
+        },
+        {
+            "key": "1970",
+            "label": "1970",
+            "count": 1
+        },
+        {
+            "key": "1971",
+            "label": "1971",
+            "count": 2
+        },
+        {
+            "key": "1972",
+            "label": "1972",
+            "count": 1
+        },
+        {
+            "key": "1973",
+            "label": "1973",
+            "count": 3
+        },
+        {
+            "key": "1975",
+            "label": "1975",
+            "count": 1
+        },
+        {
+            "key": "1977",
+            "label": "1977",
+            "count": 2
+        },
+        {
+            "key": "1979",
+            "label": "1979",
+            "count": 1
+        },
+        {
+            "key": "1982",
+            "label": "1982",
+            "count": 1
+        },
+        {
+            "key": "1983",
+            "label": "1983",
+            "count": 1
+        },
+        {
+            "key": "1990",
+            "label": "1990",
+            "count": 1
+        },
+        {
+            "key": "1991",
+            "label": "1991",
+            "count": 1
+        },
+        {
+            "key": "1997",
+            "label": "1997",
+            "count": 1
+        },
+        {
+            "key": "2007",
+            "label": "2007",
+            "count": 1
+        },
+        {
+            "key": "2016",
+            "label": "2016",
+            "count": 1
+        }
+    ],
+    "byCountry": [
+        {
+            "key": "UK",
+            "label": "UK",
+            "count": 11
+        },
+        {
+            "key": "US",
+            "label": "US",
+            "count": 7
+        },
+        {
+            "key": "Argentina",
+            "label": "Argentina",
+            "count": 5
+        },
+        {
+            "key": "Japan",
+            "label": "Japan",
+            "count": 2
+        },
+        {
+            "key": "Europe",
+            "label": "Europe",
+            "count": 1
+        }
+    ],
+    "byLabel": [
+        {
+            "key": "Atlantic",
+            "label": "Atlantic",
+            "count": 3
+        },
+        {
+            "key": "Harvest",
+            "label": "Harvest",
+            "count": 3
+        },
+        {
+            "key": "Columbia",
+            "label": "Columbia",
+            "count": 2
+        },
+        {
+            "key": "Parlophone",
+            "label": "Parlophone",
+            "count": 2
+        },
+        {
+            "key": "RCA Victor",
+            "label": "RCA Victor",
+            "count": 2
+        },
+        {
+            "key": "Apple Records",
+            "label": "Apple Records",
+            "count": 1
+        },
+        {
+            "key": "Blue Note",
+            "label": "Blue Note",
+            "count": 1
+        },
+        {
+            "key": "CBS",
+            "label": "CBS",
+            "count": 1
+        },
+        {
+            "key": "DGC",
+            "label": "DGC",
+            "count": 1
+        },
+        {
+            "key": "EMI",
+            "label": "EMI",
+            "count": 1
+        },
+        {
+            "key": "Elektra",
+            "label": "Elektra",
+            "count": 1
+        },
+        {
+            "key": "ISO Records",
+            "label": "ISO Records",
+            "count": 1
+        },
+        {
+            "key": "Impulse!",
+            "label": "Impulse!",
+            "count": 1
+        },
+        {
+            "key": "Interdisc",
+            "label": "Interdisc",
+            "count": 1
+        },
+        {
+            "key": "Odeon",
+            "label": "Odeon",
+            "count": 1
+        },
+        {
+            "key": "SG Discos",
+            "label": "SG Discos",
+            "count": 1
+        },
+        {
+            "key": "Talent",
+            "label": "Talent",
+            "count": 1
+        },
+        {
+            "key": "Warner Bros. Records",
+            "label": "Warner Bros. Records",
+            "count": 1
+        },
+        {
+            "key": "XL Recordings",
+            "label": "XL Recordings",
+            "count": 1
+        }
+    ],
+    "byFormat": [
+        {
+            "key": "12\"",
+            "label": "12\"",
+            "count": 26
+        }
+    ],
+    "byCondition": [
+        {
+            "key": "VG+",
+            "label": "VG+",
+            "count": 10
+        },
+        {
+            "key": "NM",
+            "label": "NM",
+            "count": 7
+        },
+        {
+            "key": "VG",
+            "label": "VG",
+            "count": 7
+        },
+        {
+            "key": "M",
+            "label": "M",
+            "count": 2
+        }
+    ],
+    "byEditionType": [
+        {
+            "key": "original",
+            "label": "original",
+            "count": 24
+        },
+        {
+            "key": "limited",
+            "label": "limited",
+            "count": 1
+        },
+        {
+            "key": "reissue",
+            "label": "reissue",
+            "count": 1
+        }
+    ]
+}

@@ -1,0 +1,381 @@
+{
+    "artists": [
+        {
+            "id": "1b054259-1a9d-48be-9693-f61e6fbcbbbb",
+            "value": "Pink Floyd",
+            "count": 4
+        },
+        {
+            "id": "fc443b36-b754-49ae-a04d-24aea65a62b6",
+            "value": "The Beatles",
+            "count": 3
+        },
+        {
+            "id": "c17cb2db-e918-4da5-9cbc-03527a1178c4",
+            "value": "David Bowie",
+            "count": 3
+        },
+        {
+            "id": "30800fcd-9f05-4350-8042-f4b86e72b08c",
+            "value": "Led Zeppelin",
+            "count": 3
+        },
+        {
+            "id": "a44960ef-a8ff-4b59-a07e-1e66222df8df",
+            "value": "Charly García",
+            "count": 2
+        },
+        {
+            "id": "9b327aa2-dbca-43f3-ac39-29ec4f28da3f",
+            "value": "John Coltrane",
+            "count": 2
+        },
+        {
+            "id": "611b42e6-820e-4f6b-9f10-f322ab7e2649",
+            "value": "Miles Davis",
+            "count": 2
+        },
+        {
+            "id": "651acae3-7931-4a1f-9714-477c42b4d7b6",
+            "value": "Radiohead",
+            "count": 2
+        },
+        {
+            "id": "2024be82-eecd-4191-8111-fa4b9fda4a4b",
+            "value": "Fleetwood Mac",
+            "count": 1
+        },
+        {
+            "id": "c444b0b9-91e5-435e-aabb-56e1f18dc1ee",
+            "value": "Love",
+            "count": 1
+        },
+        {
+            "id": "a2015484-b0da-43ec-91cc-41b6eb5314f2",
+            "value": "Nirvana",
+            "count": 1
+        },
+        {
+            "id": "4bce1d3b-1d6a-4513-8b88-3fbc4e85ab75",
+            "value": "Soda Stereo",
+            "count": 1
+        },
+        {
+            "id": "746f7b2e-d8c8-4dd0-bab9-b9ea4398f2dd",
+            "value": "Sui Generis",
+            "count": 1
+        }
+    ],
+    "genres": [
+        {
+            "value": "Rock",
+            "count": 22
+        },
+        {
+            "value": "Jazz",
+            "count": 5
+        },
+        {
+            "value": "Pop",
+            "count": 4
+        },
+        {
+            "value": "Electronic",
+            "count": 2
+        }
+    ],
+    "styles": [
+        {
+            "value": "Pop Rock",
+            "count": 7
+        },
+        {
+            "value": "Art Rock",
+            "count": 4
+        },
+        {
+            "value": "Prog Rock",
+            "count": 4
+        },
+        {
+            "value": "Folk Rock",
+            "count": 3
+        },
+        {
+            "value": "Hard Rock",
+            "count": 3
+        },
+        {
+            "value": "Psychedelic Rock",
+            "count": 3
+        },
+        {
+            "value": "Alternative Rock",
+            "count": 2
+        },
+        {
+            "value": "Glam",
+            "count": 2
+        },
+        {
+            "value": "Modal",
+            "count": 2
+        },
+        {
+            "value": "Blues Rock",
+            "count": 1
+        },
+        {
+            "value": "Cool Jazz",
+            "count": 1
+        },
+        {
+            "value": "Experimental",
+            "count": 1
+        },
+        {
+            "value": "Free Jazz",
+            "count": 1
+        },
+        {
+            "value": "Fusion",
+            "count": 1
+        },
+        {
+            "value": "Grunge",
+            "count": 1
+        },
+        {
+            "value": "Hard Bop",
+            "count": 1
+        },
+        {
+            "value": "New Wave",
+            "count": 1
+        },
+        {
+            "value": "Soft Rock",
+            "count": 1
+        }
+    ],
+    "decades": [
+        {
+            "value": 1950,
+            "count": 2
+        },
+        {
+            "value": 1960,
+            "count": 6
+        },
+        {
+            "value": 1970,
+            "count": 11
+        },
+        {
+            "value": 1980,
+            "count": 2
+        },
+        {
+            "value": 1990,
+            "count": 3
+        },
+        {
+            "value": 2000,
+            "count": 1
+        },
+        {
+            "value": 2010,
+            "count": 1
+        }
+    ],
+    "countries": [
+        {
+            "value": "UK",
+            "count": 11
+        },
+        {
+            "value": "US",
+            "count": 7
+        },
+        {
+            "value": "Argentina",
+            "count": 5
+        },
+        {
+            "value": "Japan",
+            "count": 2
+        },
+        {
+            "value": "Europe",
+            "count": 1
+        }
+    ],
+    "labels": [
+        {
+            "value": "Atlantic",
+            "count": 3
+        },
+        {
+            "value": "Harvest",
+            "count": 3
+        },
+        {
+            "value": "Columbia",
+            "count": 2
+        },
+        {
+            "value": "Parlophone",
+            "count": 2
+        },
+        {
+            "value": "RCA Victor",
+            "count": 2
+        },
+        {
+            "value": "Apple Records",
+            "count": 1
+        },
+        {
+            "value": "Blue Note",
+            "count": 1
+        },
+        {
+            "value": "CBS",
+            "count": 1
+        },
+        {
+            "value": "DGC",
+            "count": 1
+        },
+        {
+            "value": "EMI",
+            "count": 1
+        },
+        {
+            "value": "Elektra",
+            "count": 1
+        },
+        {
+            "value": "ISO Records",
+            "count": 1
+        },
+        {
+            "value": "Impulse!",
+            "count": 1
+        },
+        {
+            "value": "Interdisc",
+            "count": 1
+        },
+        {
+            "value": "Odeon",
+            "count": 1
+        },
+        {
+            "value": "SG Discos",
+            "count": 1
+        },
+        {
+            "value": "Talent",
+            "count": 1
+        },
+        {
+            "value": "Warner Bros. Records",
+            "count": 1
+        },
+        {
+            "value": "XL Recordings",
+            "count": 1
+        }
+    ],
+    "formats": [
+        {
+            "value": "12\"",
+            "count": 26
+        },
+        {
+            "value": "Album",
+            "count": 26
+        },
+        {
+            "value": "Vinyl",
+            "count": 26
+        },
+        {
+            "value": "LP",
+            "count": 23
+        },
+        {
+            "value": "Reissue",
+            "count": 2
+        },
+        {
+            "value": "Gatefold",
+            "count": 1
+        },
+        {
+            "value": "Limited Edition",
+            "count": 1
+        },
+        {
+            "value": "Picture Disc",
+            "count": 1
+        }
+    ],
+    "editionTypes": [
+        {
+            "value": "original",
+            "count": 24
+        },
+        {
+            "value": "limited",
+            "count": 1
+        },
+        {
+            "value": "reissue",
+            "count": 1
+        }
+    ],
+    "conditions": [
+        {
+            "value": "VG+",
+            "count": 10
+        },
+        {
+            "value": "NM",
+            "count": 7
+        },
+        {
+            "value": "VG",
+            "count": 7
+        },
+        {
+            "value": "M",
+            "count": 2
+        }
+    ],
+    "tags": [
+        {
+            "value": "favoritos",
+            "count": 6
+        }
+    ],
+    "ranges": {
+        "paid": {
+            "min": 25,
+            "max": 200
+        },
+        "value": {
+            "min": 30,
+            "max": 420
+        },
+        "year": {
+            "min": 1957,
+            "max": 2016
+        },
+        "editionYear": {
+            "min": 1959,
+            "max": 2016
+        }
+    }
+}

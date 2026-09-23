@@ -1,0 +1,42 @@
+{
+    "query": "love",
+    "artists": [
+        {
+            "id": "c444b0b9-91e5-435e-aabb-56e1f18dc1ee",
+            "name": "Love",
+            "itemCount": 1
+        }
+    ],
+    "albums": [
+        {
+            "id": "4db369d0-ae38-4c83-bd02-2ddecbea08ba",
+            "title": "A Love Supreme",
+            "artist": "John Coltrane",
+            "year": 1965,
+            "coverImageUrl": null,
+            "itemCount": 1,
+            "inWishlist": false
+        },
+        {
+            "id": "1aee1ddd-a2a8-48d1-a29e-8e96fe1e462e",
+            "title": "Forever Changes",
+            "artist": "Love",
+            "year": 1967,
+            "coverImageUrl": null,
+            "itemCount": 1,
+            "inWishlist": false
+        }
+    ],
+    "releases": [],
+    "tracks": [
+        {
+            "id": "d3d6db97-bf75-4d39-82af-cd954510f85d",
+            "title": "Whole Lotta Love",
+            "position": "A1",
+            "albumTitle": "Led Zeppelin II",
+            "artist": "Led Zeppelin",
+            "releaseId": "437f327c-1169-4c6d-a367-84daf6cbed0f",
+            "collectionItemId": "e99b81cd-62b5-43f7-aec2-06b0e7215986"
+        }
+    ]
+}

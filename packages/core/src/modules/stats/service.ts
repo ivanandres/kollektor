@@ -15,6 +15,7 @@ export interface Bucket {
 }
 
 const num = (v: unknown) => (v == null ? null : Number(v));
+const round2 = (v: number | null) => (v == null ? null : Math.round(v * 100) / 100);
 
 export function statsService(deps: CoreDeps) {
   const { db } = deps;
@@ -67,8 +68,8 @@ export function statsService(deps: CoreDeps) {
       difference: Math.round((estimated - invested) * 100) / 100,
       itemsWithPrice: t?.priced ?? 0,
       itemsWithValue: t?.valued ?? 0,
-      averagePaid: num(t?.avg_paid),
-      averageEstimated: num(t?.avg_estimated),
+      averagePaid: round2(num(t?.avg_paid)),
+      averageEstimated: round2(num(t?.avg_estimated)),
       disclaimer: 'Valor estimado: no es una tasación garantizada.',
     };
   }
@@ -250,7 +251,7 @@ export function statsService(deps: CoreDeps) {
         year: y.year,
         total: Number(y.total),
         purchases: y.purchases,
-        average: Number(y.average),
+        average: round2(Number(y.average)),
       })),
       spendPerMonth: months,
       topSpendingMonth: [...months].sort((x, y) => y.total - x.total)[0] ?? null,

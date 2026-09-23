@@ -22,7 +22,7 @@ describe('global search', () => {
   it('"Love" finds the artist, albums by that artist, and tracks called love', async () => {
     const r = await search('Love');
     expect(r.artists.map((a) => a.name)).toContain('Love');
-    expect(r.albums.map((a) => a.title)).toEqual([]); // no album *titled* love
+    expect(r.albums.map((a) => `${a.artist} — ${a.title}`)).toEqual(['Love — Forever Changes']);
     const tracks = r.tracks.map((t) => `${t.title} — ${t.artist}`);
     expect(tracks).toEqual(
       expect.arrayContaining([
@@ -43,6 +43,11 @@ describe('global search', () => {
   it('partial album title and artist + album', async () => {
     expect((await search('dark side')).albums[0]?.title).toBe('The Dark Side Of The Moon');
     expect((await search('floyd animals')).albums.map((a) => a.title)).toEqual(['Animals']);
+    // artist-only queries list that artist's albums, title matches first
+    expect((await search('pink floyd')).albums.map((a) => a.title)).toEqual([
+      'The Dark Side Of The Moon',
+      'Animals',
+    ]);
   });
 
   it('song title, including song + artist', async () => {

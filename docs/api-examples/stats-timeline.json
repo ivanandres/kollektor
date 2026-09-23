@@ -1,0 +1,317 @@
+{
+    "currency": "USD",
+    "addedPerMonth": [
+        {
+            "month": "2024-02",
+            "count": 1
+        },
+        {
+            "month": "2024-03",
+            "count": 1
+        },
+        {
+            "month": "2024-04",
+            "count": 1
+        },
+        {
+            "month": "2024-05",
+            "count": 1
+        },
+        {
+            "month": "2024-07",
+            "count": 1
+        },
+        {
+            "month": "2024-09",
+            "count": 1
+        },
+        {
+            "month": "2024-11",
+            "count": 1
+        },
+        {
+            "month": "2024-12",
+            "count": 1
+        },
+        {
+            "month": "2025-01",
+            "count": 1
+        },
+        {
+            "month": "2025-02",
+            "count": 1
+        },
+        {
+            "month": "2025-03",
+            "count": 1
+        },
+        {
+            "month": "2025-04",
+            "count": 1
+        },
+        {
+            "month": "2025-05",
+            "count": 1
+        },
+        {
+            "month": "2025-06",
+            "count": 1
+        },
+        {
+            "month": "2025-07",
+            "count": 1
+        },
+        {
+            "month": "2025-08",
+            "count": 1
+        },
+        {
+            "month": "2025-09",
+            "count": 1
+        },
+        {
+            "month": "2025-10",
+            "count": 1
+        },
+        {
+            "month": "2025-11",
+            "count": 1
+        },
+        {
+            "month": "2025-12",
+            "count": 1
+        },
+        {
+            "month": "2026-01",
+            "count": 1
+        },
+        {
+            "month": "2026-02",
+            "count": 1
+        },
+        {
+            "month": "2026-03",
+            "count": 1
+        },
+        {
+            "month": "2026-04",
+            "count": 1
+        },
+        {
+            "month": "2026-06",
+            "count": 1
+        },
+        {
+            "month": "2026-08",
+            "count": 1
+        }
+    ],
+    "spendPerYear": [
+        {
+            "year": 2024,
+            "total": 775,
+            "purchases": 8,
+            "average": 96.88
+        },
+        {
+            "year": 2025,
+            "total": 951,
+            "purchases": 12,
+            "average": 79.25
+        },
+        {
+            "year": 2026,
+            "total": 465,
+            "purchases": 6,
+            "average": 77.5
+        }
+    ],
+    "spendPerMonth": [
+        {
+            "month": "2024-02",
+            "total": 40,
+            "purchases": 1
+        },
+        {
+            "month": "2024-03",
+            "total": 120,
+            "purchases": 1
+        },
+        {
+            "month": "2024-04",
+            "total": 25,
+            "purchases": 1
+        },
+        {
+            "month": "2024-05",
+            "total": 150,
+            "purchases": 1
+        },
+        {
+            "month": "2024-07",
+            "total": 90,
+            "purchases": 1
+        },
+        {
+            "month": "2024-09",
+            "total": 80,
+            "purchases": 1
+        },
+        {
+            "month": "2024-11",
+            "total": 70,
+            "purchases": 1
+        },
+        {
+            "month": "2024-12",
+            "total": 200,
+            "purchases": 1
+        },
+        {
+            "month": "2025-01",
+            "total": 100,
+            "purchases": 1
+        },
+        {
+            "month": "2025-02",
+            "total": 121,
+            "purchases": 1
+        },
+        {
+            "month": "2025-03",
+            "total": 80,
+            "purchases": 1
+        },
+        {
+            "month": "2025-04",
+            "total": 130,
+            "purchases": 1
+        },
+        {
+            "month": "2025-05",
+            "total": 55,
+            "purchases": 1
+        },
+        {
+            "month": "2025-06",
+            "total": 95,
+            "purchases": 1
+        },
+        {
+            "month": "2025-07",
+            "total": 70,
+            "purchases": 1
+        },
+        {
+            "month": "2025-08",
+            "total": 60,
+            "purchases": 1
+        },
+        {
+            "month": "2025-09",
+            "total": 60,
+            "purchases": 1
+        },
+        {
+            "month": "2025-10",
+            "total": 85,
+            "purchases": 1
+        },
+        {
+            "month": "2025-11",
+            "total": 30,
+            "purchases": 1
+        },
+        {
+            "month": "2025-12",
+            "total": 65,
+            "purchases": 1
+        },
+        {
+            "month": "2026-01",
+            "total": 35,
+            "purchases": 1
+        },
+        {
+            "month": "2026-02",
+            "total": 45,
+            "purchases": 1
+        },
+        {
+            "month": "2026-03",
+            "total": 65,
+            "purchases": 1
+        },
+        {
+            "month": "2026-04",
+            "total": 120,
+            "purchases": 1
+        },
+        {
+            "month": "2026-06",
+            "total": 150,
+            "purchases": 1
+        },
+        {
+            "month": "2026-08",
+            "total": 50,
+            "purchases": 1
+        }
+    ],
+    "topSpendingMonth": {
+        "month": "2024-12",
+        "total": 200,
+        "purchases": 1
+    },
+    "valueHistory": [
+        {
+            "date": "2026-03-23",
+            "items": 17,
+            "invested": 1402.24,
+            "estimated": 2046.55,
+            "currency": "USD"
+        },
+        {
+            "date": "2026-04-23",
+            "items": 18,
+            "invested": 1533.7,
+            "estimated": 2247.85,
+            "currency": "USD"
+        },
+        {
+            "date": "2026-05-23",
+            "items": 20,
+            "invested": 1665.16,
+            "estimated": 2449.15,
+            "currency": "USD"
+        },
+        {
+            "date": "2026-06-23",
+            "items": 21,
+            "invested": 1796.62,
+            "estimated": 2650.45,
+            "currency": "USD"
+        },
+        {
+            "date": "2026-07-23",
+            "items": 23,
+            "invested": 1928.08,
+            "estimated": 2851.75,
+            "currency": "USD"
+        },
+        {
+            "date": "2026-08-23",
+            "items": 24,
+            "invested": 2059.54,
+            "estimated": 3053.05,
+            "currency": "USD"
+        },
+        {
+            "date": "2026-09-23",
+            "items": 26,
+            "invested": 2191,
+            "estimated": 3355,
+            "currency": "USD"
+        }
+    ]
+}

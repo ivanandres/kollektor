@@ -101,9 +101,10 @@ export function postgresSearchProvider(deps: CoreDeps): SearchProvider {
           JOIN releases r ON r.id = s.release_id
           JOIN albums a ON a.id = r.album_id
          WHERE ${each((t) => or([albumTitleMatch(t), artistMatch(t)]))}
-           AND ${some(albumTitleMatch)}
          GROUP BY a.id
-         ORDER BY (a.title_normalized = ${qn}) DESC, similarity(a.title_normalized, ${qn}) DESC, a.title
+         -- Title matches first ("Love Supreme"), then albums by a matching artist ("Love — Forever Changes").
+         ORDER BY (a.title_normalized = ${qn}) DESC, bool_or(${some(albumTitleMatch)}) DESC,
+                  similarity(a.title_normalized, ${qn}) DESC, a.original_release_year NULLS LAST, a.title
          LIMIT ${limit}`);
 
       const releasesQ = db.execute<{
