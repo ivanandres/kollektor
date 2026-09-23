@@ -16,6 +16,11 @@ export const envSchema = z.object({
   CRON_SECRET: optional,
   DISCOGS_USER_TOKEN: optional,
   DISCOGS_USER_AGENT: optional,
+  /**
+   * Comma-separated user ids allowed to use /api/admin (curation of essentials/achievements).
+   * Ids, not emails: without email verification an email could be registered by someone else.
+   */
+  ADMIN_USER_IDS: optional,
   GOOGLE_CLIENT_ID: optional,
   GOOGLE_CLIENT_SECRET: optional,
   DISCOGS_CONSUMER_KEY: optional,

@@ -6,6 +6,7 @@ import { collectionService } from './modules/collection/service';
 import { currencyService } from './modules/currency/service';
 import { discoveryService } from './modules/discovery/service';
 import { accountService } from './modules/accounts/service';
+import { adminService } from './modules/admin/service';
 import { listActivity } from './modules/activity/service';
 import { importService } from './modules/imports/service';
 import { jobService } from './modules/jobs/service';
@@ -23,6 +24,7 @@ export * from './ports';
 export * from './lib/errors';
 export * from './lib/normalize';
 export { criteriaSchema, type Criteria } from './modules/achievements/criteria';
+export { essentialListInput, achievementPatch } from './modules/admin/service';
 export type { SearchProvider, SearchResults } from './modules/search/service';
 export type { ReleaseDetail, AlbumSummary } from './modules/catalog/service';
 export type { CollectionItemDetail, CollectionListItem } from './modules/collection/service';
@@ -140,6 +142,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
     jobs,
     imports,
     accounts,
+    admin: adminService(deps),
     activity: {
       list: (userId: string, opts?: { limit?: number; before?: string }) =>
         listActivity(deps.db, userId, opts),

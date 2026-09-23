@@ -5,9 +5,17 @@ import * as repo from '../modules/catalog/repository';
 import { ACHIEVEMENTS } from './achievements';
 import { ESSENTIAL_LISTS, type EssentialListDef } from './essential-lists';
 
-export async function seedAchievements(db: Database, lists: EssentialListDef[] = ESSENTIAL_LISTS) {
+/**
+ * Code is the source of truth for definitions; `isActive` is left alone on existing rows so an
+ * admin's deactivation survives re-seeding on deploy.
+ */
+export async function seedAchievements(
+  db: Database,
+  lists: EssentialListDef[] = ESSENTIAL_LISTS,
+  opts: { onlyLists?: boolean } = {},
+) {
   const defs = [
-    ...ACHIEVEMENTS.map((a, i) => ({ ...a, sortOrder: i })),
+    ...(opts.onlyLists ? [] : ACHIEVEMENTS.map((a, i) => ({ ...a, sortOrder: i }))),
     ...lists.map((l, i) => ({
       code: `complete-${l.code}`,
       name: `${l.artist} Complete`,
@@ -23,7 +31,18 @@ export async function seedAchievements(db: Database, lists: EssentialListDef[] =
     await db
       .insert(schema.achievements)
       .values(values)
-      .onConflictDoUpdate({ target: schema.achievements.code, set: values });
+      .onConflictDoUpdate({
+        target: schema.achievements.code,
+        set: {
+          name: values.name,
+          description: values.description,
+          icon: values.icon,
+          category: values.category,
+          tier: values.tier,
+          criteria: values.criteria,
+          sortOrder: values.sortOrder,
+        },
+      });
   }
   return defs.length;
 }
@@ -32,8 +51,16 @@ export async function seedAchievements(db: Database, lists: EssentialListDef[] =
 export async function seedEssentialLists(
   db: Database,
   lists: EssentialListDef[] = ESSENTIAL_LISTS,
+  opts: { source?: 'curated' | 'admin' } = {},
 ) {
+  const source = opts.source ?? 'curated';
   for (const def of lists) {
+    // Lists edited through the admin API are never overwritten by the repo seed.
+    const [current] = await db
+      .select({ source: schema.essentialLists.source })
+      .from(schema.essentialLists)
+      .where(eq(schema.essentialLists.code, def.code));
+    if (current?.source === 'admin' && source !== 'admin') continue;
     await db.transaction(async (tx) => {
       const [artist] = await tx
         .select({ id: schema.artists.id })
@@ -55,13 +82,13 @@ export async function seedEssentialLists(
         (
           await tx
             .insert(schema.essentialLists)
-            .values({ code: def.code, artistId, name: def.name })
+            .values({ code: def.code, artistId, name: def.name, source })
             .returning()
         )[0]!.id;
       if (existing)
         await tx
           .update(schema.essentialLists)
-          .set({ name: def.name })
+          .set({ name: def.name, source, artistId })
           .where(eq(schema.essentialLists.id, listId));
       await tx
         .delete(schema.essentialListItems)

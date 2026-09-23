@@ -9,6 +9,7 @@ import { insightRoutes } from './routes/insights';
 import { meRoutes } from './routes/me';
 import { publicRoutes } from './routes/public';
 import { discogsAccountRoutes, discogsCallbackRoutes } from './routes/discogs';
+import { adminRoutes } from './routes/admin';
 import { perUserRateLimit } from './lib/rate-limit';
 import { accessLog } from './lib/log';
 import { wishlistRoutes } from './routes/wishlist';
@@ -69,6 +70,7 @@ export function createApp(deps: AppDeps) {
   authed.use('/collection/:id/photos/upload', limit);
   authed.use('/collection/:id/link', limit);
   authed.use('/me/discogs/connect', limit);
+  authed.route('/admin', adminRoutes(deps));
   authed.route('/me/discogs', discogsAccountRoutes(deps));
   authed.route('/me', meRoutes(deps));
   authed.route('/collection', collectionRoutes(deps));

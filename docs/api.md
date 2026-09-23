@@ -193,6 +193,17 @@ Volver a importar la misma colección no duplica discos y reintenta los que hab�
 | `GET /public/users/:username/collection` | Solo si la colección es pública. Nunca incluye lugar de compra ni ubicación física. Los precios y valores aparecen solo si el dueño los habilitó. Acepta los filtros de la colección salvo `tag`; los filtros y ordenamientos por precio o valor solo funcionan si el dueño los hizo públicos |
 | `GET /public/users/:username/wishlist` | Solo si la wishlist es pública |
 
+## Administración (curaduría)
+
+Requiere que el id del usuario esté en `ADMIN_USER_IDS`; si no, responde 403.
+
+| Método y ruta | Descripción |
+|---|---|
+| `GET /admin/essential-lists` | Discografías esenciales con sus álbumes |
+| `PUT /admin/essential-lists/:code` | `{ artist, name, albums: [{ title, year, aliases? }] }` crea o reemplaza una lista y su logro "<Artista> Complete". Las listas editadas acá no se pisan con el seed del repo |
+| `DELETE /admin/essential-lists/:code` | Borra la lista y desactiva su logro |
+| `GET /admin/achievements` · `PATCH /admin/achievements/:code` | Editar nombre, descripción, ícono, criterio (validado) o activar/desactivar. El seed respeta las desactivaciones |
+
 ## Operación
 
 | Método y ruta | Descripción |
