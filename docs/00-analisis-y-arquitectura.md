@@ -139,8 +139,9 @@ interface SearchProvider {              // PostgresSearchProvider hoy, Meilisear
 ```
 
 Reglas:
+- Los puertos viven en `packages/core/src/ports.ts` (el dominio define lo que necesita); `packages/integrations` los implementa y solo importa tipos del core.
 - Los **mappers** convierten DTOs de Discogs → tipos propios (`ExternalRelease`). Ningún tipo de Discogs sale de `integrations/discogs/`.
-- La **importación** (`catalog/importer.ts`) es la única que escribe datos externos en nuestras tablas: upsert por `(source, external_id)`, guarda `last_synced_at`.
+- La **importación** (`catalog/service.ts → importExternalRelease`) es la única que escribe datos externos en nuestras tablas: upsert por `(source, external_id)`, guarda `last_synced_at`.
 - Una vez importada, la ficha y la colección **leen solo de nuestra DB**. Discogs se consulta únicamente al buscar/agregar o en jobs de refresco.
 - Cada cambio de colección emite un **evento de dominio** (`activity_events`) que dispara: evaluación de logros, snapshot de valor y (en V2) el feed social.
 
@@ -276,15 +277,14 @@ kollektor/
 │   │                              # wishlist, search, stats, achievements, profile
 │   └── mobile/                    # Expo (se crea en la Fase 13)
 ├── packages/
-│   ├── core/                      # dominio: modules/{catalog,collection,wishlist,search,stats,
+│   ├── core/                      # dominio + ports.ts: modules/{catalog,collection,wishlist,search,stats,
 │   │                              #   achievements,discovery,valuation,currency}/
 │   │                              #   service · repository · types · *.test.ts
 │   ├── integrations/              # discogs · spotify · youtube · lyrics · vision · fx · storage · email
-│   │                              #   + ports.ts (interfaces)
 │   ├── db/                        # esquema Drizzle, migraciones, seed (achievements, essential lists)
 │   ├── schemas/                   # Zod compartido (web, mobile, api)
 │   ├── api-client/                # cliente tipado + hooks TanStack Query (web y mobile)
-│   └── config/                    # tsconfig, eslint, tokens de diseño compartidos
+│   └── config/                    # (futuro) tokens de diseño compartidos web/mobile
 ├── tests/e2e/                     # Playwright (viewport móvil + desktop)
 ├── docker-compose.yml             # dev local hoy; producción en VPS mañana (postgres, api, web, worker)
 ├── turbo.json · pnpm-workspace.yaml
