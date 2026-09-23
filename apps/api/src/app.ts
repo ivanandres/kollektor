@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
 import { errorResponse } from './lib/http';
 import { catalogRoutes } from './routes/catalog';
@@ -8,6 +9,7 @@ import { insightRoutes } from './routes/insights';
 import { meRoutes } from './routes/me';
 import { publicRoutes } from './routes/public';
 import { perUserRateLimit } from './lib/rate-limit';
+import { accessLog } from './lib/log';
 import { wishlistRoutes } from './routes/wishlist';
 import type { AppDeps, AppEnv } from './types';
 
@@ -15,6 +17,8 @@ export function createApp(deps: AppDeps) {
   const { auth, core, env } = deps;
   const app = new Hono<AppEnv>().basePath('/api');
 
+  app.use('*', requestId());
+  if (env.NODE_ENV !== 'test') app.use('*', accessLog());
   app.use('*', secureHeaders());
   app.use(
     '*',

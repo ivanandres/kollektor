@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { ZodError, type z } from 'zod';
 import { DomainError, type ErrorCode } from '@kollektor/core';
+import { logError } from './log';
 
 const STATUS: Record<ErrorCode, 400 | 403 | 404 | 409 | 429 | 502 | 503> = {
   VALIDATION: 400,
@@ -33,7 +34,7 @@ export function errorResponse(err: unknown, c: Context) {
     );
   }
   if (err instanceof HTTPException) return err.getResponse();
-  console.error(err);
+  logError(c, err);
   // Upstream HTTP errors (Discogs, etc.) surface as 502 without leaking internals.
   if (err instanceof Error && err.name === 'HttpError') {
     return c.json(
