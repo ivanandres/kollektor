@@ -46,6 +46,7 @@ export function collectionFilters(userId: string, q: CollectionQuery, now: Date)
     f.push(
       sql`EXISTS (SELECT 1 FROM collection_item_tags cit JOIN tags tg ON tg.id = cit.tag_id WHERE cit.collection_item_id = ci.id AND tg.name = ANY(${arr(q.tag)}))`,
     );
+  if (q.location?.length) f.push(sql`ci.storage_location = ANY(${arr(q.location)})`);
   if (q.paidMin != null) f.push(sql`ci.purchase_price_base >= ${q.paidMin}`);
   if (q.paidMax != null) f.push(sql`ci.purchase_price_base <= ${q.paidMax}`);
   if (q.valueMin != null) f.push(sql`ci.estimated_value_base >= ${q.valueMin}`);

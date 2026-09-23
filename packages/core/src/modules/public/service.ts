@@ -68,6 +68,7 @@ export function publicService(
       format: q.format,
       editionType: q.editionType,
       condition: q.condition,
+      // no `tag` or `location`: private to the owner
       ...(p.showPrices ? { paidMin: q.paidMin, paidMax: q.paidMax } : {}),
       ...(p.showValues ? { valueMin: q.valueMin, valueMax: q.valueMax } : {}),
       sort: publicSorts.includes(q.sort) ? q.sort : 'added_desc',

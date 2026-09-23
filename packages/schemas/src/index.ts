@@ -211,6 +211,8 @@ export const collectionQuery = z.object({
   editionType: list(editionType),
   condition: list(grade),
   tag: list(z.string()),
+  /** Physical location (private to the owner). */
+  location: list(z.string()),
   paidMin: num.optional(),
   paidMax: num.optional(),
   valueMin: num.optional(),

@@ -20,6 +20,8 @@ export function insightRoutes({ core }: AppDeps) {
         c.json(await core.stats.breakdowns(c.get('userId'), 50)),
       )
       .get('/stats/timeline', async (c) => c.json(await core.stats.timeline(c.get('userId'))))
+      .get('/stats/value', async (c) => c.json(await core.stats.valueBreakdowns(c.get('userId'))))
+      .get('/stats/duplicates', async (c) => c.json(await core.stats.duplicates(c.get('userId'))))
       .get('/achievements', async (c) =>
         c.json(await core.achievements.listWithProgress(c.get('userId'))),
       )

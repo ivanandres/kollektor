@@ -258,6 +258,8 @@ export function createApiClient(opts: ApiClientOptions) {
       summary: () => get<T.StatsSummary>('/stats/summary'),
       breakdowns: () => get<T.StatsBreakdowns>('/stats/breakdowns'),
       timeline: () => get<T.StatsTimeline>('/stats/timeline'),
+      value: () => get<T.StatsValue>('/stats/value'),
+      duplicates: () => get<T.Duplicate[]>('/stats/duplicates'),
     },
     achievements: {
       list: () => get<T.Achievement[]>('/achievements'),

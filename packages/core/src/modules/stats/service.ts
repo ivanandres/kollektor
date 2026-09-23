@@ -168,6 +168,81 @@ export function statsService(deps: CoreDeps) {
     };
   }
 
+  /** Where the money is: estimated value and investment by artist and by genre. */
+  async function valueBreakdowns(userId: string, limit = 15) {
+    const by = (key: SQL, label: SQL, join: SQL) =>
+      db.execute<{
+        key: string;
+        label: string;
+        count: number;
+        invested: string | null;
+        estimated: string | null;
+      }>(sql`
+        SELECT ${key} AS key, ${label} AS label, count(DISTINCT ci.id)::int AS count,
+               sum(ci.purchase_price_base) AS invested, sum(ci.estimated_value_base) AS estimated
+          ${FROM} ${join}
+         WHERE ${mine(userId)}
+         GROUP BY 1, 2 ORDER BY sum(ci.estimated_value_base) DESC NULLS LAST, count DESC LIMIT ${limit}`);
+    const shape = (
+      rows: {
+        key: string;
+        label: string;
+        count: number;
+        invested: string | null;
+        estimated: string | null;
+      }[],
+    ) =>
+      rows.map((r) => ({
+        key: String(r.key),
+        label: r.label,
+        count: r.count,
+        invested: num(r.invested) ?? 0,
+        estimated: num(r.estimated) ?? 0,
+      }));
+    const [byArtist, byGenre] = await Promise.all([
+      by(
+        sql`ar.id`,
+        sql`ar.name`,
+        sql`JOIN album_artists aa ON aa.album_id = a.id JOIN artists ar ON ar.id = aa.artist_id`,
+      ),
+      by(
+        sql`g.name`,
+        sql`g.name`,
+        sql`JOIN album_genres ag ON ag.album_id = a.id JOIN genres g ON g.id = ag.genre_id`,
+      ),
+    ]);
+    return {
+      currency: await currencyOf(userId),
+      byArtist: shape(byArtist),
+      byGenre: shape(byGenre),
+    };
+  }
+
+  /** Albums you own more than once (several copies or editions). */
+  async function duplicates(userId: string) {
+    const rows = await db.execute<{
+      album_id: string;
+      title: string;
+      artist: string;
+      copies: number;
+      editions: number;
+      item_ids: string[];
+    }>(sql`
+      SELECT a.id AS album_id, a.title, ${ARTIST_DISPLAY} AS artist, count(*)::int AS copies,
+             count(DISTINCT r.id)::int AS editions, array_agg(ci.id ORDER BY ci.created_at) AS item_ids
+        ${FROM} WHERE ${mine(userId)}
+       GROUP BY a.id HAVING count(*) > 1
+       ORDER BY count(*) DESC, a.title`);
+    return rows.map((r) => ({
+      albumId: r.album_id,
+      title: r.title,
+      artist: r.artist,
+      copies: r.copies,
+      editions: r.editions,
+      collectionItemIds: r.item_ids,
+    }));
+  }
+
   /** "Tu colección en números". */
   async function highlights(userId: string) {
     const item = (order: SQL, where: SQL = sql`true`) =>
@@ -274,7 +349,7 @@ export function statsService(deps: CoreDeps) {
     return { summary: s, highlights: h, charts: b };
   }
 
-  return { summary, breakdowns, highlights, timeline, dashboard };
+  return { summary, breakdowns, valueBreakdowns, duplicates, highlights, timeline, dashboard };
 }
 
 export type StatsService = ReturnType<typeof statsService>;

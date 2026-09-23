@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { addToCollectionInput } from '@kollektor/schemas';
+import { addToCollectionInput, collectionQuery } from '@kollektor/schemas';
 import { seedLibrary } from '../../testing/library';
 import { useCore } from '../../testing/setup';
 import { pickSnapshot } from '../valuation/service';
@@ -65,6 +65,43 @@ describe('stats', () => {
       { year: 2026, total: 85, purchases: 2, average: 42.5 },
     ]);
     expect(t.topSpendingMonth).toMatchObject({ month: '2025-03', total: 100 });
+  });
+
+  it('value by artist/genre, duplicates and shelf locations', async () => {
+    await add({
+      discogsReleaseId: 1873013,
+      purchasePrice: 100,
+      purchaseCurrency: 'USD',
+      storageLocation: 'Estante A',
+    });
+    await add({ discogsReleaseId: 2000001, storageLocation: 'Estante B' }); // same album, other edition
+    await add({
+      discogsReleaseId: 2000003,
+      valueOverride: 50,
+      valueOverrideCurrency: 'USD',
+      storageLocation: 'Estante A',
+    });
+    const v = await ctx.core.stats.valueBreakdowns(ctx.userId);
+    expect(v.byArtist[0]).toMatchObject({
+      label: 'Pink Floyd',
+      count: 2,
+      invested: 100,
+      estimated: 300,
+    });
+    expect(v.byGenre[0]).toMatchObject({ label: 'Rock', count: 3 });
+    const d = await ctx.core.stats.duplicates(ctx.userId);
+    expect(d).toEqual([
+      expect.objectContaining({ title: 'The Dark Side Of The Moon', copies: 2, editions: 2 }),
+    ]);
+    const shelfA = await ctx.core.collection.list(
+      ctx.userId,
+      collectionQuery.parse({ location: 'Estante A' }),
+    );
+    expect(shelfA.total).toBe(2);
+    expect((await ctx.core.collection.facets(ctx.userId)).locations).toEqual([
+      { value: 'Estante A', count: 2 },
+      { value: 'Estante B', count: 1 },
+    ]);
   });
 
   it('empty collection is all zeros, not errors', async () => {

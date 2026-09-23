@@ -426,6 +426,7 @@ export function collectionService(
       editionTypes,
       conditions,
       tagRows,
+      locations,
       ranges,
     ] = await Promise.all([
       db.execute<{ id: string; value: string; count: number }>(sql`
@@ -458,6 +459,7 @@ export function collectionService(
         sql`tg.name`,
         sql`JOIN collection_item_tags cit ON cit.collection_item_id = ci.id JOIN tags tg ON tg.id = cit.tag_id`,
       ),
+      facet(sql`ci.storage_location`, sql``, sql`ci.storage_location IS NOT NULL`),
       db.execute<{
         paid_min: string | null;
         paid_max: string | null;
@@ -487,6 +489,7 @@ export function collectionService(
       editionTypes: [...editionTypes],
       conditions: [...conditions],
       tags: [...tagRows],
+      locations: [...locations],
       ranges: {
         paid: { min: n(r?.paid_min), max: n(r?.paid_max) },
         value: { min: n(r?.value_min), max: n(r?.value_max) },

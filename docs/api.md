@@ -64,7 +64,7 @@ Con la cuenta vinculada, `POST /imports/discogs` sin `username` importa **tu** c
 | Método y ruta | Descripción |
 |---|---|
 | `GET /collection` | Lista paginada con filtros combinables (ver abajo) → `{ items, total, page, pageSize, pages }` |
-| `GET /collection/facets` | Valores disponibles para cada filtro, con cantidades, y rangos mínimo/máximo de precio, valor y años |
+| `GET /collection/facets` | Valores disponibles para cada filtro (incluidas las ubicaciones), con cantidades, y rangos mínimo/máximo de precio, valor y años |
 | `POST /collection` | Agrega un disco (ver abajo) → `201 { item, unlockedAchievements: [{ code, name, description, icon }], replayed }` |
 | `GET /collection/:id` | Ficha completa: edición, álbum, sellos, formatos, tracklist, imágenes, valor, tags |
 | `PATCH /collection/:id` | Campos de la copia (mismos que al agregar). `tags` reemplaza la lista completa |
@@ -91,6 +91,7 @@ repetir el parámetro (`?country=UK&country=Japan`) o separar con coma (`?countr
 | `editionType` | `original`, `reissue`, `remaster`, `limited`, `promo`, `bootleg`, `compilation`, `other` |
 | `condition` | Condición del disco (escala Goldmine) |
 | `tag` | Tag del usuario |
+| `location` | Ubicación física ("Estante A"). Es privada y no se acepta en la vista pública |
 | `paidMin`, `paidMax` | Precio pagado, en moneda base |
 | `valueMin`, `valueMax` | Valor estimado, en moneda base |
 | `sort` | `added_desc` (default), `added_asc`, `artist_asc`, `title_asc`, `year_asc`, `year_desc`, `paid_desc`, `value_desc` |
@@ -161,6 +162,8 @@ las hizo (`isVerified: false`).
 | `GET /dashboard` | `{ summary, highlights, charts }`. `summary` trae cantidad de ítems, artistas, álbumes y ediciones, lo invertido, lo estimado y la diferencia. `highlights` es "Tu colección en números" |
 | `GET /stats/summary` | Solo el resumen |
 | `GET /stats/breakdowns` | Distribución por artista, género, estilo, década, año, país, sello, formato, condición y tipo de edición |
+| `GET /stats/value` | Dónde está el valor: invertido y estimado por artista y por género |
+| `GET /stats/duplicates` | Álbumes que tenés más de una vez, con cantidad de copias y de ediciones |
 | `GET /stats/timeline` | Discos agregados por mes, gasto por año y por mes, mes de mayor gasto e historial de valor |
 | `GET /achievements` | Todos los logros con `unlocked`, `unlockedAt` y `progress: { current, target }` |
 | `GET /achievements/essentials` | Progreso de cada discografía esencial, con los álbumes que faltan |
