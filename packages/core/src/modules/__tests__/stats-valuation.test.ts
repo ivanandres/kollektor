@@ -93,6 +93,17 @@ describe('valuation', () => {
     expect(s).toMatchObject({ currency: 'ARS', invested: 100_000, estimated: 300_000 });
   });
 
+  it('retries failed currency conversions from the maintenance job', async () => {
+    const saved = ctx.fx['rates'];
+    ctx.fx['rates'] = {};
+    const { item } = await add({ discogsReleaseId: 2000002, purchasePrice: 20000, purchaseCurrency: 'ARS', purchaseDate: '2026-08-15' });
+    expect(item.value.paid).toBeNull();
+    ctx.fx['rates'] = saved;
+    await ctx.core.scheduleMaintenance();
+    await ctx.core.runJobs();
+    expect((await ctx.core.collection.get(ctx.userId, item.id)).value.paid).toBe(20);
+  });
+
   it('caches FX rates and falls back to the last known rate when the provider fails', async () => {
     const r1 = await ctx.core.currency.convert(10_000, 'ARS', 'USD', '2026-08-01');
     expect(r1).toBe(10);

@@ -8,3 +8,4 @@ export async function createUser(db: Database, name = 'Test User'): Promise<stri
   await db.insert(schema.user).values({ id, name, email: `${id}@example.com` });
   return id;
 }
+export { seedLibrary } from './library';

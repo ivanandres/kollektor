@@ -57,6 +57,13 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
       for (const r of stale)
         await jobs.enqueue('release.refresh_value', { releaseId: r.release_id }, { dedupeKey: `value:${r.release_id}:${now}` });
     }
+    // Retry FX conversions that failed when the item was saved (provider down or offline).
+    const unconverted = await deps.db.execute<{ id: string }>(sql`
+      SELECT id FROM collection_items WHERE deleted_at IS NULL AND (
+        (purchase_price IS NOT NULL AND purchase_price_base IS NULL)
+        OR (value_override IS NOT NULL AND estimated_value_base IS NULL))`);
+    for (const i of unconverted)
+      await jobs.enqueue('item.recompute', { itemId: i.id }, { dedupeKey: `recompute:${i.id}:${now}` });
     // Snapshots run after the value refreshes queued above.
     const later = new Date((deps.now ? deps.now() : new Date()).getTime() + 30 * 60_000);
     for (const u of users)
@@ -64,6 +71,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
   }
 
   const jobHandlers = {
+    'item.recompute': async (p: Record<string, unknown>) => valuation.recomputeItem(String(p.itemId)),
     'collection.snapshot': async (p: Record<string, unknown>) => valuation.snapshotCollection(String(p.userId)),
     'release.refresh_value': async (p: Record<string, unknown>) => {
       await valuation.refreshReleaseMarketValue(String(p.releaseId));
