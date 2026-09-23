@@ -19,7 +19,7 @@ export function createApp(deps: AppDeps) {
     cors({
       origin: env.WEB_ORIGIN.split(',').map((o) => o.trim()),
       credentials: true,
-      allowHeaders: ['Content-Type', 'Authorization'],
+      allowHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
       allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
       exposeHeaders: ['set-auth-token'],
     }),

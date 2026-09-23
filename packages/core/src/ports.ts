@@ -100,8 +100,17 @@ export interface Paginated<T> {
   total: number;
 }
 
+export interface ExternalCollectionEntry {
+  /** Unique per copy in the external collection. */
+  instanceId: string;
+  externalReleaseId: string;
+  dateAdded: string | null;
+}
+
 export interface CatalogProvider {
   readonly source: string;
+  /** Public collection of a user in the external service (optional capability). */
+  listUserCollection?(username: string, page: number): Promise<Paginated<ExternalCollectionEntry>>;
   search(q: CatalogSearchQuery): Promise<Paginated<CatalogSearchResult>>;
   getRelease(externalId: string): Promise<ExternalRelease>;
   getMaster(externalId: string): Promise<ExternalMaster>;

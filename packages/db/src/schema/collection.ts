@@ -54,9 +54,12 @@ export const collectionItems = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    /** Client-generated id so retries on flaky connections don't create duplicates. */
+    clientRequestId: text('client_request_id'),
   },
   (t) => [
     index('collection_items_user_idx').on(t.userId, t.deletedAt),
+    uniqueIndex('collection_items_client_request_uq').on(t.userId, t.clientRequestId),
     index('collection_items_release_idx').on(t.releaseId),
   ],
 );
@@ -109,6 +112,10 @@ export const wishlistItems = pgTable(
     }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    clientRequestId: text('client_request_id'),
   },
-  (t) => [index('wishlist_items_user_idx').on(t.userId, t.status)],
+  (t) => [
+    index('wishlist_items_user_idx').on(t.userId, t.status),
+    uniqueIndex('wishlist_items_client_request_uq').on(t.userId, t.clientRequestId),
+  ],
 );

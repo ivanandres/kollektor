@@ -1,5 +1,7 @@
+import { DomainError } from '@kollektor/core';
 import type {
   CatalogProvider,
+  ExternalCollectionEntry,
   CatalogSearchResult,
   ExternalMaster,
   ExternalRelease,
@@ -25,6 +27,7 @@ import type {
   DRelease,
   DSearchResponse,
   DVersionsResponse,
+  DCollectionResponse,
 } from './types';
 
 export interface DiscogsConfig {
@@ -132,6 +135,41 @@ export class DiscogsService implements CatalogProvider, MarketValueProvider {
     const artist = master.artists.map((a) => a.name).join(', ') || splitTitle(master.title).artist;
     return {
       items: res.versions.map((v) => ({ ...mapVersion(v, { artist }), masterId: externalId })),
+      page: res.pagination.page,
+      pages: res.pagination.pages,
+      total: res.pagination.items,
+    };
+  }
+
+  /** Public collection ("All" folder). Private collections need the owner's OAuth token. */
+  async listUserCollection(
+    username: string,
+    page = 1,
+  ): Promise<Paginated<ExternalCollectionEntry>> {
+    let res: DCollectionResponse;
+    try {
+      res = await this.get<DCollectionResponse>(
+        `/users/${encodeURIComponent(username)}/collection/folders/0/releases`,
+        {
+          page,
+          per_page: 100,
+          sort: 'added',
+          sort_order: 'asc',
+        },
+      );
+    } catch (e) {
+      if (e instanceof HttpError && e.status === 404)
+        throw new DomainError('NOT_FOUND', 'No encontramos ese usuario de Discogs');
+      if (e instanceof HttpError && (e.status === 401 || e.status === 403))
+        throw new DomainError('FORBIDDEN', 'La colección de ese usuario de Discogs es privada');
+      throw e;
+    }
+    return {
+      items: res.releases.map((r) => ({
+        instanceId: String(r.instance_id),
+        externalReleaseId: String(r.id),
+        dateAdded: r.date_added ?? null,
+      })),
       page: res.pagination.page,
       pages: res.pagination.pages,
       total: res.pagination.items,

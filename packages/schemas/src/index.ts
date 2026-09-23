@@ -121,6 +121,13 @@ export type ManualReleaseInput = z.infer<typeof manualReleaseInput>;
 
 // ─── Collection ─────────────────────────────────────────────────────────────
 
+/** Client-generated id (e.g. a UUID) that makes "add" requests safe to retry on bad connections. */
+export const clientRequestId = z
+  .string()
+  .trim()
+  .regex(/^[A-Za-z0-9_-]{8,64}$/)
+  .optional();
+
 export const collectionItemFields = z.object({
   conditionMedia: grade.optional().nullable(),
   conditionSleeve: grade.optional().nullable(),
@@ -152,6 +159,7 @@ const withPriceCurrency = <T extends z.ZodType<CollectionItemFields>>(s: T) =>
 /** Exactly one source for the edition: an existing release, a Discogs release, or manual data. */
 export const addToCollectionInput = withPriceCurrency(
   collectionItemFields.extend({
+    clientRequestId,
     releaseId: z.uuid().optional(),
     discogsReleaseId: z.coerce.number().int().positive().optional(),
     manual: manualReleaseInput.optional(),
@@ -224,6 +232,7 @@ export const wishlistFields = z.object({
 
 export const addToWishlistInput = wishlistFields
   .extend({
+    clientRequestId,
     albumId: z.uuid().optional(),
     releaseId: z.uuid().optional(),
     discogsReleaseId: z.coerce.number().int().positive().optional(),

@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { addToCollectionInput } from '@kollektor/schemas';
+import { addToCollectionInput, collectionQuery } from '@kollektor/schemas';
 import { createUser, FakeMusicLinks, FakeRecognizer } from '../../testing';
 import { seedLibrary } from '../../testing/library';
 import { useCore } from '../../testing/setup';
@@ -102,6 +102,28 @@ describe('recognition', () => {
     await expect(ctx.core.recognition.identifyByPhoto(ctx.userId, [])).rejects.toMatchObject({
       code: 'NOT_CONFIGURED',
     });
+  });
+});
+
+describe('discogs import', () => {
+  it('queues every copy, processes in batches and is safe to re-run', async () => {
+    ctx.catalog.userCollections.set('ivan', [
+      '1873013',
+      '2000002',
+      '2000003',
+      '1873013',
+      '2000006',
+    ]);
+    const started = await ctx.core.imports.startDiscogsImport(ctx.userId, 'ivan');
+    expect(started).toMatchObject({ total: 5, queued: 5, status: { pending: 5, done: 0 } });
+    const b1 = await ctx.core.imports.runBatch(ctx.userId, 3);
+    expect(b1.status).toMatchObject({ pending: 2, done: 3 });
+    await ctx.core.imports.runBatch(ctx.userId, 10);
+    expect((await ctx.core.collection.list(ctx.userId, collectionQuery.parse({}))).total).toBe(5); // two copies of DSOTM
+    // Re-running the import doesn't duplicate
+    await ctx.core.imports.startDiscogsImport(ctx.userId, 'ivan');
+    await ctx.core.imports.runBatch(ctx.userId, 10);
+    expect((await ctx.core.collection.list(ctx.userId, collectionQuery.parse({}))).total).toBe(5);
   });
 });
 

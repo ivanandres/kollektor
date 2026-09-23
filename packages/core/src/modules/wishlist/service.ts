@@ -58,6 +58,18 @@ export function wishlistService(
   }
 
   async function add(userId: string, input: AddToWishlistInput) {
+    if (input.clientRequestId) {
+      const [prev] = await db
+        .select({ id: wishlistItems.id })
+        .from(wishlistItems)
+        .where(
+          and(
+            eq(wishlistItems.userId, userId),
+            eq(wishlistItems.clientRequestId, input.clientRequestId),
+          ),
+        );
+      if (prev) return (await list(userId, { ids: [prev.id], includePurchased: true }))[0]!;
+    }
     const target = await resolveTarget(userId, input);
     const duplicate = await db
       .select({ id: wishlistItems.id })
@@ -86,6 +98,7 @@ export function wishlistService(
         priority: input.priority ?? 2,
         status: input.status ?? 'wanted',
         notes: input.notes ?? null,
+        clientRequestId: input.clientRequestId ?? null,
       })
       .returning();
     await recordActivity(db, {

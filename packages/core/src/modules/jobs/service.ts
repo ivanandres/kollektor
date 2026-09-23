@@ -31,7 +31,13 @@ export function jobService(deps: CoreDeps) {
   }
 
   /** Runs up to `limit` due jobs. Safe to call concurrently (SKIP LOCKED). */
-  async function runDue(handlers: Record<string, JobHandler>, limit = 20) {
+  async function runDue(
+    handlers: Record<string, JobHandler>,
+    limit = 20,
+    filter: { type?: string; userId?: string } = {},
+  ) {
+    const typeCond = filter.type ? sql`AND type = ${filter.type}` : sql``;
+    const userCond = filter.userId ? sql`AND payload->>'userId' = ${filter.userId}` : sql``;
     const picked = await db.execute<{
       id: string;
       type: string;
@@ -41,7 +47,7 @@ export function jobService(deps: CoreDeps) {
       UPDATE ${syncJobs} SET status = 'running', attempts = attempts + 1, updated_at = now()
        WHERE id IN (
          SELECT id FROM ${syncJobs}
-          WHERE status = 'pending' AND run_after <= ${nowOf(deps).toISOString()}::timestamptz
+          WHERE status = 'pending' AND run_after <= ${nowOf(deps).toISOString()}::timestamptz ${typeCond} ${userCond}
           ORDER BY run_after LIMIT ${limit} FOR UPDATE SKIP LOCKED)
       RETURNING id, type, payload, attempts`);
     const result = { done: 0, failed: 0, retried: 0 };
@@ -74,7 +80,19 @@ export function jobService(deps: CoreDeps) {
     return result;
   }
 
-  return { enqueue, runDue };
+  async function countsFor(type: string, userId: string) {
+    const rows = await db.execute<{ status: string; n: number }>(sql`
+      SELECT status, count(*)::int AS n FROM ${syncJobs}
+       WHERE type = ${type} AND payload->>'userId' = ${userId} GROUP BY status`);
+    const by = Object.fromEntries(rows.map((r) => [r.status, r.n]));
+    return {
+      pending: (by.pending ?? 0) + (by.running ?? 0),
+      done: by.done ?? 0,
+      failed: by.failed ?? 0,
+    };
+  }
+
+  return { enqueue, runDue, countsFor };
 }
 
 export type JobService = ReturnType<typeof jobService>;

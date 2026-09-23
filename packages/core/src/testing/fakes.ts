@@ -180,6 +180,19 @@ export class FakeCatalog implements CatalogProvider, MarketValueProvider {
     return { items, page: 1, pages: 1, total: items.length };
   }
 
+  userCollections = new Map<string, string[]>();
+  async listUserCollection(username: string, page = 1) {
+    const ids = this.userCollections.get(username);
+    if (!ids) throw new Error('not found');
+    const size = 2;
+    const items = ids.slice((page - 1) * size, page * size).map((externalReleaseId, i) => ({
+      instanceId: `${username}-${(page - 1) * size + i}`,
+      externalReleaseId,
+      dateAdded: null,
+    }));
+    return { items, page, pages: Math.max(1, Math.ceil(ids.length / size)), total: ids.length };
+  }
+
   async getMarketValues(id: string) {
     return this.market.get(id) ?? [];
   }

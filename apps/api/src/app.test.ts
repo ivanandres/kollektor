@@ -304,6 +304,15 @@ describe('MVP flow', () => {
     expect(ok.status).toBe(200);
   });
 
+  it('Idempotency-Key makes adds safe to retry', async () => {
+    const body = { discogsReleaseId: 2000003 };
+    const headers = { 'idempotency-key': 'mobile-retry-0001' };
+    const a = await call('/collection', { method: 'POST', session: ivan, body, headers });
+    const b = await call('/collection', { method: 'POST', session: ivan, body, headers });
+    expect([a.status, b.status]).toEqual([201, 200]);
+    expect(b.json.item.id).toBe(a.json.item.id);
+  });
+
   it('validation errors are structured', async () => {
     const r = await call('/collection', {
       method: 'POST',

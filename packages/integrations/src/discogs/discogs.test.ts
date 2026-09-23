@@ -181,6 +181,36 @@ describe('DiscogsService', () => {
   });
 });
 
+describe('DiscogsService.listUserCollection', () => {
+  it('pages through a public collection and maps private/missing users to domain errors', async () => {
+    const f = mockFetch({
+      '/users/ivan/collection': {
+        body: {
+          pagination: { page: 1, pages: 1, items: 2 },
+          releases: [
+            { id: 10, instance_id: 99, date_added: '2020-01-01T00:00:00-08:00' },
+            { id: 10, instance_id: 100 },
+          ],
+        },
+      },
+      '/users/private/collection': { status: 403, body: {} },
+    });
+    const svc = new DiscogsService({
+      token: 't',
+      userAgent: 'u',
+      fetch: f.impl,
+      limiter: noWaitLimiter(),
+    });
+    const res = await svc.listUserCollection('ivan');
+    expect(res.items).toEqual([
+      { instanceId: '99', externalReleaseId: '10', dateAdded: '2020-01-01T00:00:00-08:00' },
+      { instanceId: '100', externalReleaseId: '10', dateAdded: null },
+    ]);
+    await expect(svc.listUserCollection('private')).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    await expect(svc.listUserCollection('nobody')).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+});
+
 describe('RateLimiter', () => {
   it('spaces requests and pauses when remaining quota is low', async () => {
     let t = 0;

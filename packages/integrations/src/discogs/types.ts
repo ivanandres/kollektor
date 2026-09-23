@@ -122,3 +122,8 @@ export interface DMarketStats {
   num_for_sale?: number | null;
   blocked_from_sale?: boolean;
 }
+
+export interface DCollectionResponse {
+  pagination: DPagination;
+  releases: { id: number; instance_id: number; date_added?: string; rating?: number }[];
+}

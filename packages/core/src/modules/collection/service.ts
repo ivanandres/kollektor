@@ -70,7 +70,7 @@ export function collectionService(
       .values(rows.map((r) => ({ collectionItemId: itemId, tagId: r.id })));
   }
 
-  function itemValues(input: CollectionItemFields) {
+  function itemValues(input: CollectionItemFields & { clientRequestId?: string }) {
     const { tags: _tags, ...rest } = input;
     return rest;
   }
@@ -100,10 +100,49 @@ export function collectionService(
     return row;
   }
 
+  async function findByClientRequest(userId: string, clientRequestId: string) {
+    const [row] = await db
+      .select({ id: collectionItems.id })
+      .from(collectionItems)
+      .where(
+        and(
+          eq(collectionItems.userId, userId),
+          eq(collectionItems.clientRequestId, clientRequestId),
+        ),
+      );
+    return row?.id ?? null;
+  }
+
   async function add(userId: string, input: AddToCollectionInput) {
+    // Idempotent retry: the same clientRequestId returns the item created the first time.
+    if (input.clientRequestId) {
+      const existing = await findByClientRequest(userId, input.clientRequestId);
+      if (existing)
+        return { item: await get(userId, existing), unlockedAchievements: [], replayed: true };
+    }
     const releaseId = await resolveRelease(userId, input);
     const { releaseId: _r, discogsReleaseId: _d, manual: _m, ...fields } = input;
-    const itemId = await db.transaction(async (tx) => {
+    let itemId: string;
+    try {
+      itemId = await insertItem(userId, releaseId, fields);
+    } catch (e) {
+      const existing = input.clientRequestId
+        ? await findByClientRequest(userId, input.clientRequestId)
+        : null;
+      if (!existing) throw e;
+      return { item: await get(userId, existing), unlockedAchievements: [], replayed: true };
+    }
+    await valuation.recomputeItem(itemId);
+    const unlocked = (await hooks.afterChange?.(userId)) ?? [];
+    return { item: await get(userId, itemId), unlockedAchievements: unlocked, replayed: false };
+  }
+
+  async function insertItem(
+    userId: string,
+    releaseId: string,
+    fields: CollectionItemFields & { clientRequestId?: string },
+  ): Promise<string> {
+    return db.transaction(async (tx) => {
       const [row] = await tx
         .insert(collectionItems)
         .values({ ...itemValues(fields), userId, releaseId })
@@ -118,9 +157,6 @@ export function collectionService(
       });
       return row!.id;
     });
-    await valuation.recomputeItem(itemId);
-    const unlocked = (await hooks.afterChange?.(userId)) ?? [];
-    return { item: await get(userId, itemId), unlockedAchievements: unlocked };
   }
 
   async function update(userId: string, itemId: string, input: UpdateCollectionItemInput) {

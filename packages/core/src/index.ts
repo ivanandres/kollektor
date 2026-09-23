@@ -5,6 +5,7 @@ import { catalogService } from './modules/catalog/service';
 import { collectionService } from './modules/collection/service';
 import { currencyService } from './modules/currency/service';
 import { discoveryService } from './modules/discovery/service';
+import { importService } from './modules/imports/service';
 import { jobService } from './modules/jobs/service';
 import { musicLinkService } from './modules/music/service';
 import { profileService } from './modules/profiles/service';
@@ -42,6 +43,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
   const music = musicLinkService(deps, catalog);
   const recognition = recognitionService(deps);
   const jobs = jobService(deps);
+  const imports = importService(deps, collection, jobs);
 
   /** Periodic maintenance: daily value snapshots and weekly market refresh (rate-limit friendly). */
   async function scheduleMaintenance() {
@@ -85,6 +87,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
   }
 
   const jobHandlers = {
+    [imports.JOB]: imports.handler,
     'item.recompute': async (p: Record<string, unknown>) =>
       valuation.recomputeItem(String(p.itemId)),
     'collection.snapshot': async (p: Record<string, unknown>) =>
@@ -109,6 +112,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
     music,
     recognition,
     jobs,
+    imports,
     scheduleMaintenance,
     runJobs: (limit?: number) => jobs.runDue(jobHandlers, limit),
   };

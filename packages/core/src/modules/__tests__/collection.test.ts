@@ -122,6 +122,14 @@ describe('collection', () => {
     expect(item.value.estimate?.source).toBe('manual');
   });
 
+  it('is idempotent with a clientRequestId (retries on bad connections)', async () => {
+    const first = await add({ discogsReleaseId: 1873013, clientRequestId: 'req-12345678' });
+    const retry = await add({ discogsReleaseId: 1873013, clientRequestId: 'req-12345678' });
+    expect(first.replayed).toBe(false);
+    expect(retry).toMatchObject({ replayed: true, item: { id: first.item.id } });
+    expect((await ctx.core.collection.list(ctx.userId, q())).total).toBe(1);
+  });
+
   it('rejects a price without currency', () => {
     expect(() => addToCollectionInput.parse({ discogsReleaseId: 1, purchasePrice: 10 })).toThrow();
   });

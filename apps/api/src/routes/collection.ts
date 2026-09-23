@@ -18,8 +18,14 @@ export function collectionRoutes({ core }: AppDeps) {
     )
     .get('/facets', async (c) => c.json(await core.collection.facets(c.get('userId'))))
     .post('/', async (c) => {
-      const input = parse(addToCollectionInput, await jsonBody(c));
-      return c.json(await withAchievements(await core.collection.add(c.get('userId'), input)), 201);
+      const body = (await jsonBody(c)) as Record<string, unknown>;
+      const key = c.req.header('idempotency-key');
+      const input = parse(
+        addToCollectionInput,
+        key && body && typeof body === 'object' ? { clientRequestId: key, ...body } : body,
+      );
+      const result = await core.collection.add(c.get('userId'), input);
+      return c.json(await withAchievements(result), result.replayed ? 200 : 201);
     })
     .get('/:id{[0-9a-f-]{36}}', async (c) =>
       c.json(await core.collection.get(c.get('userId'), c.req.param('id'))),
