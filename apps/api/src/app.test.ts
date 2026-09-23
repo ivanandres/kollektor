@@ -622,6 +622,16 @@ describe('MVP flow', () => {
     expect(byCountry.Japan.ownedEditionsOfAlbum).toBeGreaterThanOrEqual(1);
   });
 
+  it('imports a CSV sent as text/csv', async () => {
+    const res = await app.request('/api/imports/csv', {
+      method: 'POST',
+      headers: { cookie: ivan.cookie, origin: ORIGIN, 'content-type': 'text/csv' },
+      body: 'Artista,Álbum,Año\nSeru Giran,La grasa de las capitales,1979\n',
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ total: 1, created: 1, errors: [] });
+  });
+
   it('validation errors are structured', async () => {
     const r = await call('/collection', {
       method: 'POST',

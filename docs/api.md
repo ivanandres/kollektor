@@ -176,6 +176,12 @@ las hizo (`isVerified: false`).
 
 Volver a importar la misma colección no duplica discos y reintenta los que habían fallado.
 
+**Importar un CSV** — `POST /imports/csv` con el archivo como `text/csv`, multipart (campo `file`) o JSON `{ csv }`, hasta 2 MB y 5.000 filas:
+
+- **Export de Discogs** (Colección → Exportar): las filas con `release_id` se encolan como la importación de Discogs (hay que procesarlas con `POST /imports/discogs/run`). Conserva condición y notas, y funciona aunque la colección sea privada.
+- **Planilla propia** (Excel o Sheets, separada por `,` o `;`): reconoce columnas en español o inglés (`artista`, `álbum`, `año`, `sello`, `catálogo`, `país`, `precio`, `moneda`, `estado`, `fecha`, `ubicación`, `notas`…) y crea cargas manuales privadas, que después se pueden vincular con Discogs. Entiende precios como `$ 45.000` o `35.000,50`, fechas `dd/mm/aaaa` y condiciones como "Near Mint (NM or M-)" o "VG+".
+- Responde `{ total, queued, created, skipped, errors: [{ line, message }] }`. Subir el mismo archivo otra vez no duplica nada.
+
 ## Público (sin sesión, base para la V2)
 
 | Método y ruta | Descripción |

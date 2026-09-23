@@ -138,6 +138,63 @@ describe('discogs import', () => {
   });
 });
 
+describe('CSV import', () => {
+  it('imports a Discogs collection export (queued by release_id) without duplicates', async () => {
+    const csv = [
+      'Catalog#,Artist,Title,Label,Format,Rating,Released,release_id,CollectionFolder,Date Added,Collection Media Condition,Collection Sleeve Condition,Collection Notes',
+      'SHVL 804,Pink Floyd,The Dark Side Of The Moon,Harvest,"LP, Album",,1973,1873013,Uncategorized,2024-03-12 10:00:00,Near Mint (NM or M-),Very Good Plus (VG+),Primera que compré',
+      'EKS-74013,Love,Forever Changes,Elektra,"LP, Album",,1967,2000003,Uncategorized,2025-01-02 09:00:00,Very Good (VG),Good (G),',
+    ].join('\n');
+    const r = await ctx.core.imports.importCsv(ctx.userId, csv);
+    expect(r).toMatchObject({ total: 2, queued: 2, created: 0, errors: [] });
+    await ctx.core.imports.runBatch(ctx.userId, 10);
+    const list = await ctx.core.collection.list(
+      ctx.userId,
+      collectionQuery.parse({ sort: 'year_asc' }),
+    );
+    expect(list.items.map((i) => [i.title, i.conditionMedia, i.conditionSleeve])).toEqual([
+      ['Forever Changes', 'VG', 'G'],
+      ['The Dark Side Of The Moon', 'NM', 'VG+'],
+    ]);
+    const again = await ctx.core.imports.importCsv(ctx.userId, csv);
+    expect(again).toMatchObject({ queued: 0, skipped: 2 });
+  });
+
+  it('imports a personal spreadsheet as private manual records, reporting bad rows', async () => {
+    const csv =
+      'Artista;Álbum;Año;Sello;Catálogo;Precio;Moneda;Estado;Fecha;Ubicación\n' +
+      'Soda Stereo;Signos;1986;CBS;;$ 45.000;ARS;VG+;12/03/2024;Estante 1\n' +
+      'Simon & Garfunkel;Bookends;1968;Columbia;KCS 9529;20;;NM;;\n' +
+      ';Sin artista;;;;;;;;\n';
+    const r = await ctx.core.imports.importCsv(ctx.userId, csv);
+    expect(r).toMatchObject({
+      total: 3,
+      created: 2,
+      errors: [{ line: 4, message: 'Falta artista o álbum' }],
+    });
+    const items = (
+      await ctx.core.collection.list(ctx.userId, collectionQuery.parse({ sort: 'year_asc' }))
+    ).items;
+    expect(items.map((i) => `${i.artist} — ${i.title}`)).toEqual([
+      'Simon & Garfunkel — Bookends',
+      'Soda Stereo — Signos',
+    ]);
+    const signos = await ctx.core.collection.get(ctx.userId, items[1]!.id);
+    expect(signos).toMatchObject({
+      purchasePrice: 45000,
+      purchaseCurrency: 'ARS',
+      purchaseDate: '2024-03-12',
+      storageLocation: 'Estante 1',
+      conditionMedia: 'VG+',
+    });
+    expect(signos.release.isVerified).toBe(false);
+    expect((await ctx.core.imports.importCsv(ctx.userId, csv)).created).toBe(0);
+    await expect(ctx.core.imports.importCsv(ctx.userId, 'foo,bar\n1,2')).rejects.toMatchObject({
+      code: 'VALIDATION',
+    });
+  });
+});
+
 describe('linked Discogs account', () => {
   it('connects via OAuth, stores encrypted tokens and imports a private collection', async () => {
     const oauth = new FakeDiscogsOAuth(ctx.catalog);

@@ -47,7 +47,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
   const recognition = recognitionService(deps);
   const jobs = jobService(deps);
   const accounts = accountService(deps);
-  const imports = importService(deps, collection, jobs, accounts);
+  const imports = importService(deps, collection, jobs, accounts, profiles);
   const publicViews = publicService(deps, profiles, collection, wishlist, stats);
 
   /** Periodic maintenance: daily value snapshots and weekly market refresh (rate-limit friendly). */

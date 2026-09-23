@@ -1,8 +1,11 @@
 import { Hono } from 'hono';
 import { searchQuery } from '@kollektor/schemas';
 import { z } from 'zod';
+import { DomainError } from '@kollektor/core';
 import { jsonBody, parse, queryObject } from '../lib/http';
 import type { AppDeps, AppEnv } from '../types';
+
+const MAX_CSV_BYTES = 2 * 1024 * 1024;
 
 export function insightRoutes({ core }: AppDeps) {
   return (
@@ -34,6 +37,27 @@ export function insightRoutes({ core }: AppDeps) {
         return c.json(await core.imports.startDiscogsImport(c.get('userId'), username), 202);
       })
       .get('/imports/discogs', async (c) => c.json(await core.imports.status(c.get('userId'))))
+      // CSV: Discogs' collection export or a personal spreadsheet. Body: text/csv, multipart
+      // (field "file") or JSON { csv }. Discogs rows are then processed with /imports/discogs/run.
+      .post('/imports/csv', async (c) => {
+        const type = c.req.header('content-type') ?? '';
+        let text: string;
+        if (type.includes('multipart/form-data')) {
+          const file = (await c.req.formData()).get('file');
+          if (!file || typeof file === 'string')
+            throw new DomainError('VALIDATION', 'Adjuntá el archivo CSV');
+          if (file.size > MAX_CSV_BYTES)
+            throw new DomainError('VALIDATION', 'El CSV debe pesar menos de 2 MB');
+          text = await file.text();
+        } else if (type.includes('application/json')) {
+          text = parse(z.object({ csv: z.string().max(MAX_CSV_BYTES) }), await jsonBody(c)).csv;
+        } else {
+          text = await c.req.text();
+          if (text.length > MAX_CSV_BYTES)
+            throw new DomainError('VALIDATION', 'El CSV debe pesar menos de 2 MB');
+        }
+        return c.json(await core.imports.importCsv(c.get('userId'), text));
+      })
       .post('/imports/discogs/run', async (c) =>
         c.json(await core.imports.runBatch(c.get('userId'), 10)),
       )

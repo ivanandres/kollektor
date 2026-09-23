@@ -275,6 +275,8 @@ export function createApiClient(opts: ApiClientOptions) {
           '/imports/discogs/run',
         ),
       status: () => get<T.ImportStatus>('/imports/discogs'),
+      /** Discogs collection export or a personal spreadsheet (UTF-8 text). */
+      csv: (csv: string) => post<T.CsvImportResult>('/imports/csv', { csv }),
     },
     public: {
       profile: (username: string) => get<T.PublicProfile>(`/public/users/${id(username)}`),
