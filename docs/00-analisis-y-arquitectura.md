@@ -53,7 +53,10 @@ Criterio: una sola base de código TypeScript, full-stack, desplegable en minuto
 
 | Capa | Elección | Por qué |
 |------|----------|---------|
-| Framework | **Next.js (App Router) + TypeScript** | Server Components + Server Actions eliminan la necesidad de una API separada en V1; SSR para perfiles públicos en V2; ecosistema enorme. |
+| Repo | **Monorepo pnpm + Turborepo** | Web, API y (más adelante) app móvil comparten tipos, validaciones y cliente de API. |
+| API | **Hono** (TypeScript) con contrato tipado (Hono RPC / OpenAPI) | Una sola API para web y apps nativas. Corre igual en Vercel Functions y en un contenedor Node en un VPS. |
+| Web | **Next.js (App Router) + TypeScript** | Consume la API; SSR para perfiles públicos en V2; `output: 'standalone'` para correr en Docker. La lógica de negocio **no** vive en Server Actions. |
+| App móvil (post-MVP) | **Expo / React Native** | Build nativo para iOS y Android desde TypeScript; cámara y escáner de código de barras nativos. Ver ADR 0001. |
 | UI | **Tailwind CSS + shadcn/ui** (Radix) | Componentes accesibles, sin "look corporativo" impuesto; fácil de darle identidad propia. |
 | Gráficos | **Recharts** | Simple, responsive, suficiente para barras/donas/líneas. |
 | Base de datos | **PostgreSQL** (Neon en prod, Docker en local) | Relacional, `pg_trgm` + `unaccent` + full-text para búsqueda fuzzy sin infraestructura extra. |
@@ -63,34 +66,38 @@ Criterio: una sola base de código TypeScript, full-stack, desplegable en minuto
 | Formularios | React Hook Form + borradores en IndexedDB | Punto 25: no perder formularios con mala conexión. |
 | Storage de imágenes | **S3-compatible (Cloudflare R2)** | Avatares y fotos subidas por el usuario. |
 | Email | **Resend** | Recuperación de contraseña. |
-| Jobs | Tabla `sync_jobs` + **Vercel Cron** | Refresco de precios/sync de Discogs respetando rate limit, sin infraestructura extra. Migrable a Inngest/Trigger.dev si crece. |
+| Jobs | Tabla `sync_jobs` en Postgres + disparador por cron (Vercel Cron hoy, cron del sistema en el VPS) | Refresco de precios/sync de Discogs respetando rate limit, sin infraestructura extra ni dependencia de un proveedor. |
 | Visión | **Claude (Anthropic API, visión)** + lector de código de barras en el cliente (`BarcodeDetector` / `zxing-wasm`) | Ver sección 8. |
-| Mobile | **PWA** (instalable, acceso a cámara vía `<input capture>` / `getUserMedia`) | Evita mantener una app nativa en V1. Si en el futuro se hace React Native, la lógica ya está en `modules/*` y se expone como API. |
+| Mobile (MVP) | **PWA** (instalable, cámara vía `<input capture>` / `getUserMedia`) | Suficiente para uso personal mientras no exista la app nativa. |
 | Tests | **Vitest** (unit/integración con Postgres de test) + **Playwright** (e2e mobile y desktop) | |
-| Hosting | **Vercel** + Neon + R2 | Free tiers alcanzan para el MVP. |
+| Hosting | **Vercel + Neon + R2** ahora → **VPS con Docker Compose** después | Sin servicios propietarios de Vercel (KV, Blob, Edge Config): la migración es cambiar variables de entorno y `pg_dump`/`pg_restore`. |
 
-**Decisión importante a explicitar:** elijo **PWA en lugar de app nativa**. Ventaja: velocidad de desarrollo y un solo código. Costo: en iOS la experiencia de cámara es algo menos fluida y `BarcodeDetector` no existe en Safari (se usa `zxing-wasm` como fallback).
+**Decisión importante a explicitar:** arquitectura **API-first en monorepo**. El MVP se lanza como web + PWA; las apps de iOS/Android se construyen después con Expo sobre la misma API, sin reescribir backend ni lógica. Detalle y alternativas descartadas en [`adr/0001-plataforma-movil-y-despliegue.md`](adr/0001-plataforma-movil-y-despliegue.md).
 
 ---
 
 ## 4. Arquitectura
 
-Monolito modular. Tres capas, con dependencias en una sola dirección:
+Monolito modular, API-first: los clientes (web hoy, mobile mañana) hablan con una única API; el dominio no conoce a los clientes. Dependencias en una sola dirección:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  app/  (rutas Next.js, páginas, Server Actions finas)       │  ← UI: no contiene lógica de negocio
+│  apps/web (Next.js)          apps/mobile (Expo, post-MVP)   │  ← UI: no contiene lógica de negocio
+└───────────────┬─────────────────────────────────────────────┘
+                ▼  HTTP tipado (packages/api-client)
+┌─────────────────────────────────────────────────────────────┐
+│  apps/api (Hono): rutas, auth, validación Zod               │
 └───────────────┬─────────────────────────────────────────────┘
                 ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  modules/  (dominio)                                        │
+│  packages/core  (dominio)                                   │
 │  auth · profiles · catalog · collection · wishlist · search │
 │  stats · achievements · discovery · valuation · currency    │
 │  cada uno: service.ts · repository.ts · schemas.ts · types  │
 └───────────────┬─────────────────────────────────────────────┘
                 ▼  (solo a través de interfaces)
 ┌─────────────────────────────────────────────────────────────┐
-│  integrations/  (adaptadores HTTP, nunca importan dominio)  │
+│  packages/integrations (adaptadores, no importan dominio)   │
 │  DiscogsService · SpotifyService · YouTubeService           │
 │  LyricsService · CoverRecognitionService · FxRateService    │
 │  StorageService · EmailService                              │
@@ -260,46 +267,31 @@ Sirve hoy para "discos agregados por mes" y para disparar logros; en V2 es la ba
 
 ```
 kollektor/
-├── docs/                          # análisis, ADRs, documentación por fase
-├── drizzle/                       # migraciones SQL generadas
-├── public/                        # íconos PWA, manifest
-├── src/
-│   ├── app/
-│   │   ├── (auth)/                # login, register, forgot-password, reset-password
-│   │   ├── (app)/                 # layout autenticado con navegación
-│   │   │   ├── page.tsx           # Inicio / dashboard
-│   │   │   ├── collection/        # grid/lista + filtros · [itemId]/ ficha
-│   │   │   ├── add/               # elegir método · search/ · scan/ · manual/ · confirm/
-│   │   │   ├── wishlist/
-│   │   │   ├── search/
-│   │   │   ├── stats/
-│   │   │   ├── achievements/
-│   │   │   └── profile/           # perfil, privacidad, moneda base
-│   │   └── api/                   # auth handler, cron, uploads
-│   ├── modules/
-│   │   ├── auth/  profiles/  catalog/  collection/  wishlist/
-│   │   ├── search/  stats/  achievements/  discovery/  valuation/  currency/
-│   │   └── <módulo>/{service,repository,schemas,types}.ts + *.test.ts
-│   ├── integrations/
-│   │   ├── discogs/               # client (rate limit, retry, cache) · mapper · service
-│   │   ├── spotify/  youtube/  lyrics/
-│   │   ├── vision/                # CoverRecognitionService (Claude) 
-│   │   ├── fx/  storage/  email/
-│   │   └── ports.ts               # interfaces CatalogProvider, MusicLinkProvider, …
-│   ├── db/
-│   │   ├── schema/                # tablas Drizzle por módulo
-│   │   ├── client.ts
-│   │   └── seed/                  # achievements.json · essential-lists/*.json · géneros
-│   ├── components/
-│   │   ├── ui/                    # shadcn
-│   │   └── collection/ charts/ achievements/ layout/
-│   └── lib/                       # normalize, money, dates, errors, draft-storage
+├── apps/
+│   ├── api/                       # Hono: rutas HTTP, auth, cron endpoints · Dockerfile
+│   ├── web/                       # Next.js: páginas, componentes web, PWA · Dockerfile
+│   │   └── src/app/
+│   │       ├── (auth)/            # login, register, forgot-password, reset-password
+│   │       └── (app)/             # inicio, collection/[itemId], add/{search,scan,manual},
+│   │                              # wishlist, search, stats, achievements, profile
+│   └── mobile/                    # Expo (se crea en la Fase 13)
+├── packages/
+│   ├── core/                      # dominio: modules/{catalog,collection,wishlist,search,stats,
+│   │                              #   achievements,discovery,valuation,currency}/
+│   │                              #   service · repository · types · *.test.ts
+│   ├── integrations/              # discogs · spotify · youtube · lyrics · vision · fx · storage · email
+│   │                              #   + ports.ts (interfaces)
+│   ├── db/                        # esquema Drizzle, migraciones, seed (achievements, essential lists)
+│   ├── schemas/                   # Zod compartido (web, mobile, api)
+│   ├── api-client/                # cliente tipado + hooks TanStack Query (web y mobile)
+│   └── config/                    # tsconfig, eslint, tokens de diseño compartidos
 ├── tests/e2e/                     # Playwright (viewport móvil + desktop)
-├── docker-compose.yml             # Postgres local
+├── docker-compose.yml             # dev local hoy; producción en VPS mañana (postgres, api, web, worker)
+├── turbo.json · pnpm-workspace.yaml
 └── .env.example
 ```
 
----
+`packages/*` no importa nada de React DOM ni de React Native: todo lo que está ahí se comparte entre web y mobile.
 
 ## 8. APIs externas necesarias
 
@@ -374,6 +366,8 @@ Cada fase cierra con: tests verdes → revisión de errores → verificación ma
 | **10. Dashboard + estadísticas** | Números clave, "Tu colección en números", gráficos por artista/género/década/país/sello/formato/condición, compras por año/mes, snapshots de valor. | Estadísticas verificadas contra dataset seed conocido. |
 | **11. Logros + descubrimiento** | Motor de reglas, badges, progreso, essential lists curadas, sección Explorar ("te falta 1 para completar…"). | Tests por tipo de criterio; desbloqueo en tiempo real al agregar. |
 | **12. Refinamiento** | Identidad visual, animaciones de desbloqueo, PWA instalable, accesibilidad, performance, e2e completo de los 16 criterios de éxito. | Checklist de criterios de éxito 100% verde. |
+| **13. App móvil (post-MVP)** | `apps/mobile` con Expo: auth con tokens en almacenamiento seguro, escáner nativo de código de barras, cámara, colección, agregar y wishlist sobre la misma API. Builds con EAS y publicación en App Store y Google Play. | Flujo "estoy en la disquería" completo en iOS y Android físicos; apps aprobadas en ambas tiendas. |
+| **14. Migración a VPS** (cuando convenga) | `docker compose` en VPS: postgres, api, web, worker, reverse proxy con TLS, backups automáticos. | Restore de backup probado; DNS apuntando al VPS; Vercel/Neon dados de baja. |
 
 ---
 
@@ -385,6 +379,6 @@ Cada fase cierra con: tests verdes → revisión de errores → verificación ma
 4. **Essential lists**: ¿las curamos nosotros en el repo para ~20 artistas iniciales? ¿cuáles? *(default: sí; lista inicial por definir: Beatles, Pink Floyd, Led Zeppelin, Bowie, Miles Davis, Radiohead, Rolling Stones, Queen, Charly García, Spinetta…)*
 5. **Discogs OAuth por usuario** + importar colección existente en el MVP? *(default: sí, opcional para el usuario)*
 6. **Idioma de la UI**: ¿español rioplatense únicamente, o i18n preparado desde el inicio? *(default: español, con strings centralizados para i18n futuro)*
-7. **Hosting**: ¿OK Vercel + Neon + R2 (free tiers)? *(default: sí)*
+7. ~~**Hosting**~~ *(decidido: Vercel + Neon + R2 ahora, VPS después; ver ADR 0001)*
 8. **API de visión (Claude)**: ¿aceptable el costo por foto con límite diario por usuario? *(default: sí, 30 fotos/día)*
 9. **Logros**: ¿no se revocan al borrar discos? *(default: no se revocan)*
