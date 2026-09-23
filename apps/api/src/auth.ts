@@ -3,11 +3,19 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { bearer } from 'better-auth/plugins';
 import type { Core } from '@kollektor/core';
 import { schema, type Database } from '@kollektor/db';
-import type { EmailService } from '@kollektor/integrations';
+import type { EmailService, StorageService } from '@kollektor/integrations';
 import type { Env } from './env';
 
-export function createAuth(opts: { db: Database; core: Core; email: EmailService; env: Env }) {
-  const { db, core, email, env } = opts;
+export function createAuth(opts: {
+  db: Database;
+  core: Core;
+  email: EmailService;
+  env: Env;
+  storage?: StorageService;
+}) {
+  const { db, core, email, env, storage } = opts;
+  /** Files to remove once the account is gone (collected before the rows cascade away). */
+  const pendingFileDeletes = new Map<string, string[]>();
   return betterAuth({
     appName: 'Kollektor',
     baseURL: env.BETTER_AUTH_URL,
@@ -38,7 +46,27 @@ export function createAuth(opts: { db: Database; core: Core; email: EmailService
       },
     },
     // "Borrar mi cuenta": POST /api/auth/delete-user { password } removes the user and all their data.
-    user: { deleteUser: { enabled: true } },
+    user: {
+      deleteUser: {
+        enabled: true,
+        beforeDelete: async (user) => {
+          pendingFileDeletes.set(user.id, await core.profiles.uploadedFileUrls(user.id));
+        },
+        afterDelete: async (user) => {
+          await core.jobs.deleteForUser(user.id);
+          const urls = pendingFileDeletes.get(user.id) ?? [];
+          pendingFileDeletes.delete(user.id);
+          if (!storage) return;
+          for (const url of urls) {
+            const key = storage.keyFromPublicUrl(url);
+            if (key)
+              await storage
+                .delete(key)
+                .catch((e) => console.error('storage delete failed', key, e));
+          }
+        },
+      },
+    },
     session: {
       expiresIn: 60 * 60 * 24 * 30,
       updateAge: 60 * 60 * 24,

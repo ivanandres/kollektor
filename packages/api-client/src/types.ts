@@ -36,6 +36,7 @@ export type IdentifyResult = Out<Core['recognition']['identifyByPhoto']>;
 export type ImportStatus = Out<Core['imports']['status']>;
 export type PublicProfile = Out<Core['publicViews']['profile']>;
 export type PublicCollection = Out<Core['publicViews']['collectionOf']>;
+export type PublicWishlist = Out<Core['publicViews']['wishlistOf']>;
 
 type ExternalPage = Out<NonNullable<Core['deps']['catalogProvider']>['search']>;
 export type ExternalSearchPage = ExternalPage & { attribution: string };

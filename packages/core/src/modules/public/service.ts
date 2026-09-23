@@ -41,12 +41,38 @@ export function publicService(
 
   async function collectionOf(username: string, q: CollectionQuery) {
     const p = await profiles.publicOwner(username, 'collection');
+    // Whitelist: only filters/sorts over data the owner made public. Tags, and prices/values
+    // unless opted in, can't be used to filter or rank (that would leak them).
+    const publicSorts: CollectionQuery['sort'][] = [
+      'added_desc',
+      'added_asc',
+      'artist_asc',
+      'title_asc',
+      'year_asc',
+      'year_desc',
+    ];
+    if (p.showPrices) publicSorts.push('paid_desc');
+    if (p.showValues) publicSorts.push('value_desc');
     const res = await collection.list(p.userId, {
-      ...q,
-      paidMin: undefined,
-      paidMax: undefined,
-      ...(p.showValues ? {} : { valueMin: undefined, valueMax: undefined }),
-      ...(q.sort === 'paid_desc' && !p.showPrices ? { sort: 'added_desc' } : {}),
+      q: q.q,
+      artistId: q.artistId,
+      genre: q.genre,
+      style: q.style,
+      decade: q.decade,
+      yearFrom: q.yearFrom,
+      yearTo: q.yearTo,
+      editionYearFrom: q.editionYearFrom,
+      editionYearTo: q.editionYearTo,
+      country: q.country,
+      label: q.label,
+      format: q.format,
+      editionType: q.editionType,
+      condition: q.condition,
+      ...(p.showPrices ? { paidMin: q.paidMin, paidMax: q.paidMax } : {}),
+      ...(p.showValues ? { valueMin: q.valueMin, valueMax: q.valueMax } : {}),
+      sort: publicSorts.includes(q.sort) ? q.sort : 'added_desc',
+      page: q.page,
+      pageSize: q.pageSize,
     });
     return {
       ...res,

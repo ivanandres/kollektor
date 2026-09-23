@@ -9,7 +9,15 @@ import { loadEnv } from '../env';
 const EMAIL = process.env.DEMO_EMAIL ?? 'demo@kollektor.app';
 const PASSWORD = process.env.DEMO_PASSWORD ?? 'vinilos-demo';
 
-const { auth, core, close } = bootstrap(loadEnv());
+const env = loadEnv();
+if (env.NODE_ENV === 'production' && process.env.DEMO_ALLOW_PRODUCTION !== '1') {
+  // The demo account has a known password and adds demo rows to the shared catalog.
+  console.error(
+    'Refusing to seed demo data in production (set DEMO_ALLOW_PRODUCTION=1 to override).',
+  );
+  process.exit(1);
+}
+const { auth, core, close } = bootstrap(env);
 try {
   let userId = await core.profiles.userIdByEmail(EMAIL);
   if (!userId) {

@@ -58,6 +58,9 @@ export function createApp(deps: AppDeps) {
   authed.use('/catalog/external/*', limit);
   authed.use('/catalog/identify/*', limit);
   authed.use('/imports/*', limit);
+  authed.use('/catalog/albums/:id/external-versions', limit);
+  authed.use('/me/avatar-upload', limit);
+  authed.use('/collection/:id/photos/upload', limit);
   authed.route('/me', meRoutes(deps));
   authed.route('/collection', collectionRoutes(deps));
   authed.route('/wishlist', wishlistRoutes(deps));

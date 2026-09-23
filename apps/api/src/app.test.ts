@@ -37,19 +37,34 @@ const core = createCore({
   ],
   recognizer: new FakeRecognizer({ artist: 'Pink Floyd', title: 'The Dark Side of the Moon' }),
 });
+const objects = new Map<string, number>();
+const deletedKeys: string[] = [];
 const storage = {
-  createUpload: async (key: string, contentType: string) => ({
-    uploadUrl: `https://upload.example.com/${key}?sig=1`,
-    publicUrl: `https://media.example.com/${key}`,
-    method: 'PUT' as const,
-    headers: { 'Content-Type': contentType },
-    expiresIn: 600,
-  }),
-  isOwnPublicUrl: (url: string) => url.startsWith('https://media.example.com/'),
+  createUpload: async (key: string, contentType: string) => {
+    objects.set(key, 120_000); // simulate the client's PUT
+    return {
+      uploadUrl: `https://upload.example.com/${key}?sig=1`,
+      publicUrl: `https://media.example.com/${key}`,
+      method: 'PUT' as const,
+      headers: { 'Content-Type': contentType },
+      expiresIn: 600,
+    };
+  },
+  keyFromPublicUrl: (url: string) => {
+    const u = new URL(url);
+    return u.origin === 'https://media.example.com' && !u.search && !u.hash
+      ? u.pathname.slice(1)
+      : null;
+  },
+  size: async (key: string) => objects.get(key) ?? null,
+  delete: async (key: string) => {
+    objects.delete(key);
+    deletedKeys.push(key);
+  },
 };
 const app = createApp({
   core,
-  auth: createAuth({ db: handle.db, core, email, env }),
+  auth: createAuth({ db: handle.db, core, email, env, storage }),
   env,
   storage,
 });
@@ -355,6 +370,27 @@ describe('MVP flow', () => {
     expect(pub.status).toBe(200);
     expect(JSON.stringify(pub.json)).not.toMatch(/Disquería|purchasePrice/);
     expect((await call('/public/users/ivan/wishlist')).status).toBe(404);
+
+    // Hidden data can't be probed through filters or sorting.
+    const titles = (r: { json: { items: { title: string }[] } }) =>
+      r.json.items.map((i) => i.title);
+    const byValue = await call('/public/users/ivan/collection?sort=value_desc');
+    const byAdded = await call('/public/users/ivan/collection?sort=added_desc');
+    expect(titles(byValue)).toEqual(titles(byAdded));
+    const withTag = await call('/public/users/ivan/collection?tag=para-vender');
+    expect(withTag.json.total).toBe(pub.json.total);
+    const withValue = await call('/public/users/ivan/collection?valueMin=100000');
+    expect(withValue.json.total).toBe(pub.json.total);
+  });
+
+  it('wishlist adds honor Idempotency-Key', async () => {
+    const headers = { 'idempotency-key': 'wish-retry-0001' };
+    const body = { discogsMasterId: 47680 };
+    const a = await call('/wishlist', { method: 'POST', session: ivan, body, headers });
+    const b = await call('/wishlist', { method: 'POST', session: ivan, body, headers });
+    expect([a.status, b.status]).toEqual([201, 200]);
+    expect(b.json.id).toBe(a.json.id);
+    await call(`/wishlist/${a.json.id}`, { method: 'DELETE', session: ivan });
   });
 
   it('avatar upload returns a presigned target and only accepts our own URLs', async () => {
@@ -407,6 +443,27 @@ describe('MVP flow', () => {
         })
       ).status,
     ).toBe(400);
+    // Query-string tricks and oversized files are rejected (oversized files get deleted).
+    const trick = await call(`/collection/${itemId}/photos`, {
+      method: 'POST',
+      session: ivan,
+      body: { url: `https://media.example.com/avatars/x.png?/copies/` },
+    });
+    expect(trick.status).toBe(400);
+    const big = await call(`/collection/${itemId}/photos/upload`, {
+      method: 'POST',
+      session: ivan,
+      body: { contentType: 'image/png' },
+    });
+    const bigKey = new URL(big.json.publicUrl).pathname.slice(1);
+    objects.set(bigKey, 20 * 1024 * 1024);
+    const tooBig = await call(`/collection/${itemId}/photos`, {
+      method: 'POST',
+      session: ivan,
+      body: { url: big.json.publicUrl },
+    });
+    expect(tooBig.json.error.message).toBe('La imagen debe pesar menos de 5 MB');
+    expect(deletedKeys).toContain(bigKey);
     expect((await call(`/collection/${itemId}`, { session: ivan })).json.photos).toEqual([
       { id: added.json.id, url: up.json.publicUrl, caption: 'Etiqueta lado A' },
     ]);
@@ -430,10 +487,20 @@ describe('MVP flow', () => {
 
   it("deleting the account removes all of the user's data", async () => {
     const bye = await signUp('Bye', 'bye@example.com', 'bye-password-1');
-    await call('/collection', {
+    const added = await call('/collection', {
       method: 'POST',
       session: bye,
       body: { discogsReleaseId: 1873013, tags: ['x'] },
+    });
+    const up = await call(`/collection/${added.json.item.id}/photos/upload`, {
+      method: 'POST',
+      session: bye,
+      body: { contentType: 'image/jpeg' },
+    });
+    await call(`/collection/${added.json.item.id}/photos`, {
+      method: 'POST',
+      session: bye,
+      body: { url: up.json.publicUrl },
     });
     await call('/collection', {
       method: 'POST',
@@ -456,6 +523,7 @@ describe('MVP flow', () => {
       (SELECT count(*) FROM albums WHERE title IN ('Solo mío', 'Deseado'))::int AS albums,
       (SELECT count(*) FROM "user" WHERE email = 'bye@example.com')::int AS users`;
     expect(left).toEqual({ albums: 0, users: 0 });
+    expect(deletedKeys).toContain(new URL(up.json.publicUrl).pathname.slice(1));
     // The shared catalog row stays for everyone else
     expect((await call(`/collection/${itemId}`, { session: ivan })).status).toBe(200);
   });

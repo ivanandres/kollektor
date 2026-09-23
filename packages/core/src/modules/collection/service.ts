@@ -339,6 +339,27 @@ export function collectionService(
     };
   }
 
+  /** Every field of every record in one query (owner-only CSV export). */
+  async function exportRows(userId: string) {
+    return db.execute<Record<string, string | number | null>>(sql`
+      SELECT ${ARTIST_DISPLAY} AS artista, a.title AS album, a.original_release_year AS año_original,
+             r.release_year AS año_edicion, r.country AS pais,
+             (SELECT string_agg(lb.name, ' / ' ORDER BY rl.position) FROM release_labels rl JOIN labels lb ON lb.id = rl.label_id WHERE rl.release_id = r.id) AS sello,
+             (SELECT string_agg(rl.catalog_number, ' / ' ORDER BY rl.position) FROM release_labels rl WHERE rl.release_id = r.id) AS catalogo,
+             r.format_summary AS formato, ci.condition_media::text AS estado_disco, ci.condition_sleeve::text AS estado_tapa,
+             ci.copy_number AS numero_copia, ci.purchase_date::text AS fecha_compra, ci.purchase_price::text AS precio,
+             ci.purchase_currency AS moneda, ci.purchase_price_base::text AS precio_base,
+             ci.estimated_value_base::text AS valor_estimado, ci.base_currency AS moneda_base,
+             ci.purchase_place AS lugar_compra, ci.storage_location AS ubicacion,
+             (SELECT string_agg(tg.name, ' / ' ORDER BY tg.name) FROM collection_item_tags cit JOIN tags tg ON tg.id = cit.tag_id WHERE cit.collection_item_id = ci.id) AS tags,
+             ci.notes AS notas, ci.created_at::text AS agregado
+        FROM collection_items ci
+        JOIN releases r ON r.id = ci.release_id
+        JOIN albums a ON a.id = r.album_id
+       WHERE ci.user_id = ${userId} AND ci.deleted_at IS NULL
+       ORDER BY ci.created_at, ci.id`);
+  }
+
   /** Available filter values with counts over the whole (non-deleted) collection. */
   async function facets(userId: string) {
     const from = sql`FROM collection_items ci JOIN releases r ON r.id = ci.release_id JOIN albums a ON a.id = r.album_id`;
@@ -488,7 +509,19 @@ export function collectionService(
     if (!deleted.length) throw notFound('Foto');
   }
 
-  return { add, update, remove, get, list, facets, getOwnedRow, addPhoto, removePhoto, relink };
+  return {
+    add,
+    update,
+    remove,
+    get,
+    list,
+    facets,
+    exportRows,
+    getOwnedRow,
+    addPhoto,
+    removePhoto,
+    relink,
+  };
 }
 
 export interface CollectionItemDetail {

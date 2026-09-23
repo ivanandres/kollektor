@@ -19,12 +19,16 @@ export function wishlistRoutes({ core }: AppDeps) {
     .get('/', async (c) =>
       c.json(await core.wishlist.list(c.get('userId'), parse(wishlistQuery, queryObject(c)))),
     )
-    .post('/', async (c) =>
-      c.json(
-        await core.wishlist.add(c.get('userId'), parse(addToWishlistInput, await jsonBody(c))),
-        201,
-      ),
-    )
+    .post('/', async (c) => {
+      const body = (await jsonBody(c)) as Record<string, unknown>;
+      const key = c.req.header('idempotency-key');
+      const input = parse(
+        addToWishlistInput,
+        key && body && typeof body === 'object' ? { clientRequestId: key, ...body } : body,
+      );
+      const { replayed, ...item } = await core.wishlist.add(c.get('userId'), input);
+      return c.json(item, replayed ? 200 : 201);
+    })
     .patch('/:id{[0-9a-f-]{36}}', async (c) =>
       c.json(
         await core.wishlist.update(

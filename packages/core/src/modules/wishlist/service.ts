@@ -70,7 +70,11 @@ export function wishlistService(
             eq(wishlistItems.clientRequestId, input.clientRequestId),
           ),
         );
-      if (prev) return (await list(userId, { ids: [prev.id], includePurchased: true }))[0]!;
+      if (prev)
+        return {
+          ...(await list(userId, { ids: [prev.id], includePurchased: true }))[0]!,
+          replayed: true,
+        };
     }
     const target = await resolveTarget(userId, input);
     const duplicate = await db
@@ -115,7 +119,10 @@ export function wishlistService(
             eq(wishlistItems.clientRequestId, input.clientRequestId!),
           ),
         );
-      return (await list(userId, { ids: [prev!.id], includePurchased: true }))[0]!;
+      return {
+        ...(await list(userId, { ids: [prev!.id], includePurchased: true }))[0]!,
+        replayed: true,
+      };
     }
     await recordActivity(db, {
       userId,
@@ -124,7 +131,10 @@ export function wishlistService(
       subjectId: row!.id,
       payload: { albumId: target.albumId, releaseId: target.releaseId },
     });
-    return (await list(userId, { ids: [row!.id], includePurchased: true }))[0]!;
+    return {
+      ...(await list(userId, { ids: [row!.id], includePurchased: true }))[0]!,
+      replayed: false,
+    };
   }
 
   async function update(userId: string, id: string, input: UpdateWishlistInput) {

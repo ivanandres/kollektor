@@ -20,8 +20,8 @@ export function jobService(deps: CoreDeps) {
     type: string,
     payload: Record<string, unknown>,
     opts: { dedupeKey?: string; runAfter?: Date } = {},
-  ) {
-    await db
+  ): Promise<boolean> {
+    const inserted = await db
       .insert(syncJobs)
       .values({
         type,
@@ -29,7 +29,17 @@ export function jobService(deps: CoreDeps) {
         dedupeKey: opts.dedupeKey ?? null,
         runAfter: opts.runAfter ?? nowOf(deps),
       })
-      .onConflictDoNothing();
+      .onConflictDoNothing()
+      .returning({ id: syncJobs.id });
+    return inserted.length > 0;
+  }
+
+  /** Puts a user's failed jobs of a type back in the queue (e.g. re-running an import). */
+  async function retryFailed(type: string, userId: string): Promise<number> {
+    const rows = await db.execute<{ id: string }>(sql`
+      UPDATE ${syncJobs} SET status = 'pending', attempts = 0, last_error = NULL, run_after = now(), updated_at = now()
+       WHERE type = ${type} AND payload->>'userId' = ${userId} AND status = 'failed' RETURNING id`);
+    return rows.length;
   }
 
   /** Runs up to `limit` due jobs. Safe to call concurrently (SKIP LOCKED). */
@@ -39,8 +49,11 @@ export function jobService(deps: CoreDeps) {
     filter: { type?: string; userId?: string; budgetMs?: number } = {},
   ) {
     const started = Date.now();
+    // A job that keeps killing its worker must not loop forever.
     await db.execute(sql`
-      UPDATE ${syncJobs} SET status = 'pending', updated_at = now()
+      UPDATE ${syncJobs}
+         SET status = CASE WHEN attempts >= ${MAX_ATTEMPTS} THEN 'failed'::job_status ELSE 'pending'::job_status END,
+             last_error = coalesce(last_error, 'lease expired'), updated_at = now()
        WHERE status = 'running' AND updated_at < now() - make_interval(secs => ${LEASE_MS / 1000})`);
     const typeCond = filter.type ? sql`AND type = ${filter.type}` : sql``;
     const userCond = filter.userId ? sql`AND payload->>'userId' = ${filter.userId}` : sql``;
@@ -108,7 +121,14 @@ export function jobService(deps: CoreDeps) {
     };
   }
 
-  return { enqueue, runDue, countsFor };
+  /** Drops queued work that belongs to a deleted user. */
+  async function deleteForUser(userId: string): Promise<void> {
+    await db.execute(
+      sql`DELETE FROM ${syncJobs} WHERE payload->>'userId' = ${userId} AND status <> 'done'`,
+    );
+  }
+
+  return { enqueue, retryFailed, runDue, countsFor, deleteForUser };
 }
 
 export type JobService = ReturnType<typeof jobService>;

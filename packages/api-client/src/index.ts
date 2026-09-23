@@ -184,7 +184,17 @@ export function createApiClient(opts: ApiClientOptions) {
         ),
       removePhoto: (itemId: string, photoId: string) =>
         del(`/collection/${id(itemId)}/photos/${id(photoId)}`),
-      exportCsvUrl: () => `${base}/collection/export.csv`,
+      /** CSV text (works with cookies or bearer tokens). */
+      exportCsv: async () => {
+        const res = await raw('GET', '/collection/export.csv');
+        if (!res.ok)
+          throw new ApiError(
+            res.status,
+            statusCode(res.status),
+            'No se pudo exportar la colección.',
+          );
+        return res.text();
+      },
     },
     wishlist: {
       list: (query: { status?: string[]; includePurchased?: boolean } = {}) =>
@@ -251,6 +261,8 @@ export function createApiClient(opts: ApiClientOptions) {
       profile: (username: string) => get<T.PublicProfile>(`/public/users/${id(username)}`),
       collection: (username: string, query: Partial<CollectionQuery> = {}) =>
         get<T.PublicCollection>(`/public/users/${id(username)}/collection`, query as Query),
+      wishlist: (username: string) =>
+        get<T.PublicWishlist>(`/public/users/${id(username)}/wishlist`),
     },
     /** PUT a file to a presigned upload target. */
     upload: async (target: T.UploadTarget, file: Blob) => {

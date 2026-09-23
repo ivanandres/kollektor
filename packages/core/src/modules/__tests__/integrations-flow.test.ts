@@ -115,14 +115,24 @@ describe('discogs import', () => {
       '2000006',
     ]);
     const started = await ctx.core.imports.startDiscogsImport(ctx.userId, 'ivan');
-    expect(started).toMatchObject({ total: 5, queued: 5, status: { pending: 5, done: 0 } });
+    // Only the first page (2 records in the fake) is listed in the request; the rest is queued.
+    expect(started).toMatchObject({
+      total: 5,
+      queued: 2,
+      status: { pending: 2, done: 0, listing: true },
+    });
     const b1 = await ctx.core.imports.runBatch(ctx.userId, 3);
-    expect(b1.status).toMatchObject({ pending: 2, done: 3 });
-    await ctx.core.imports.runBatch(ctx.userId, 10);
+    expect(b1.status).toMatchObject({ done: 3, listing: true });
+    for (let i = 0; i < 5; i++) await ctx.core.imports.runBatch(ctx.userId, 10);
+    expect(await ctx.core.imports.status(ctx.userId)).toMatchObject({
+      pending: 0,
+      done: 5,
+      listing: false,
+    });
     expect((await ctx.core.collection.list(ctx.userId, collectionQuery.parse({}))).total).toBe(5); // two copies of DSOTM
     // Re-running the import doesn't duplicate
     await ctx.core.imports.startDiscogsImport(ctx.userId, 'ivan');
-    await ctx.core.imports.runBatch(ctx.userId, 10);
+    for (let i = 0; i < 5; i++) await ctx.core.imports.runBatch(ctx.userId, 10);
     expect((await ctx.core.collection.list(ctx.userId, collectionQuery.parse({}))).total).toBe(5);
   });
 });

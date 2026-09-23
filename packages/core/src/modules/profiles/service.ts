@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { schema } from '@kollektor/db';
 import type { ProfileUpdateInput } from '@kollektor/schemas';
 import type { CoreDeps } from '../../context';
@@ -96,6 +96,16 @@ export function profileService(
     return p;
   }
 
+  /** Public URLs of files the user uploaded (avatar, photos of their copies), for account deletion. */
+  async function uploadedFileUrls(userId: string): Promise<string[]> {
+    const rows = await db.execute<{ url: string }>(sql`
+      SELECT avatar_url AS url FROM profiles WHERE user_id = ${userId} AND avatar_url IS NOT NULL
+      UNION ALL
+      SELECT p.url FROM collection_item_photos p JOIN collection_items ci ON ci.id = p.collection_item_id
+       WHERE ci.user_id = ${userId}`);
+    return rows.map((r) => r.url);
+  }
+
   async function userIdByEmail(email: string): Promise<string | null> {
     const [u] = await db
       .select({ id: user.id })
@@ -105,6 +115,7 @@ export function profileService(
   }
 
   return {
+    uploadedFileUrls,
     publicOwner,
     userIdByEmail,
     isUsernameAvailable,

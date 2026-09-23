@@ -16,7 +16,11 @@ describe('S3StorageService', () => {
     expect(u.searchParams.get('X-Amz-Expires')).toBe('600');
     expect(u.searchParams.get('X-Amz-Signature')).toMatch(/^[0-9a-f]{64}$/);
     expect(t.publicUrl).toBe('https://media.example.com/avatars/u1/abc.jpg');
-    expect(s.isOwnPublicUrl(t.publicUrl)).toBe(true);
-    expect(s.isOwnPublicUrl('https://evil.example.com/x.jpg')).toBe(false);
+    expect(s.keyFromPublicUrl(t.publicUrl)).toBe('avatars/u1/abc.jpg');
+    expect(s.keyFromPublicUrl('https://evil.example.com/x.jpg')).toBeNull();
+    expect(
+      s.keyFromPublicUrl('https://media.example.com/avatars/other/x.png?/copies/u1/'),
+    ).toBeNull();
+    expect(s.keyFromPublicUrl('https://media.example.com/a/../b.png')).toBe('b.png'); // URL normalizes ..
   });
 });

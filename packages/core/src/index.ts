@@ -107,7 +107,7 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
   }
 
   const jobHandlers = {
-    [imports.JOB]: imports.handler,
+    ...imports.handlers,
     'wishlist.check_listing': async (p: Record<string, unknown>) => {
       await valuation.refreshLowestListing(String(p.releaseId));
     },

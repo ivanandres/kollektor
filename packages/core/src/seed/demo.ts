@@ -505,7 +505,10 @@ export async function seedDemo(db: Database, opts: { userId: string }) {
     });
     releaseIds.push(releaseId);
     const o = row[8] ?? {};
-    if (o.value)
+    const [existing] = await db.execute<{ n: number }>(
+      sql`SELECT count(*)::int AS n FROM ${schema.priceSnapshots} WHERE release_id = ${releaseId} AND source = 'demo'`,
+    );
+    if (o.value && !existing?.n)
       await db
         .insert(schema.priceSnapshots)
         .values({ releaseId, source: 'demo', kind: 'median', price: o.value, currency: 'USD' });
