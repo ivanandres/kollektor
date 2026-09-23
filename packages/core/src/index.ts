@@ -128,3 +128,4 @@ export type Core = ReturnType<typeof createCore>;
 export { seedAll, seedAchievements, seedEssentialLists } from './seed/seed';
 export { ESSENTIAL_LISTS } from './seed/essential-lists';
 export { ACHIEVEMENTS } from './seed/achievements';
+export { seedDemo } from './seed/demo';

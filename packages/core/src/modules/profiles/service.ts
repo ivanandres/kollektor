@@ -100,7 +100,16 @@ export function profileService(
     };
   }
 
+  async function userIdByEmail(email: string): Promise<string | null> {
+    const [u] = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.email, email.toLowerCase()));
+    return u?.id ?? null;
+  }
+
   return {
+    userIdByEmail,
     isUsernameAvailable,
     suggestUsername,
     ensureProfile,

@@ -17,7 +17,8 @@
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @kollektor/db generate",
     "db:migrate": "tsx --env-file-if-exists=.env packages/db/src/migrate.ts",
-    "db:seed": "tsx --env-file-if-exists=.env packages/core/src/seed/run.ts"
+    "db:seed": "tsx --env-file-if-exists=.env packages/core/src/seed/run.ts",
+    "db:seed:demo": "tsx --env-file-if-exists=.env apps/api/src/scripts/seed-demo.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
