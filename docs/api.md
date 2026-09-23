@@ -181,9 +181,11 @@ Volver a importar la misma colección no duplica discos y reintenta los que hab�
 
 **Importar un CSV** — `POST /imports/csv` con el archivo como `text/csv`, multipart (campo `file`) o JSON `{ csv }`, hasta 2 MB y 5.000 filas:
 
-- **Export de Discogs** (Colección → Exportar): las filas con `release_id` se encolan como la importación de Discogs (hay que procesarlas con `POST /imports/discogs/run`). Conserva condición y notas, y funciona aunque la colección sea privada.
-- **Planilla propia** (Excel o Sheets, separada por `,` o `;`): reconoce columnas en español o inglés (`artista`, `álbum`, `año`, `sello`, `catálogo`, `país`, `precio`, `moneda`, `estado`, `fecha`, `ubicación`, `notas`…) y crea cargas manuales privadas, que después se pueden vincular con Discogs. Entiende precios como `$ 45.000` o `35.000,50`, fechas `dd/mm/aaaa` y condiciones como "Near Mint (NM or M-)" o "VG+".
-- Responde `{ total, queued, created, skipped, errors: [{ line, message }] }`. Subir el mismo archivo otra vez no duplica nada.
+- Valida todas las filas al instante y las encola; se procesan con `POST /imports/discogs/run` (el mismo bucle y el mismo `status` que la importación de Discogs).
+- **Export de Discogs** (Colección → Exportar): las filas con `release_id` importan esa edición, con condición y notas, aunque la colección sea privada.
+- **Planilla propia** (Excel o Sheets, separada por `,` o `;`): reconoce columnas en español o inglés (`artista`, `álbum`, `año`, `sello`, `catálogo`, `país`, `precio`, `moneda`, `estado`, `fecha`, `ubicación`, `notas`…) y crea cargas manuales privadas, que después se pueden vincular con Discogs. Entiende precios como `$ 45.000`, `35.000,50`, `U$S 20` o `€ 20`, fechas `dd/mm/aaaa` y condiciones como "Near Mint (NM or M-)" o "VG+".
+- Responde `{ total, queued, skipped, errors: [{ line, message }], warnings: [{ line, message }], status }`. Las filas con errores (sin artista o sin álbum) no se importan. Las advertencias (fecha o moneda no reconocidas) importan la fila sin ese dato.
+- Subir el mismo archivo otra vez no duplica nada, y dos filas idénticas cuentan como dos copias. Ojo: importar el CSV de Discogs después de haber importado la misma colección por usuario sí duplica, porque el export no trae ids de copia.
 
 ## Público (sin sesión, base para la V2)
 
