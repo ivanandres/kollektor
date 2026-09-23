@@ -1,6 +1,6 @@
 # Estado del backend — noche del 23/09/2026
 
-Resumen: el backend del MVP (fases 1 a 11 del roadmap) está implementado, con 89 tests pasando contra
+Resumen: el backend del MVP (fases 1 a 11 del roadmap) está implementado, con 93 tests pasando contra
 Postgres real. Falta todo lo visual: web (fase 12, espera las pantallas de diseño) y app móvil (fase 13).
 
 ## Por fase
@@ -18,6 +18,10 @@ Postgres real. Falta todo lo visual: web (fase 12, espera las pantallas de dise�
 | 9. Ficha + tracklist + links | Ficha completa con otras ediciones del álbum. Links de Spotify/YouTube y "Ver letra" (Genius): solo coincidencias verificadas, buscados la primera vez que se piden y cacheados | `modules/music`, `integrations/src/{spotify,youtube,lyrics}` |
 | 10. Dashboard + estadísticas | Totales, invertido vs. estimado, "Tu colección en números", 10 distribuciones, línea de tiempo de compras e historial de valor (snapshots diarios) | `modules/stats` |
 | 11. Logros + descubrir | Motor de reglas declarativo (conteos, diversidad, décadas, países, rarezas, discografías completas), 30 logros sembrados, 7 discografías esenciales curadas, mensajes de "descubrir" | `modules/achievements`, `modules/discovery`, `seed/` |
+
+También quedó un **cliente tipado** (`packages/api-client`) que usan igual la web y la app móvil: tipos
+derivados del dominio, sesión por cookie o token, errores con mensajes en español y altas seguras ante
+reintentos.
 
 También quedó una base para la V2 social: vistas públicas con proyecciones explícitas de privacidad y la
 tabla `activity_events`, que ya registra cada alta, compra y logro.

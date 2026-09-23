@@ -28,6 +28,7 @@ packages/
   integrations/        Adaptadores: Discogs, Spotify, YouTube, Genius, Claude (visión), FX, email, storage
   db/                  Esquema Drizzle + migraciones SQL
   schemas/             Validaciones Zod compartidas (API, web y mobile)
+  api-client/          Cliente tipado de la API para web (Next.js) y mobile (Expo)
 docs/                  Análisis, ADRs, referencia de la API y ejemplos de respuestas reales
 ```
 
@@ -71,7 +72,7 @@ su variable en `.env`:
 ## Comandos
 
 ```bash
-pnpm test            # 89 tests (unitarios + integración contra Postgres + API de punta a punta)
+pnpm test            # 93 tests (unitarios + integración contra Postgres + API de punta a punta)
 pnpm typecheck
 pnpm lint
 pnpm format
@@ -93,4 +94,18 @@ y nunca llaman a servicios externos: usan fakes y fixtures.
 ## API
 
 Referencia completa para el frontend: [`docs/api.md`](docs/api.md).
+Cliente tipado listo para usar desde web o mobile:
+
+```ts
+import { createApiClient } from '@kollektor/api-client';
+
+const api = createApiClient({ baseUrl: '/api' }); // web: cookies
+// mobile: createApiClient({ baseUrl, getToken, onToken })         // bearer token en SecureStore
+const { items } = await api.collection.list({ genre: ['Rock'], decade: [1970] });
+const { item, unlockedAchievements } = await api.collection.add(
+  { discogsReleaseId: 1873013 },
+  formKey,
+);
+```
+
 Respuestas reales generadas con el usuario demo: [`docs/api-examples/`](docs/api-examples/).

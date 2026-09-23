@@ -66,9 +66,22 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
     devDependencies:
+      '@kollektor/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
+
+  packages/api-client:
+    dependencies:
+      '@kollektor/schemas':
+        specifier: workspace:*
+        version: link:../schemas
+    devDependencies:
+      '@kollektor/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/core:
     dependencies:

@@ -21,6 +21,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@kollektor/api-client": "workspace:*",
     "esbuild": "^0.28.2"
   }
 }
