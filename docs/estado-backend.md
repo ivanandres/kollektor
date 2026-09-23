@@ -55,6 +55,21 @@ para el diseño.**
    aparte, para el flujo de "Agregar".
 9. **Estadísticas:** "vinilos" cuenta copias, así que un 2×LP cuenta como 1.
 
+## Rendimiento medido
+
+Colección sintética de 5.000 discos (3.000 álbumes, 6.000 ediciones, 54.000 temas), Postgres 16 local:
+
+| Operación | Tiempo |
+|---|---|
+| Listar colección (default, filtros combinados, orden por artista) | 3–41 ms |
+| Facetas de filtros | ~50 ms |
+| Dashboard completo | ~70 ms |
+| Búsqueda global, consultas realistas ("love", "cat-12", "artist a1") | 120–350 ms |
+| Búsqueda global, peor caso sintético (todos los títulos coinciden) | ~700 ms |
+
+Si las colecciones crecen mucho más, el paso natural es un índice de búsqueda dedicado detrás del
+mismo `SearchProvider` (Meilisearch o Typesense), sin tocar la API.
+
 ## Limitaciones conocidas / pendientes
 
 - **Valor de mercado:** la sugerencia de precio por condición de Discogs requiere que la cuenta del token

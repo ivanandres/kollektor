@@ -141,20 +141,25 @@ export function postgresSearchProvider(deps: CoreDeps): SearchProvider {
         artist: string;
         release_id: string;
         item_id: string | null;
-        score: number;
-        exact: boolean;
       }>(sql`
-        WITH ${scope(userId)}
-        SELECT DISTINCT ON (tr.id) tr.id, tr.title, tr.position, a.title AS album_title,
-               ${ARTIST_DISPLAY} AS artist, r.id AS release_id, s.item_id,
-               similarity(tr.title_normalized, ${qn}) AS score, (tr.title_normalized = ${qn}) AS exact
-          FROM scope s
-          JOIN releases r ON r.id = s.release_id
-          JOIN albums a ON a.id = r.album_id
-          JOIN tracks tr ON tr.release_id = r.id
-         WHERE ${each((t) => or([textMatch(sql`tr.title_normalized`, t), artistMatch(t), albumTitleMatch(t)]))}
-           AND ${some((t) => textMatch(sql`tr.title_normalized`, t))}
-         ORDER BY tr.id, s.item_id NULLS LAST`);
+        WITH ${scope(userId)},
+        hits AS (
+          SELECT DISTINCT ON (tr.id) tr.id, tr.title, tr.position, tr.release_id, r.album_id, s.item_id,
+                 (tr.title_normalized = ${qn}) AS exact, similarity(tr.title_normalized, ${qn}) AS score
+            FROM scope s
+            JOIN releases r ON r.id = s.release_id
+            JOIN albums a ON a.id = r.album_id
+            JOIN tracks tr ON tr.release_id = r.id
+           WHERE ${some((t) => textMatch(sql`tr.title_normalized`, t))}
+             AND ${each((t) => or([textMatch(sql`tr.title_normalized`, t), artistMatch(t), albumTitleMatch(t)]))}
+           ORDER BY tr.id, s.item_id NULLS LAST
+        ),
+        top AS (SELECT * FROM hits ORDER BY exact DESC, score DESC, title LIMIT ${limit})
+        -- Presentation columns only for the final rows.
+        SELECT top.id, top.title, top.position, a.title AS album_title, ${ARTIST_DISPLAY} AS artist,
+               top.release_id, top.item_id
+          FROM top JOIN albums a ON a.id = top.album_id
+         ORDER BY top.exact DESC, top.score DESC, top.title`);
 
       const [artists, albums, releases, trackRows] = await Promise.all([
         artistsQ,
@@ -162,14 +167,7 @@ export function postgresSearchProvider(deps: CoreDeps): SearchProvider {
         releasesQ,
         tracksQ,
       ]);
-      const tracks = [...trackRows]
-        .sort(
-          (x, y) =>
-            Number(y.exact) - Number(x.exact) ||
-            Number(y.score) - Number(x.score) ||
-            x.title.localeCompare(y.title),
-        )
-        .slice(0, limit);
+      const tracks = trackRows;
 
       return {
         query: q,
