@@ -37,7 +37,16 @@ export class ClaudeCoverRecognizer implements CoverRecognizer {
   }
 
   async extract(images: RecognitionImage[]): Promise<RecognitionHints> {
-    const empty: RecognitionHints = { artist: null, title: null, catalogNumber: null, label: null, barcode: null, country: null, year: null, confidence: 0 };
+    const empty: RecognitionHints = {
+      artist: null,
+      title: null,
+      catalogNumber: null,
+      label: null,
+      barcode: null,
+      country: null,
+      year: null,
+      confidence: 0,
+    };
     if (images.length === 0) return empty;
     const response = await this.client.messages.parse({
       model: this.model,

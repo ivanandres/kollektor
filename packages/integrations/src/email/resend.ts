@@ -20,7 +20,13 @@ export class ResendEmailService implements EmailService {
     await fetchJson(this.fetchImpl, 'https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${this.cfg.apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: this.cfg.from, to: [msg.to], subject: msg.subject, html: msg.html, text: msg.text }),
+      body: JSON.stringify({
+        from: this.cfg.from,
+        to: [msg.to],
+        subject: msg.subject,
+        html: msg.html,
+        text: msg.text,
+      }),
     });
   }
 }
@@ -31,6 +37,7 @@ export class ConsoleEmailService implements EmailService {
   constructor(private readonly log = true) {}
   async send(msg: EmailMessage): Promise<void> {
     this.outbox.push(msg);
-    if (this.log) console.info(`[email] to=${msg.to} subject="${msg.subject}"\n${msg.text ?? msg.html}`);
+    if (this.log)
+      console.info(`[email] to=${msg.to} subject="${msg.subject}"\n${msg.text ?? msg.html}`);
   }
 }

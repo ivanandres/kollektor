@@ -2,12 +2,7 @@ import { sql, type SQL } from 'drizzle-orm';
 import type { CoreDeps } from '../../context';
 import { nowOf } from '../../context';
 import { normalizeText } from '../../lib/normalize';
-import {
-  albumTitleMatch,
-  artistMatch,
-  editionMatch,
-  textMatch,
-} from './conditions';
+import { albumTitleMatch, artistMatch, editionMatch, textMatch } from './conditions';
 import { tokenize, type QueryToken } from './tokens';
 
 export interface SearchResults {
@@ -91,8 +86,13 @@ export function postgresSearchProvider(deps: CoreDeps): SearchProvider {
          LIMIT ${limit}`);
 
       const albumsQ = db.execute<{
-        id: string; title: string; artist: string; year: number | null;
-        cover_image_url: string | null; item_count: number; in_wishlist: boolean;
+        id: string;
+        title: string;
+        artist: string;
+        year: number | null;
+        cover_image_url: string | null;
+        item_count: number;
+        in_wishlist: boolean;
       }>(sql`
         WITH ${scope(userId)}
         SELECT a.id, a.title, ${ARTIST_DISPLAY} AS artist, a.original_release_year AS year,
@@ -107,8 +107,15 @@ export function postgresSearchProvider(deps: CoreDeps): SearchProvider {
          LIMIT ${limit}`);
 
       const releasesQ = db.execute<{
-        id: string; album_title: string; artist: string; release_year: number | null; country: string | null;
-        labels: string | null; catalog_numbers: string | null; format_summary: string | null; item_ids: string[];
+        id: string;
+        album_title: string;
+        artist: string;
+        release_year: number | null;
+        country: string | null;
+        labels: string | null;
+        catalog_numbers: string | null;
+        format_summary: string | null;
+        item_ids: string[];
       }>(sql`
         WITH ${scope(userId)}
         SELECT r.id, a.title AS album_title, ${ARTIST_DISPLAY} AS artist, r.release_year, r.country,
@@ -126,8 +133,15 @@ export function postgresSearchProvider(deps: CoreDeps): SearchProvider {
          LIMIT ${limit}`);
 
       const tracksQ = db.execute<{
-        id: string; title: string; position: string | null; album_title: string; artist: string;
-        release_id: string; item_id: string | null; score: number; exact: boolean;
+        id: string;
+        title: string;
+        position: string | null;
+        album_title: string;
+        artist: string;
+        release_id: string;
+        item_id: string | null;
+        score: number;
+        exact: boolean;
       }>(sql`
         WITH ${scope(userId)}
         SELECT DISTINCT ON (tr.id) tr.id, tr.title, tr.position, a.title AS album_title,
@@ -141,9 +155,19 @@ export function postgresSearchProvider(deps: CoreDeps): SearchProvider {
            AND ${some((t) => textMatch(sql`tr.title_normalized`, t))}
          ORDER BY tr.id, s.item_id NULLS LAST`);
 
-      const [artists, albums, releases, trackRows] = await Promise.all([artistsQ, albumsQ, releasesQ, tracksQ]);
+      const [artists, albums, releases, trackRows] = await Promise.all([
+        artistsQ,
+        albumsQ,
+        releasesQ,
+        tracksQ,
+      ]);
       const tracks = [...trackRows]
-        .sort((x, y) => Number(y.exact) - Number(x.exact) || Number(y.score) - Number(x.score) || x.title.localeCompare(y.title))
+        .sort(
+          (x, y) =>
+            Number(y.exact) - Number(x.exact) ||
+            Number(y.score) - Number(x.score) ||
+            x.title.localeCompare(y.title),
+        )
         .slice(0, limit);
 
       return {

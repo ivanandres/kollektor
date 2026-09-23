@@ -42,7 +42,11 @@ export function createApp(deps: AppDeps) {
   const authed = new Hono<AppEnv>();
   authed.use('*', async (c, next) => {
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
-    if (!session) return c.json({ error: { code: 'UNAUTHORIZED', message: 'Iniciá sesión para continuar' } }, 401);
+    if (!session)
+      return c.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Iniciá sesión para continuar' } },
+        401,
+      );
     c.set('userId', session.user.id);
     await next();
   });

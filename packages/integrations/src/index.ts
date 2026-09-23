@@ -15,7 +15,12 @@ export { YouTubeService } from './youtube/service';
 export { GeniusLyricsService } from './lyrics/genius';
 export { ClaudeCoverRecognizer } from './vision/claude';
 export { ChainFx, CurrencyApiFx, FrankfurterFx } from './fx/providers';
-export { ConsoleEmailService, ResendEmailService, type EmailService, type EmailMessage } from './email/resend';
+export {
+  ConsoleEmailService,
+  ResendEmailService,
+  type EmailService,
+  type EmailMessage,
+} from './email/resend';
 export { scoreMatch, coreTitle } from './matching';
 export { HttpError } from './http/fetch-json';
 
@@ -33,13 +38,23 @@ export interface IntegrationEnv {
 }
 
 /** Builds adapters from env. Anything not configured is simply left out (features degrade gracefully). */
-export function integrationsFromEnv(env: IntegrationEnv): Omit<CoreDeps, 'db' | 'now' | 'config'> & { email: EmailService } {
+export function integrationsFromEnv(
+  env: IntegrationEnv,
+): Omit<CoreDeps, 'db' | 'now' | 'config'> & { email: EmailService } {
   const discogs = env.DISCOGS_USER_TOKEN
-    ? new DiscogsService({ token: env.DISCOGS_USER_TOKEN, userAgent: env.DISCOGS_USER_AGENT ?? 'Kollektor/0.1' })
+    ? new DiscogsService({
+        token: env.DISCOGS_USER_TOKEN,
+        userAgent: env.DISCOGS_USER_AGENT ?? 'Kollektor/0.1',
+      })
     : undefined;
   const musicLinks = [
     ...(env.SPOTIFY_CLIENT_ID && env.SPOTIFY_CLIENT_SECRET
-      ? [new SpotifyService({ clientId: env.SPOTIFY_CLIENT_ID, clientSecret: env.SPOTIFY_CLIENT_SECRET })]
+      ? [
+          new SpotifyService({
+            clientId: env.SPOTIFY_CLIENT_ID,
+            clientSecret: env.SPOTIFY_CLIENT_SECRET,
+          }),
+        ]
       : []),
     ...(env.YOUTUBE_API_KEY ? [new YouTubeService({ apiKey: env.YOUTUBE_API_KEY })] : []),
   ];
@@ -48,8 +63,15 @@ export function integrationsFromEnv(env: IntegrationEnv): Omit<CoreDeps, 'db' | 
     catalogProvider: discogs,
     marketValue: discogs,
     musicLinks,
-    lyrics: env.GENIUS_ACCESS_TOKEN ? new GeniusLyricsService({ accessToken: env.GENIUS_ACCESS_TOKEN }) : undefined,
-    recognizer: env.ANTHROPIC_API_KEY ? new ClaudeCoverRecognizer({ apiKey: env.ANTHROPIC_API_KEY, model: env.VISION_MODEL || undefined }) : undefined,
+    lyrics: env.GENIUS_ACCESS_TOKEN
+      ? new GeniusLyricsService({ accessToken: env.GENIUS_ACCESS_TOKEN })
+      : undefined,
+    recognizer: env.ANTHROPIC_API_KEY
+      ? new ClaudeCoverRecognizer({
+          apiKey: env.ANTHROPIC_API_KEY,
+          model: env.VISION_MODEL || undefined,
+        })
+      : undefined,
     email:
       env.RESEND_API_KEY && env.EMAIL_FROM
         ? new ResendEmailService({ apiKey: env.RESEND_API_KEY, from: env.EMAIL_FROM })

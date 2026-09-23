@@ -26,7 +26,8 @@ export function recognitionService(deps: CoreDeps) {
   const dailyLimit = deps.config?.visionDailyLimit ?? 30;
 
   function provider() {
-    if (!deps.catalogProvider) throw new DomainError('NOT_CONFIGURED', 'El catálogo externo no está configurado');
+    if (!deps.catalogProvider)
+      throw new DomainError('NOT_CONFIGURED', 'El catálogo externo no está configurado');
     return deps.catalogProvider;
   }
 
@@ -39,7 +40,10 @@ export function recognitionService(deps: CoreDeps) {
       RETURNING count`);
     const used = row?.count ?? 1;
     if (used > dailyLimit) {
-      throw new DomainError('RATE_LIMITED', `Llegaste al límite de ${dailyLimit} identificaciones por foto de hoy.`);
+      throw new DomainError(
+        'RATE_LIMITED',
+        `Llegaste al límite de ${dailyLimit} identificaciones por foto de hoy.`,
+      );
     }
     return dailyLimit - used;
   }
@@ -59,16 +63,35 @@ export function recognitionService(deps: CoreDeps) {
     const base = { type: 'release' as const, page: 1, perPage: 20 };
     if (hints.barcode) {
       strategies.push('barcode');
-      push((await p.search({ ...base, barcode: hints.barcode.replace(/\D/g, '') })).items, 'barcode');
+      push(
+        (await p.search({ ...base, barcode: hints.barcode.replace(/\D/g, '') })).items,
+        'barcode',
+      );
     }
     if (hints.catalogNumber) {
       strategies.push('catalog_number');
-      push((await p.search({ ...base, catalogNumber: hints.catalogNumber, artist: hints.artist ?? undefined })).items, 'catalog_number');
+      push(
+        (
+          await p.search({
+            ...base,
+            catalogNumber: hints.catalogNumber,
+            artist: hints.artist ?? undefined,
+          })
+        ).items,
+        'catalog_number',
+      );
     }
     if (hints.artist || hints.title) {
       strategies.push('artist_title');
       push(
-        (await p.search({ ...base, artist: hints.artist ?? undefined, title: hints.title ?? undefined, format: 'Vinyl' })).items,
+        (
+          await p.search({
+            ...base,
+            artist: hints.artist ?? undefined,
+            title: hints.title ?? undefined,
+            format: 'Vinyl',
+          })
+        ).items,
         'artist_title',
       );
     }
@@ -81,8 +104,12 @@ export function recognitionService(deps: CoreDeps) {
     return { hints: null, strategies, candidates, remainingToday: null };
   }
 
-  async function identifyByPhoto(userId: string, images: RecognitionImage[]): Promise<IdentifyResult> {
-    if (!deps.recognizer) throw new DomainError('NOT_CONFIGURED', 'El reconocimiento de imágenes no está configurado');
+  async function identifyByPhoto(
+    userId: string,
+    images: RecognitionImage[],
+  ): Promise<IdentifyResult> {
+    if (!deps.recognizer)
+      throw new DomainError('NOT_CONFIGURED', 'El reconocimiento de imágenes no está configurado');
     provider();
     const remainingToday = await consumeQuota(userId);
     const hints = await deps.recognizer.extract(images);

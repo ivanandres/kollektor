@@ -22,13 +22,20 @@ export class GeniusLyricsService implements LyricsProvider {
   async findLyricsPage(q: TrackQuery) {
     const url = new URL('https://api.genius.com/search');
     url.searchParams.set('q', `${q.title} ${q.artist}`);
-    const res = await fetchJson<{ response: { hits: GeniusHit[] } }>(this.fetchImpl, url.toString(), {
-      headers: { Authorization: `Bearer ${this.cfg.accessToken}` },
-    });
+    const res = await fetchJson<{ response: { hits: GeniusHit[] } }>(
+      this.fetchImpl,
+      url.toString(),
+      {
+        headers: { Authorization: `Bearer ${this.cfg.accessToken}` },
+      },
+    );
     let best: { url: string; confidence: number } | null = null;
     for (const hit of res.response.hits) {
       if (hit.type !== 'song') continue;
-      const confidence = scoreMatch({ title: q.title, artist: q.artist }, { title: hit.result.title, artists: [hit.result.primary_artist.name] });
+      const confidence = scoreMatch(
+        { title: q.title, artist: q.artist },
+        { title: hit.result.title, artists: [hit.result.primary_artist.name] },
+      );
       if (!best || confidence > best.confidence) best = { url: hit.result.url, confidence };
     }
     return best;

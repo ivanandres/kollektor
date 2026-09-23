@@ -41,7 +41,10 @@ export function wishlistService(
       return { albumId: input.albumId, releaseId: null };
     }
     if (input.discogsMasterId != null)
-      return { albumId: await catalog.importMasterFromProvider(String(input.discogsMasterId)), releaseId: null };
+      return {
+        albumId: await catalog.importMasterFromProvider(String(input.discogsMasterId)),
+        releaseId: null,
+      };
     let releaseId: string;
     if (input.releaseId) {
       await catalog.assertReleaseVisible(userId, input.releaseId);
@@ -132,7 +135,12 @@ export function wishlistService(
     const result = await collection.add(userId, { ...fields, releaseId });
     await db
       .update(wishlistItems)
-      .set({ status: 'purchased', collectionItemId: result.item.id, releaseId, updatedAt: nowOf(deps) })
+      .set({
+        status: 'purchased',
+        collectionItemId: result.item.id,
+        releaseId,
+        updatedAt: nowOf(deps),
+      })
       .where(eq(wishlistItems.id, id));
     await recordActivity(db, {
       userId,
@@ -167,7 +175,9 @@ export function wishlistService(
             country: releases.country,
             formatSummary: releases.formatSummary,
             editionType: releases.editionType,
-            catalogNumbers: sql<string[]>`coalesce((SELECT array_agg(${releaseLabels.catalogNumber}) FROM ${releaseLabels} WHERE ${releaseLabels.releaseId} = ${releases.id}), '{}')`,
+            catalogNumbers: sql<
+              string[]
+            >`coalesce((SELECT array_agg(${releaseLabels.catalogNumber}) FROM ${releaseLabels} WHERE ${releaseLabels.releaseId} = ${releases.id}), '{}')`,
           })
           .from(releases)
           .where(inArray(releases.id, releaseIds))

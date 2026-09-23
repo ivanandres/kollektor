@@ -45,7 +45,12 @@ export class CurrencyApiFx implements FxRateProvider {
     ];
     for (const url of urls) {
       try {
-        const res = await fetchJson<Record<string, Record<string, number> | string>>(this.fetchImpl, url, {}, { retries: 0 });
+        const res = await fetchJson<Record<string, Record<string, number> | string>>(
+          this.fetchImpl,
+          url,
+          {},
+          { retries: 0 },
+        );
         const table = res[b];
         const rate = typeof table === 'object' ? table[quote.toLowerCase()] : undefined;
         if (rate != null) return rate;

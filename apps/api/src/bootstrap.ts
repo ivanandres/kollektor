@@ -9,7 +9,11 @@ import type { Env } from './env';
 export function bootstrap(env: Env) {
   const { db, close } = createDb(env.DATABASE_URL);
   const { email, ...adapters } = integrationsFromEnv(env);
-  const core = createCore({ db, ...adapters, config: { visionDailyLimit: env.VISION_DAILY_LIMIT } });
+  const core = createCore({
+    db,
+    ...adapters,
+    config: { visionDailyLimit: env.VISION_DAILY_LIMIT },
+  });
   const auth = createAuth({ db, core, email, env });
   const app = createApp({ core, auth, env });
   return { app, core, auth, close };

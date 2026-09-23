@@ -54,7 +54,8 @@ export function inferEditionType(
   if (d.has('remastered')) return 'remaster';
   if (d.has('reissue') || d.has('repress')) return 'reissue';
   if (d.has('compilation')) return 'compilation';
-  if (releaseYear != null && originalYear != null && releaseYear === originalYear) return 'original';
+  if (releaseYear != null && originalYear != null && releaseYear === originalYear)
+    return 'original';
   return null;
 }
 
@@ -68,7 +69,11 @@ function discNumberOf(position: string | null): number {
 export function catalogService(deps: CoreDeps) {
   const { db } = deps;
 
-  async function resolveExternalArtists(tx: Db, ext: ExternalRelease | ExternalMaster, source: string) {
+  async function resolveExternalArtists(
+    tx: Db,
+    ext: ExternalRelease | ExternalMaster,
+    source: string,
+  ) {
     const links: { artistId: string; joinPhrase: string | null }[] = [];
     for (const a of ext.artists) {
       const name = stripDisambiguation(a.name);
@@ -92,22 +97,37 @@ export function catalogService(deps: CoreDeps) {
       const name = stripDisambiguation(l.name);
       let labelId: string | null = null;
       if (l.externalId)
-        labelId = (await repo.findExternal(tx, 'label', ext.source, l.externalId))?.entityId ?? null;
+        labelId =
+          (await repo.findExternal(tx, 'label', ext.source, l.externalId))?.entityId ?? null;
       if (!labelId) {
         labelId = await repo.insertLabel(tx, name, null);
         if (l.externalId)
-          await repo.linkExternal(tx, 'label', labelId, ext.source, l.externalId, null, nowOf(deps));
+          await repo.linkExternal(
+            tx,
+            'label',
+            labelId,
+            ext.source,
+            l.externalId,
+            null,
+            nowOf(deps),
+          );
       }
-      const catalogNumber = l.catalogNumber && l.catalogNumber.toLowerCase() !== 'none' ? l.catalogNumber : null;
+      const catalogNumber =
+        l.catalogNumber && l.catalogNumber.toLowerCase() !== 'none' ? l.catalogNumber : null;
       out.push({ labelId, catalogNumber });
     }
     return out;
   }
 
   /** Album key: the master when present, otherwise the release itself. */
-  const albumKey = (ext: ExternalRelease) => (ext.masterId ? `master:${ext.masterId}` : `release:${ext.externalId}`);
+  const albumKey = (ext: ExternalRelease) =>
+    ext.masterId ? `master:${ext.masterId}` : `release:${ext.externalId}`;
 
-  async function ensureAlbum(tx: Db, ext: ExternalRelease, master: ExternalMaster | null): Promise<string> {
+  async function ensureAlbum(
+    tx: Db,
+    ext: ExternalRelease,
+    master: ExternalMaster | null,
+  ): Promise<string> {
     const key = albumKey(ext);
     const existing = await repo.findExternal(tx, 'album', ext.source, key);
     if (existing) return existing.entityId;
@@ -125,7 +145,15 @@ export function catalogService(deps: CoreDeps) {
       artistLinks,
     );
     await repo.setAlbumGenresAndStyles(tx, albumId, base.genres, base.styles);
-    await repo.linkExternal(tx, 'album', albumId, ext.source, key, master?.url ?? null, nowOf(deps));
+    await repo.linkExternal(
+      tx,
+      'album',
+      albumId,
+      ext.source,
+      key,
+      master?.url ?? null,
+      nowOf(deps),
+    );
     return albumId;
   }
 
@@ -148,7 +176,15 @@ export function catalogService(deps: CoreDeps) {
             updatedAt: nowOf(deps),
           })
           .where(eq(releases.id, existing.entityId));
-        await repo.linkExternal(tx, 'release', existing.entityId, ext.source, ext.externalId, ext.url, nowOf(deps));
+        await repo.linkExternal(
+          tx,
+          'release',
+          existing.entityId,
+          ext.source,
+          ext.externalId,
+          ext.url,
+          nowOf(deps),
+        );
         return existing.entityId;
       }
       const albumId = await ensureAlbum(tx, ext, master);
@@ -176,7 +212,12 @@ export function catalogService(deps: CoreDeps) {
         {
           labels: await resolveExternalLabels(tx, ext),
           formats: ext.formats.map(splitFormat),
-          images: ext.images.map((i) => ({ kind: i.kind, url: i.url, width: i.width, height: i.height })),
+          images: ext.images.map((i) => ({
+            kind: i.kind,
+            url: i.url,
+            width: i.width,
+            height: i.height,
+          })),
           tracks: ext.tracklist.map((t) => ({
             position: t.position,
             side: sideFromPosition(t.position),
@@ -187,7 +228,15 @@ export function catalogService(deps: CoreDeps) {
           })),
         },
       );
-      await repo.linkExternal(tx, 'release', releaseId, ext.source, ext.externalId, ext.url, nowOf(deps));
+      await repo.linkExternal(
+        tx,
+        'release',
+        releaseId,
+        ext.source,
+        ext.externalId,
+        ext.url,
+        nowOf(deps),
+      );
       const isMain = master?.mainReleaseId === ext.externalId;
       if (isMain || album?.mainReleaseId == null) {
         await tx.update(albums).set({ mainReleaseId: releaseId }).where(eq(albums.id, albumId));
@@ -220,7 +269,12 @@ export function catalogService(deps: CoreDeps) {
     const ext = await provider.getRelease(externalReleaseId);
     let master: ExternalMaster | null = null;
     if (ext.masterId) {
-      const knownAlbum = await repo.findExternal(db, 'album', provider.source, `master:${ext.masterId}`);
+      const knownAlbum = await repo.findExternal(
+        db,
+        'album',
+        provider.source,
+        `master:${ext.masterId}`,
+      );
       if (!knownAlbum) master = await provider.getMaster(ext.masterId);
     }
     return importExternalRelease(ext, master);
@@ -229,13 +283,21 @@ export function catalogService(deps: CoreDeps) {
   /** Imports the main release of an external master; returns the album id. */
   async function importMasterFromProvider(externalMasterId: string): Promise<string> {
     const provider = requireProvider();
-    const known = await repo.findExternal(db, 'album', provider.source, `master:${externalMasterId}`);
+    const known = await repo.findExternal(
+      db,
+      'album',
+      provider.source,
+      `master:${externalMasterId}`,
+    );
     if (known) return known.entityId;
     const master = await provider.getMaster(externalMasterId);
     if (!master.mainReleaseId) throw notFound('Edición principal del álbum');
     const ext = await provider.getRelease(master.mainReleaseId);
     const releaseId = await importExternalRelease(ext, master);
-    const [row] = await db.select({ albumId: releases.albumId }).from(releases).where(eq(releases.id, releaseId));
+    const [row] = await db
+      .select({ albumId: releases.albumId })
+      .from(releases)
+      .where(eq(releases.id, releaseId));
     return row!.albumId;
   }
 
@@ -272,7 +334,9 @@ export function catalogService(deps: CoreDeps) {
         ? input.release.formats
         : [{ name: 'Vinyl', qty: 1, descriptions: ['LP'] }];
       const formatSummary = formats
-        .map((f) => [f.qty > 1 ? `${f.qty}×` : '', f.name, ...f.descriptions].filter(Boolean).join(' '))
+        .map((f) =>
+          [f.qty > 1 ? `${f.qty}×` : '', f.name, ...f.descriptions].filter(Boolean).join(' '),
+        )
         .join(' + ');
       const releaseYear = input.release.year ?? null;
       const originalYear = input.album.originalReleaseYear ?? null;
@@ -284,7 +348,11 @@ export function catalogService(deps: CoreDeps) {
           country: input.release.country ?? null,
           editionType:
             input.release.editionType ??
-            inferEditionType(formats.flatMap((f) => f.descriptions), releaseYear, originalYear),
+            inferEditionType(
+              formats.flatMap((f) => f.descriptions),
+              releaseYear,
+              originalYear,
+            ),
           formatSummary,
           barcode: input.release.barcode ?? null,
           notes: input.release.notes ?? null,
@@ -333,7 +401,10 @@ export function catalogService(deps: CoreDeps) {
   }
 
   async function albumIdOfRelease(releaseId: string): Promise<string> {
-    const [row] = await db.select({ albumId: releases.albumId }).from(releases).where(eq(releases.id, releaseId));
+    const [row] = await db
+      .select({ albumId: releases.albumId })
+      .from(releases)
+      .where(eq(releases.id, releaseId));
     if (!row) throw notFound('Edición');
     return row.albumId;
   }
@@ -377,8 +448,14 @@ export function catalogService(deps: CoreDeps) {
         isVerified: a.isVerified,
         artists: albumArtistsList.map(({ id, name, joinPhrase }) => ({ id, name, joinPhrase })),
         artistDisplay: formatArtistCredit(albumArtistsList),
-        genres: genreRows.filter((g) => g.albumId === a.id).map((g) => g.name).sort(),
-        styles: styleRows.filter((s) => s.albumId === a.id).map((s) => s.name).sort(),
+        genres: genreRows
+          .filter((g) => g.albumId === a.id)
+          .map((g) => g.name)
+          .sort(),
+        styles: styleRows
+          .filter((s) => s.albumId === a.id)
+          .map((s) => s.name)
+          .sort(),
       });
     }
     return map;
@@ -398,11 +475,24 @@ export function catalogService(deps: CoreDeps) {
         .innerJoin(labels, eq(labels.id, releaseLabels.labelId))
         .where(eq(releaseLabels.releaseId, releaseId))
         .orderBy(asc(releaseLabels.position)),
-      db.select().from(releaseFormats).where(eq(releaseFormats.releaseId, releaseId)).orderBy(asc(releaseFormats.position)),
-      db.select().from(releaseImages).where(eq(releaseImages.releaseId, releaseId)).orderBy(asc(releaseImages.position)),
+      db
+        .select()
+        .from(releaseFormats)
+        .where(eq(releaseFormats.releaseId, releaseId))
+        .orderBy(asc(releaseFormats.position)),
+      db
+        .select()
+        .from(releaseImages)
+        .where(eq(releaseImages.releaseId, releaseId))
+        .orderBy(asc(releaseImages.position)),
       db.select().from(tracks).where(eq(tracks.releaseId, releaseId)).orderBy(asc(tracks.sequence)),
       db
-        .select({ source: externalIds.source, externalId: externalIds.externalId, url: externalIds.url, lastSyncedAt: externalIds.lastSyncedAt })
+        .select({
+          source: externalIds.source,
+          externalId: externalIds.externalId,
+          url: externalIds.url,
+          lastSyncedAt: externalIds.lastSyncedAt,
+        })
         .from(externalIds)
         .where(and(eq(externalIds.entityType, 'release'), eq(externalIds.entityId, releaseId))),
     ]);
@@ -421,18 +511,30 @@ export function catalogService(deps: CoreDeps) {
       isVerified: release.isVerified,
       community: { have: release.communityHave, want: release.communityWant },
       labels: labelRows,
-      formats: formatRows.map(({ name, qty, size, speed, color, descriptions }) => ({ name, qty, size, speed, color, descriptions })),
-      images: imageRows.map(({ kind, url, width, height }) => ({ kind, url, width, height })),
-      coverImageUrl: imageRows.find((i) => i.kind === 'primary')?.url ?? imageRows[0]?.url ?? album.coverImageUrl,
-      tracks: trackRows.map(({ id, position, side, discNumber, title, durationSeconds, artistCredit }) => ({
-        id,
-        position,
-        side,
-        discNumber,
-        title,
-        durationSeconds,
-        artistCredit,
+      formats: formatRows.map(({ name, qty, size, speed, color, descriptions }) => ({
+        name,
+        qty,
+        size,
+        speed,
+        color,
+        descriptions,
       })),
+      images: imageRows.map(({ kind, url, width, height }) => ({ kind, url, width, height })),
+      coverImageUrl:
+        imageRows.find((i) => i.kind === 'primary')?.url ??
+        imageRows[0]?.url ??
+        album.coverImageUrl,
+      tracks: trackRows.map(
+        ({ id, position, side, discNumber, title, durationSeconds, artistCredit }) => ({
+          id,
+          position,
+          side,
+          discNumber,
+          title,
+          durationSeconds,
+          artistCredit,
+        }),
+      ),
       external: extRows,
     };
   }
@@ -447,7 +549,9 @@ export function catalogService(deps: CoreDeps) {
         country: releases.country,
         formatSummary: releases.formatSummary,
         editionType: releases.editionType,
-        catalogNumbers: sql<string[]>`coalesce((SELECT array_agg(${releaseLabels.catalogNumber}) FROM ${releaseLabels} WHERE ${releaseLabels.releaseId} = ${releases.id}), '{}')`,
+        catalogNumbers: sql<
+          string[]
+        >`coalesce((SELECT array_agg(${releaseLabels.catalogNumber}) FROM ${releaseLabels} WHERE ${releaseLabels.releaseId} = ${releases.id}), '{}')`,
       })
       .from(releases)
       .where(and(eq(releases.albumId, albumId), repo.visibleTo(releases.createdByUserId, userId)))
@@ -507,8 +611,20 @@ export interface ReleaseDetail {
   isVerified: boolean;
   community: { have: number | null; want: number | null };
   labels: { id: string; name: string; catalogNumber: string | null }[];
-  formats: { name: string; qty: number; size: string | null; speed: string | null; color: string | null; descriptions: string[] }[];
-  images: { kind: 'primary' | 'secondary' | 'user'; url: string; width: number | null; height: number | null }[];
+  formats: {
+    name: string;
+    qty: number;
+    size: string | null;
+    speed: string | null;
+    color: string | null;
+    descriptions: string[];
+  }[];
+  images: {
+    kind: 'primary' | 'secondary' | 'user';
+    url: string;
+    width: number | null;
+    height: number | null;
+  }[];
   coverImageUrl: string | null;
   tracks: {
     id: string;

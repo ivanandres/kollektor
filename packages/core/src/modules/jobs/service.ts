@@ -14,16 +14,30 @@ export type JobHandler = (payload: Record<string, unknown>) => Promise<void>;
 export function jobService(deps: CoreDeps) {
   const { db } = deps;
 
-  async function enqueue(type: string, payload: Record<string, unknown>, opts: { dedupeKey?: string; runAfter?: Date } = {}) {
+  async function enqueue(
+    type: string,
+    payload: Record<string, unknown>,
+    opts: { dedupeKey?: string; runAfter?: Date } = {},
+  ) {
     await db
       .insert(syncJobs)
-      .values({ type, payload, dedupeKey: opts.dedupeKey ?? null, runAfter: opts.runAfter ?? nowOf(deps) })
+      .values({
+        type,
+        payload,
+        dedupeKey: opts.dedupeKey ?? null,
+        runAfter: opts.runAfter ?? nowOf(deps),
+      })
       .onConflictDoNothing();
   }
 
   /** Runs up to `limit` due jobs. Safe to call concurrently (SKIP LOCKED). */
   async function runDue(handlers: Record<string, JobHandler>, limit = 20) {
-    const picked = await db.execute<{ id: string; type: string; payload: Record<string, unknown>; attempts: number }>(sql`
+    const picked = await db.execute<{
+      id: string;
+      type: string;
+      payload: Record<string, unknown>;
+      attempts: number;
+    }>(sql`
       UPDATE ${syncJobs} SET status = 'running', attempts = attempts + 1, updated_at = now()
        WHERE id IN (
          SELECT id FROM ${syncJobs}
@@ -36,7 +50,10 @@ export function jobService(deps: CoreDeps) {
       try {
         if (!handler) throw new Error(`No handler for job type ${job.type}`);
         await handler(job.payload);
-        await db.update(syncJobs).set({ status: 'done', updatedAt: nowOf(deps) }).where(eq(syncJobs.id, job.id));
+        await db
+          .update(syncJobs)
+          .set({ status: 'done', updatedAt: nowOf(deps) })
+          .where(eq(syncJobs.id, job.id));
         result.done++;
       } catch (e) {
         const final = job.attempts >= MAX_ATTEMPTS;

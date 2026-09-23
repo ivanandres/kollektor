@@ -34,11 +34,16 @@ export async function fetchJson<T>(
     opts.onResponse?.(res);
     if (res.ok) return (await res.json()) as T;
     const retryAfter = Number(res.headers.get('retry-after'));
-    const retryAfterMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : undefined;
+    const retryAfterMs =
+      Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : undefined;
     const retryable = res.status === 429 || res.status >= 500;
     if (!retryable || attempt >= retries) {
       const body = await res.text().catch(() => '');
-      throw new HttpError(res.status, `HTTP ${res.status} for ${url.split('?')[0]}: ${body.slice(0, 200)}`, retryAfterMs);
+      throw new HttpError(
+        res.status,
+        `HTTP ${res.status} for ${url.split('?')[0]}: ${body.slice(0, 200)}`,
+        retryAfterMs,
+      );
     }
     await sleep(retryAfterMs ?? base * 2 ** attempt);
   }

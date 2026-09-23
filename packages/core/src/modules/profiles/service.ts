@@ -10,11 +10,17 @@ const { profiles, user } = schema;
 
 export type Profile = typeof profiles.$inferSelect;
 
-export function profileService(deps: CoreDeps, hooks: { onBaseCurrencyChanged?: (userId: string) => Promise<void> } = {}) {
+export function profileService(
+  deps: CoreDeps,
+  hooks: { onBaseCurrencyChanged?: (userId: string) => Promise<void> } = {},
+) {
   const { db } = deps;
 
   async function isUsernameAvailable(username: string, exceptUserId?: string): Promise<boolean> {
-    const [row] = await db.select({ userId: profiles.userId }).from(profiles).where(eq(profiles.username, username));
+    const [row] = await db
+      .select({ userId: profiles.userId })
+      .from(profiles)
+      .where(eq(profiles.username, username));
     return !row || row.userId === exceptUserId;
   }
 
@@ -37,7 +43,10 @@ export function profileService(deps: CoreDeps, hooks: { onBaseCurrencyChanged?: 
   async function ensureProfile(userId: string): Promise<Profile> {
     const [existing] = await db.select().from(profiles).where(eq(profiles.userId, userId));
     if (existing) return existing;
-    const [u] = await db.select({ name: user.name, email: user.email }).from(user).where(eq(user.id, userId));
+    const [u] = await db
+      .select({ name: user.name, email: user.email })
+      .from(user)
+      .where(eq(user.id, userId));
     if (!u) throw notFound('Usuario');
     const username = await suggestUsername(u.name || u.email);
     const [created] = await db
@@ -83,7 +92,14 @@ export function profileService(deps: CoreDeps, hooks: { onBaseCurrencyChanged?: 
     };
   }
 
-  return { isUsernameAvailable, suggestUsername, ensureProfile, getProfile, updateProfile, getPublicProfile };
+  return {
+    isUsernameAvailable,
+    suggestUsername,
+    ensureProfile,
+    getProfile,
+    updateProfile,
+    getPublicProfile,
+  };
 }
 
 export type ProfileService = ReturnType<typeof profileService>;

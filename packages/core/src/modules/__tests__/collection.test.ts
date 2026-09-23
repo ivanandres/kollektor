@@ -6,10 +6,9 @@ import { useCore } from '../../testing/setup';
 
 const h = useCore();
 const { ctx } = h;
-let lib: ReturnType<typeof seedLibrary>;
 beforeEach(async () => {
   await h.setup();
-  lib = seedLibrary(ctx.catalog);
+  seedLibrary(ctx.catalog);
 });
 afterAll(() => h.close());
 
@@ -28,7 +27,12 @@ describe('catalog import', () => {
     expect(detail.album.originalReleaseYear).toBe(1973);
     expect(detail.labels.map((l) => l.catalogNumber)).toEqual(['SHVL 804', 'SHVL 804']);
     expect(detail.tracks).toHaveLength(10);
-    expect(detail.tracks[5]).toMatchObject({ position: 'B1', side: 'B', title: 'Money', durationSeconds: 382 });
+    expect(detail.tracks[5]).toMatchObject({
+      position: 'B1',
+      side: 'B',
+      title: 'Money',
+      durationSeconds: 382,
+    });
     expect(detail.editionType).toBe('original');
     expect(detail.external[0]).toMatchObject({ source: 'discogs', externalId: '1873013' });
   });
@@ -52,15 +56,26 @@ describe('catalog import', () => {
   it('keeps manual entries private to their creator', async () => {
     const { item } = await add({
       manual: {
-        album: { artists: ['Spinetta Jade'], title: 'Bajo Belgrano', originalReleaseYear: 1983, genres: ['Rock'] },
-        release: { year: 1983, country: 'Argentina', labels: [{ name: 'EMI', catalogNumber: '6444' }] },
+        album: {
+          artists: ['Spinetta Jade'],
+          title: 'Bajo Belgrano',
+          originalReleaseYear: 1983,
+          genres: ['Rock'],
+        },
+        release: {
+          year: 1983,
+          country: 'Argentina',
+          labels: [{ name: 'EMI', catalogNumber: '6444' }],
+        },
         tracks: [{ position: 'A1', title: 'Resumen Porteño', duration: '4:10' }],
       },
     });
     expect(item.release.isVerified).toBe(false);
     expect(item.release.tracks[0]).toMatchObject({ side: 'A', durationSeconds: 250 });
     const other = await createUser(h.db, 'Other');
-    await expect(ctx.core.catalog.getReleaseDetail(other, item.release.id)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(ctx.core.catalog.getReleaseDetail(other, item.release.id)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    });
   });
 });
 
@@ -76,7 +91,12 @@ describe('collection', () => {
       storageLocation: 'Estante 2',
       tags: ['favoritos', 'prog'],
     });
-    expect(item.value).toMatchObject({ baseCurrency: 'USD', paid: 35, estimated: 300, difference: 265 });
+    expect(item.value).toMatchObject({
+      baseCurrency: 'USD',
+      paid: 35,
+      estimated: 300,
+      difference: 265,
+    });
     expect(item.value.estimate?.kind).toBe('lowest');
     expect(item.value.disclaimer).toMatch(/estimado/i);
     expect(item.tags).toEqual(['favoritos', 'prog']);
@@ -93,7 +113,11 @@ describe('collection', () => {
   });
 
   it('manual value override wins over market data', async () => {
-    const { item } = await add({ discogsReleaseId: 1873013, valueOverride: 80, valueOverrideCurrency: 'EUR' });
+    const { item } = await add({
+      discogsReleaseId: 1873013,
+      valueOverride: 80,
+      valueOverrideCurrency: 'EUR',
+    });
     expect(item.value.estimated).toBe(88);
     expect(item.value.estimate?.source).toBe('manual');
   });
@@ -105,7 +129,9 @@ describe('collection', () => {
   it('isolates collections between users', async () => {
     const { item } = await add({ discogsReleaseId: 1873013 });
     const other = await createUser(h.db, 'Other');
-    await expect(ctx.core.collection.get(other, item.id)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(ctx.core.collection.get(other, item.id)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    });
     expect((await ctx.core.collection.list(other, q())).total).toBe(0);
   });
 
@@ -124,18 +150,28 @@ describe('collection', () => {
   });
 
   it('filters combine: genre + decade + artist + country + format', async () => {
-    for (const id of [1873013, 2000001, 2000002, 2000003, 2000006, 2000007]) await add({ discogsReleaseId: id });
+    for (const id of [1873013, 2000001, 2000002, 2000003, 2000006, 2000007])
+      await add({ discogsReleaseId: id });
     const titles = async (f: Record<string, unknown>) =>
-      (await ctx.core.collection.list(ctx.userId, q(f))).items.map((i) => `${i.title}|${i.country}`).sort();
+      (await ctx.core.collection.list(ctx.userId, q(f))).items
+        .map((i) => `${i.title}|${i.country}`)
+        .sort();
 
     expect(await titles({ genre: 'Rock', decade: '1970' })).toEqual([
-      'Animals|UK', 'The Dark Side Of The Moon|Japan', 'The Dark Side Of The Moon|UK',
+      'Animals|UK',
+      'The Dark Side Of The Moon|Japan',
+      'The Dark Side Of The Moon|UK',
     ]);
-    expect(await titles({ genre: 'Jazz', country: 'Japan', decade: 1950 })).toEqual(['Kind Of Blue|Japan']);
+    expect(await titles({ genre: 'Jazz', country: 'Japan', decade: 1950 })).toEqual([
+      'Kind Of Blue|Japan',
+    ]);
     expect(await titles({ format: 'Limited Edition' })).toEqual(['Kind Of Blue|Japan']);
     expect(await titles({ country: 'UK', style: 'Hard Rock' })).toEqual(['Led Zeppelin II|UK']);
     expect(await titles({ label: 'Harvest', yearFrom: 1975 })).toEqual(['Animals|UK']);
-    expect(await titles({ q: 'money' })).toEqual(['The Dark Side Of The Moon|Japan', 'The Dark Side Of The Moon|UK']);
+    expect(await titles({ q: 'money' })).toEqual([
+      'The Dark Side Of The Moon|Japan',
+      'The Dark Side Of The Moon|UK',
+    ]);
     expect(await titles({ q: 'shvl 804' })).toEqual(['The Dark Side Of The Moon|UK']);
     const facets = await ctx.core.collection.facets(ctx.userId);
     expect(facets.countries[0]).toMatchObject({ value: 'UK', count: 3 });

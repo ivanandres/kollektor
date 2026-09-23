@@ -156,10 +156,9 @@ export const addToCollectionInput = withPriceCurrency(
     discogsReleaseId: z.coerce.number().int().positive().optional(),
     manual: manualReleaseInput.optional(),
   }),
-).refine(
-  (v) => [v.releaseId, v.discogsReleaseId, v.manual].filter((x) => x != null).length === 1,
-  { message: 'Indicá exactamente una fuente: releaseId, discogsReleaseId o manual' },
-);
+).refine((v) => [v.releaseId, v.discogsReleaseId, v.manual].filter((x) => x != null).length === 1, {
+  message: 'Indicá exactamente una fuente: releaseId, discogsReleaseId o manual',
+});
 export type AddToCollectionInput = z.infer<typeof addToCollectionInput>;
 
 export const updateCollectionItemInput = withPriceCurrency(collectionItemFields);

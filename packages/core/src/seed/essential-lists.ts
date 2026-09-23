@@ -81,7 +81,11 @@ export const ESSENTIAL_LISTS: EssentialListDef[] = [
     name: 'Miles Davis — esenciales',
     albums: [
       { title: 'Birth of the Cool', year: 1957 },
-      { title: "'Round About Midnight", year: 1957, aliases: ['Round About Midnight', 'Round Midnight'] },
+      {
+        title: "'Round About Midnight",
+        year: 1957,
+        aliases: ['Round About Midnight', 'Round Midnight'],
+      },
       { title: 'Milestones', year: 1958 },
       { title: 'Kind of Blue', year: 1959 },
       { title: 'Sketches of Spain', year: 1960 },

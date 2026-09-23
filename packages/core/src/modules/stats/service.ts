@@ -30,9 +30,16 @@ export function statsService(deps: CoreDeps) {
 
   async function summary(userId: string) {
     const [t] = await db.execute<{
-      items: number; albums: number; releases: number; artists: number;
-      invested: string | null; estimated: string | null; priced: number; valued: number;
-      avg_paid: string | null; avg_estimated: string | null;
+      items: number;
+      albums: number;
+      releases: number;
+      artists: number;
+      invested: string | null;
+      estimated: string | null;
+      priced: number;
+      valued: number;
+      avg_paid: string | null;
+      avg_estimated: string | null;
     }>(sql`
       SELECT count(*)::int AS items,
              count(DISTINCT a.id)::int AS albums,
@@ -66,7 +73,12 @@ export function statsService(deps: CoreDeps) {
     };
   }
 
-  async function bucket(userId: string, key: SQL, join: SQL = sql``, limit = 50): Promise<Bucket[]> {
+  async function bucket(
+    userId: string,
+    key: SQL,
+    join: SQL = sql``,
+    limit = 50,
+  ): Promise<Bucket[]> {
     const rows = await db.execute<{ key: string; count: number }>(sql`
       SELECT ${key} AS key, count(DISTINCT ci.id)::int AS count ${FROM} ${join}
        WHERE ${mine(userId)} AND ${key} IS NOT NULL
@@ -75,43 +87,104 @@ export function statsService(deps: CoreDeps) {
   }
 
   async function breakdowns(userId: string, limit = 20) {
-    const [byArtist, byGenre, byStyle, byDecade, byYear, byCountry, byLabel, byFormat, byCondition, byEditionType] =
-      await Promise.all([
-        db
-          .execute<{ key: string; label: string; count: number }>(sql`
+    const [
+      byArtist,
+      byGenre,
+      byStyle,
+      byDecade,
+      byYear,
+      byCountry,
+      byLabel,
+      byFormat,
+      byCondition,
+      byEditionType,
+    ] = await Promise.all([
+      db
+        .execute<{ key: string; label: string; count: number }>(
+          sql`
             SELECT ar.id AS key, ar.name AS label, count(DISTINCT ci.id)::int AS count ${FROM}
               JOIN album_artists aa ON aa.album_id = a.id JOIN artists ar ON ar.id = aa.artist_id
-             WHERE ${mine(userId)} GROUP BY ar.id ORDER BY count DESC, ar.sort_name LIMIT ${limit}`)
-          .then((rows) => rows.map((r) => ({ ...r }))),
-        bucket(userId, sql`g.name`, sql`JOIN album_genres ag ON ag.album_id = a.id JOIN genres g ON g.id = ag.genre_id`, limit),
-        bucket(userId, sql`s.name`, sql`JOIN album_styles ast ON ast.album_id = a.id JOIN styles s ON s.id = ast.style_id`, limit),
-        db
-          .execute<{ key: number; count: number }>(sql`
+             WHERE ${mine(userId)} GROUP BY ar.id ORDER BY count DESC, ar.sort_name LIMIT ${limit}`,
+        )
+        .then((rows) => rows.map((r) => ({ ...r }))),
+      bucket(
+        userId,
+        sql`g.name`,
+        sql`JOIN album_genres ag ON ag.album_id = a.id JOIN genres g ON g.id = ag.genre_id`,
+        limit,
+      ),
+      bucket(
+        userId,
+        sql`s.name`,
+        sql`JOIN album_styles ast ON ast.album_id = a.id JOIN styles s ON s.id = ast.style_id`,
+        limit,
+      ),
+      db
+        .execute<{ key: number; count: number }>(
+          sql`
             SELECT ((${ALBUM_YEAR} / 10) * 10)::int AS key, count(*)::int AS count ${FROM}
-             WHERE ${mine(userId)} AND ${ALBUM_YEAR} IS NOT NULL GROUP BY 1 ORDER BY 1`)
-          .then((rows) => rows.map((r) => ({ key: String(r.key), label: `${r.key}s`, count: r.count }))),
-        db
-          .execute<{ key: number; count: number }>(sql`
+             WHERE ${mine(userId)} AND ${ALBUM_YEAR} IS NOT NULL GROUP BY 1 ORDER BY 1`,
+        )
+        .then((rows) =>
+          rows.map((r) => ({ key: String(r.key), label: `${r.key}s`, count: r.count })),
+        ),
+      db
+        .execute<{ key: number; count: number }>(
+          sql`
             SELECT ${ALBUM_YEAR}::int AS key, count(*)::int AS count ${FROM}
-             WHERE ${mine(userId)} AND ${ALBUM_YEAR} IS NOT NULL GROUP BY 1 ORDER BY 1`)
-          .then((rows) => rows.map((r) => ({ key: String(r.key), label: String(r.key), count: r.count }))),
-        bucket(userId, sql`r.country`, sql``, limit),
-        bucket(userId, sql`lb.name`, sql`JOIN release_labels rl ON rl.release_id = r.id JOIN labels lb ON lb.id = rl.label_id`, limit),
-        bucket(userId, sql`coalesce(rf.size, rf.name)`, sql`JOIN release_formats rf ON rf.release_id = r.id`, limit),
-        bucket(userId, sql`ci.condition_media::text`),
-        bucket(userId, sql`r.edition_type::text`),
-      ]);
-    return { byArtist, byGenre, byStyle, byDecade, byYear, byCountry, byLabel, byFormat, byCondition, byEditionType };
+             WHERE ${mine(userId)} AND ${ALBUM_YEAR} IS NOT NULL GROUP BY 1 ORDER BY 1`,
+        )
+        .then((rows) =>
+          rows.map((r) => ({ key: String(r.key), label: String(r.key), count: r.count })),
+        ),
+      bucket(userId, sql`r.country`, sql``, limit),
+      bucket(
+        userId,
+        sql`lb.name`,
+        sql`JOIN release_labels rl ON rl.release_id = r.id JOIN labels lb ON lb.id = rl.label_id`,
+        limit,
+      ),
+      bucket(
+        userId,
+        sql`coalesce(rf.size, rf.name)`,
+        sql`JOIN release_formats rf ON rf.release_id = r.id`,
+        limit,
+      ),
+      bucket(userId, sql`ci.condition_media::text`),
+      bucket(userId, sql`r.edition_type::text`),
+    ]);
+    return {
+      byArtist,
+      byGenre,
+      byStyle,
+      byDecade,
+      byYear,
+      byCountry,
+      byLabel,
+      byFormat,
+      byCondition,
+      byEditionType,
+    };
   }
 
   /** "Tu colección en números". */
   async function highlights(userId: string) {
     const item = (order: SQL, where: SQL = sql`true`) =>
       db
-        .execute<{ id: string; title: string; artist: string; release_year: number | null; paid: string | null; value: string | null; created_at: Date }>(sql`
+        .execute<{
+          id: string;
+          title: string;
+          artist: string;
+          release_year: number | null;
+          paid: string | null;
+          value: string | null;
+          created_at: Date;
+        }>(
+          sql`
           SELECT ci.id, a.title, ${ARTIST_DISPLAY} AS artist, r.release_year,
                  ci.purchase_price_base AS paid, ci.estimated_value_base AS value, ci.created_at
-            ${FROM} WHERE ${mine(userId)} AND ${where} ORDER BY ${order} LIMIT 1`)
+            ${FROM} WHERE ${mine(userId)} AND ${where} ORDER BY ${order} LIMIT 1`,
+        )
         .then((rows) => {
           const r = rows[0];
           return r
@@ -160,7 +233,11 @@ export function statsService(deps: CoreDeps) {
         SELECT to_char(${when}, 'YYYY-MM') AS month, sum(ci.purchase_price_base) AS total, count(*)::int AS purchases
           FROM collection_items ci WHERE ${mine(userId)} AND ci.purchase_price_base IS NOT NULL GROUP BY 1 ORDER BY 1`),
     ]);
-    const months = spendPerMonth.map((m) => ({ month: m.month, total: Number(m.total), purchases: m.purchases }));
+    const months = spendPerMonth.map((m) => ({
+      month: m.month,
+      total: Number(m.total),
+      purchases: m.purchases,
+    }));
     const valueHistory = await db
       .select()
       .from(schema.collectionValueSnapshots)
@@ -169,7 +246,12 @@ export function statsService(deps: CoreDeps) {
     return {
       currency: await currencyOf(userId),
       addedPerMonth: [...addedPerMonth],
-      spendPerYear: spendPerYear.map((y) => ({ year: y.year, total: Number(y.total), purchases: y.purchases, average: Number(y.average) })),
+      spendPerYear: spendPerYear.map((y) => ({
+        year: y.year,
+        total: Number(y.total),
+        purchases: y.purchases,
+        average: Number(y.average),
+      })),
       spendPerMonth: months,
       topSpendingMonth: [...months].sort((x, y) => y.total - x.total)[0] ?? null,
       valueHistory: valueHistory.map((v) => ({
@@ -183,7 +265,11 @@ export function statsService(deps: CoreDeps) {
   }
 
   async function dashboard(userId: string) {
-    const [s, h, b] = await Promise.all([summary(userId), highlights(userId), breakdowns(userId, 8)]);
+    const [s, h, b] = await Promise.all([
+      summary(userId),
+      highlights(userId),
+      breakdowns(userId, 8),
+    ]);
     return { summary: s, highlights: h, charts: b };
   }
 

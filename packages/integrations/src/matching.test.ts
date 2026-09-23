@@ -9,9 +9,19 @@ describe('track matching', () => {
   });
   it('scores exact title + artist + duration high, live versions and wrong songs low', () => {
     const want = { title: 'Money', artist: 'Pink Floyd', durationSeconds: 382 };
-    expect(scoreMatch(want, { title: 'Money - 2011 Remastered Version', artists: ['Pink Floyd'], durationSeconds: 383 })).toBe(1);
-    expect(scoreMatch(want, { title: 'Money (Live)', artists: ['Pink Floyd'], durationSeconds: 500 })).toBeLessThan(0.6);
-    expect(scoreMatch(want, { title: 'Money', artists: ['The Flying Lizards'], durationSeconds: 150 })).toBeLessThan(0.6);
+    expect(
+      scoreMatch(want, {
+        title: 'Money - 2011 Remastered Version',
+        artists: ['Pink Floyd'],
+        durationSeconds: 383,
+      }),
+    ).toBe(1);
+    expect(
+      scoreMatch(want, { title: 'Money (Live)', artists: ['Pink Floyd'], durationSeconds: 500 }),
+    ).toBeLessThan(0.6);
+    expect(
+      scoreMatch(want, { title: 'Money', artists: ['The Flying Lizards'], durationSeconds: 150 }),
+    ).toBeLessThan(0.6);
     expect(scoreMatch(want, { title: 'Breathe', artists: ['Pink Floyd'] })).toBe(0);
   });
 });

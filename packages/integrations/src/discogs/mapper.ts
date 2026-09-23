@@ -8,7 +8,16 @@ import type {
   Grade,
   MarketValue,
 } from '@kollektor/core';
-import type { DArtist, DImage, DMaster, DPriceSuggestions, DRelease, DSearchResult, DTrack, DVersion } from './types';
+import type {
+  DArtist,
+  DImage,
+  DMaster,
+  DPriceSuggestions,
+  DRelease,
+  DSearchResult,
+  DTrack,
+  DVersion,
+} from './types';
 
 const SOURCE = 'discogs';
 const WEB = 'https://www.discogs.com';
@@ -16,7 +25,10 @@ const WEB = 'https://www.discogs.com';
 /** "3:45" / "1:02:03" → seconds. */
 export function parseDuration(d?: string): number | null {
   if (!d || !/^\d+(:\d{1,2}){1,2}$/.test(d.trim())) return null;
-  return d.trim().split(':').reduce((acc, p) => acc * 60 + Number(p), 0);
+  return d
+    .trim()
+    .split(':')
+    .reduce((acc, p) => acc * 60 + Number(p), 0);
 }
 
 const artists = (list: DArtist[] = []): ExternalArtistRef[] =>
@@ -25,10 +37,20 @@ const artists = (list: DArtist[] = []): ExternalArtistRef[] =>
 const images = (list: DImage[] = []): ExternalImage[] =>
   list
     .filter((i) => i.uri)
-    .map((i) => ({ kind: i.type === 'primary' ? 'primary' : 'secondary', url: i.uri, width: i.width ?? null, height: i.height ?? null }));
+    .map((i) => ({
+      kind: i.type === 'primary' ? 'primary' : 'secondary',
+      url: i.uri,
+      width: i.width ?? null,
+      height: i.height ?? null,
+    }));
 
 const artistCredit = (list?: DArtist[]) =>
-  list?.length ? list.map((a, i) => a.name + (i < list.length - 1 ? ` ${a.join?.trim() || ','} ` : '')).join('').replace(/ , /g, ', ') : null;
+  list?.length
+    ? list
+        .map((a, i) => a.name + (i < list.length - 1 ? ` ${a.join?.trim() || ','} ` : ''))
+        .join('')
+        .replace(/ , /g, ', ')
+    : null;
 
 /** Flattens index tracks into their sub-tracks and drops headings. */
 export function mapTracklist(list: DTrack[] = []): ExternalTrack[] {
@@ -54,7 +76,9 @@ export function formatSummary(r: DRelease): string | null {
   return r.formats
     .map((f) => {
       const qty = Number(f.qty ?? 1);
-      return [qty > 1 ? `${qty}×${f.name}` : f.name, ...(f.descriptions ?? []), f.text].filter(Boolean).join(', ');
+      return [qty > 1 ? `${qty}×${f.name}` : f.name, ...(f.descriptions ?? []), f.text]
+        .filter(Boolean)
+        .join(', ');
     })
     .join(' + ');
 }
@@ -67,11 +91,18 @@ export function mapRelease(r: DRelease, currency = 'USD'): ExternalRelease {
     title: r.title,
     artists: artists(r.artists),
     year: r.year && r.year > 0 ? r.year : null,
-    releaseDate: r.released && /^\d{4}-\d{2}-\d{2}$/.test(r.released) && !r.released.endsWith('-00') ? r.released : null,
+    releaseDate:
+      r.released && /^\d{4}-\d{2}-\d{2}$/.test(r.released) && !r.released.endsWith('-00')
+        ? r.released
+        : null,
     country: r.country || null,
     genres: r.genres ?? [],
     styles: r.styles ?? [],
-    labels: (r.labels ?? []).map((l) => ({ externalId: l.id ? String(l.id) : null, name: l.name, catalogNumber: l.catno ?? null })),
+    labels: (r.labels ?? []).map((l) => ({
+      externalId: l.id ? String(l.id) : null,
+      name: l.name,
+      catalogNumber: l.catno ?? null,
+    })),
     formats: (r.formats ?? []).map((f) => ({
       name: f.name,
       qty: Math.max(1, Number(f.qty ?? 1) || 1),
@@ -79,7 +110,9 @@ export function mapRelease(r: DRelease, currency = 'USD'): ExternalRelease {
       text: f.text?.trim() || null,
     })),
     formatSummary: formatSummary(r),
-    barcodes: (r.identifiers ?? []).filter((i) => i.type === 'Barcode').map((i) => i.value.replace(/\s/g, '')),
+    barcodes: (r.identifiers ?? [])
+      .filter((i) => i.type === 'Barcode')
+      .map((i) => i.value.replace(/\s/g, '')),
     tracklist: mapTracklist(r.tracklist),
     images: images(r.images),
     notes: r.notes ?? null,
@@ -108,7 +141,9 @@ export function mapMaster(m: DMaster): ExternalMaster {
 /** Search titles come as "Artist - Title". */
 export function splitTitle(title: string): { artist: string | null; title: string } {
   const i = title.indexOf(' - ');
-  return i === -1 ? { artist: null, title } : { artist: title.slice(0, i), title: title.slice(i + 3) };
+  return i === -1
+    ? { artist: null, title }
+    : { artist: title.slice(0, i), title: title.slice(i + 3) };
 }
 
 export function mapSearchResult(r: DSearchResult): CatalogSearchResult {
@@ -146,11 +181,17 @@ export function mapVersion(v: DVersion, master: { artist: string | null }): Cata
     country: v.country ?? null,
     labels: v.label ? [v.label] : [],
     catalogNumber: v.catno ?? null,
-    formats: [...(v.major_formats ?? []), ...(v.format ? v.format.split(',').map((s) => s.trim()) : [])],
+    formats: [
+      ...(v.major_formats ?? []),
+      ...(v.format ? v.format.split(',').map((s) => s.trim()) : []),
+    ],
     barcodes: [],
     thumbUrl: v.thumb || null,
     coverUrl: null,
-    community: { have: v.stats?.community?.in_collection ?? null, want: v.stats?.community?.in_wantlist ?? null },
+    community: {
+      have: v.stats?.community?.in_collection ?? null,
+      want: v.stats?.community?.in_wantlist ?? null,
+    },
   };
 }
 
@@ -168,5 +209,10 @@ const CONDITION_MAP: Record<string, Grade> = {
 export function mapPriceSuggestions(s: DPriceSuggestions): MarketValue[] {
   return Object.entries(s)
     .filter(([k, v]) => CONDITION_MAP[k] && v && Number.isFinite(v.value))
-    .map(([k, v]) => ({ kind: 'suggestion' as const, condition: CONDITION_MAP[k]!, amount: Math.round(v.value * 100) / 100, currency: v.currency }));
+    .map(([k, v]) => ({
+      kind: 'suggestion' as const,
+      condition: CONDITION_MAP[k]!,
+      amount: Math.round(v.value * 100) / 100,
+      currency: v.currency,
+    }));
 }

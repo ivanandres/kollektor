@@ -22,7 +22,8 @@ const id = () => uuid('id').primaryKey().defaultRandom();
 const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
 const updatedAt = () => timestamp('updated_at', { withTimezone: true }).notNull().defaultNow();
 /** NULL = shared catalog row (from an external source). Set = private manual entry of that user. */
-const createdBy = () => text('created_by_user_id').references(() => user.id, { onDelete: 'cascade' });
+const createdBy = () =>
+  text('created_by_user_id').references(() => user.id, { onDelete: 'cascade' });
 
 export const artists = pgTable(
   'artists',

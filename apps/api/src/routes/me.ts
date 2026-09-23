@@ -12,6 +12,9 @@ export function meRoutes({ core }: AppDeps) {
     })
     .get('/username-available', async (c) => {
       const u = parse(username, c.req.query('username') ?? '');
-      return c.json({ username: u, available: await core.profiles.isUsernameAvailable(u, c.get('userId')) });
+      return c.json({
+        username: u,
+        available: await core.profiles.isUsernameAvailable(u, c.get('userId')),
+      });
     });
 }

@@ -19,7 +19,14 @@ import type {
 export class FakeFx implements FxRateProvider {
   readonly source = 'fake-fx';
   calls = 0;
-  constructor(private rates: Record<string, number> = { 'ARS/USD': 0.001, 'EUR/USD': 1.1, 'USD/ARS': 1000, 'USD/EUR': 0.9 }) {}
+  constructor(
+    private rates: Record<string, number> = {
+      'ARS/USD': 0.001,
+      'EUR/USD': 1.1,
+      'USD/ARS': 1000,
+      'USD/EUR': 0.9,
+    },
+  ) {}
   async getRate(base: string, quote: string): Promise<number | null> {
     this.calls++;
     return this.rates[`${base}/${quote}`] ?? null;
@@ -56,14 +63,22 @@ export function makeRelease(s: FakeReleaseSpec): ExternalRelease {
     country: s.country ?? 'UK',
     genres: s.genres ?? ['Rock'],
     styles: s.styles ?? [],
-    labels: (s.labels ?? []).map((l) => ({ externalId: l.id ?? `l-${normalizeText(l.name)}`, name: l.name, catalogNumber: l.catno })),
-    formats: s.formats ?? [{ name: 'Vinyl', qty: 1, descriptions: ['LP', 'Album'], text: null }].map((f) => f),
+    labels: (s.labels ?? []).map((l) => ({
+      externalId: l.id ?? `l-${normalizeText(l.name)}`,
+      name: l.name,
+      catalogNumber: l.catno,
+    })),
+    formats:
+      s.formats ??
+      [{ name: 'Vinyl', qty: 1, descriptions: ['LP', 'Album'], text: null }].map((f) => f),
     formatSummary: 'Vinyl, LP, Album',
     barcodes: s.barcode ? [s.barcode] : [],
     tracklist: (s.tracks ?? []).map(([position, title, duration]) => ({
       position,
       title,
-      durationSeconds: duration ? duration.split(':').reduce((a, p) => a * 60 + Number(p), 0) : null,
+      durationSeconds: duration
+        ? duration.split(':').reduce((a, p) => a * 60 + Number(p), 0)
+        : null,
       artistCredit: null,
     })),
     images: [{ kind: 'primary', url: `https://img.example/${s.id}.jpg`, width: 600, height: 600 }],
@@ -128,7 +143,13 @@ export class FakeCatalog implements CatalogProvider, MarketValueProvider {
     const items = [...this.releases.values()]
       .filter((r) => {
         if (q.barcode && !r.barcodes.includes(q.barcode)) return false;
-        if (q.catalogNumber && !r.labels.some((l) => n(l.catalogNumber).replace(/\s/g, '') === n(q.catalogNumber).replace(/\s/g, ''))) return false;
+        if (
+          q.catalogNumber &&
+          !r.labels.some(
+            (l) => n(l.catalogNumber).replace(/\s/g, '') === n(q.catalogNumber).replace(/\s/g, ''),
+          )
+        )
+          return false;
         if (q.artist && !r.artists.some((a) => n(a.name).includes(n(q.artist)))) return false;
         if (q.title && !n(r.title).includes(n(q.title))) return false;
         if (q.q && !n(`${r.artists[0]?.name} ${r.title}`).includes(n(q.q))) return false;
@@ -153,7 +174,9 @@ export class FakeCatalog implements CatalogProvider, MarketValueProvider {
   }
 
   async getMasterVersions(id: string) {
-    const items = [...this.releases.values()].filter((r) => r.masterId === id).map((r) => this.toResult(r));
+    const items = [...this.releases.values()]
+      .filter((r) => r.masterId === id)
+      .map((r) => this.toResult(r));
     return { items, page: 1, pages: 1, total: items.length };
   }
 
@@ -181,6 +204,16 @@ export class FakeRecognizer implements CoverRecognizer {
   constructor(private hints: Partial<RecognitionHints>) {}
   async extract() {
     this.calls++;
-    return { artist: null, title: null, catalogNumber: null, label: null, barcode: null, country: null, year: null, confidence: 0.9, ...this.hints };
+    return {
+      artist: null,
+      title: null,
+      catalogNumber: null,
+      label: null,
+      barcode: null,
+      country: null,
+      year: null,
+      confidence: 0.9,
+      ...this.hints,
+    };
   }
 }

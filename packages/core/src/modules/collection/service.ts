@@ -219,12 +219,26 @@ export function collectionService(
     const where = collectionFilters(userId, q, nowOf(deps));
     const offset = (q.page - 1) * q.pageSize;
     const rows = await db.execute<{
-      id: string; release_id: string; album_id: string; title: string; artist: string;
-      original_release_year: number | null; release_year: number | null; country: string | null;
-      format_summary: string | null; edition_type: string | null; cover_image_url: string | null;
-      condition_media: string | null; condition_sleeve: string | null; purchase_price: string | null;
-      purchase_currency: string | null; purchase_price_base: string | null; estimated_value_base: string | null;
-      base_currency: string | null; created_at: Date; total: number;
+      id: string;
+      release_id: string;
+      album_id: string;
+      title: string;
+      artist: string;
+      original_release_year: number | null;
+      release_year: number | null;
+      country: string | null;
+      format_summary: string | null;
+      edition_type: string | null;
+      cover_image_url: string | null;
+      condition_media: string | null;
+      condition_sleeve: string | null;
+      purchase_price: string | null;
+      purchase_currency: string | null;
+      purchase_price_base: string | null;
+      estimated_value_base: string | null;
+      base_currency: string | null;
+      created_at: Date;
+      total: number;
     }>(sql`
       SELECT ci.id, r.id AS release_id, a.id AS album_id, a.title, ${ARTIST_DISPLAY} AS artist,
              a.original_release_year, r.release_year, r.country, r.format_summary, r.edition_type,
@@ -260,7 +274,13 @@ export function collectionService(
       createdAt: new Date(r.created_at).toISOString(),
     }));
     const total = rows[0]?.total ?? 0;
-    return { items, total, page: q.page, pageSize: q.pageSize, pages: Math.ceil(total / q.pageSize) };
+    return {
+      items,
+      total,
+      page: q.page,
+      pageSize: q.pageSize,
+      pages: Math.ceil(total / q.pageSize),
+    };
   }
 
   /** Available filter values with counts over the whole (non-deleted) collection. */
@@ -272,33 +292,65 @@ export function collectionService(
       db.execute<Facet>(sql`SELECT ${select} AS value, count(DISTINCT ci.id)::int AS count ${from} ${join}
         WHERE ${mine} AND ${extra} GROUP BY 1 ORDER BY count DESC, 1`);
     const albumYear = sql`coalesce(a.original_release_year, r.release_year)`;
-    const [artists, genres, styles, decades, countries, labels, formats, editionTypes, conditions, tagRows, ranges] =
-      await Promise.all([
-        db.execute<{ id: string; value: string; count: number }>(sql`
+    const [
+      artists,
+      genres,
+      styles,
+      decades,
+      countries,
+      labels,
+      formats,
+      editionTypes,
+      conditions,
+      tagRows,
+      ranges,
+    ] = await Promise.all([
+      db.execute<{ id: string; value: string; count: number }>(sql`
           SELECT ar.id, ar.name AS value, count(DISTINCT ci.id)::int AS count ${from}
             JOIN album_artists aa ON aa.album_id = a.id JOIN artists ar ON ar.id = aa.artist_id
            WHERE ${mine} GROUP BY ar.id ORDER BY count DESC, ar.sort_name`),
-        facet(sql`g.name`, sql`JOIN album_genres ag ON ag.album_id = a.id JOIN genres g ON g.id = ag.genre_id`),
-        facet(sql`s.name`, sql`JOIN album_styles ast ON ast.album_id = a.id JOIN styles s ON s.id = ast.style_id`),
-        db.execute<Facet>(sql`SELECT ((${albumYear} / 10) * 10)::int AS value, count(*)::int AS count ${from}
+      facet(
+        sql`g.name`,
+        sql`JOIN album_genres ag ON ag.album_id = a.id JOIN genres g ON g.id = ag.genre_id`,
+      ),
+      facet(
+        sql`s.name`,
+        sql`JOIN album_styles ast ON ast.album_id = a.id JOIN styles s ON s.id = ast.style_id`,
+      ),
+      db.execute<Facet>(sql`SELECT ((${albumYear} / 10) * 10)::int AS value, count(*)::int AS count ${from}
           WHERE ${mine} AND ${albumYear} IS NOT NULL GROUP BY 1 ORDER BY 1`),
-        facet(sql`r.country`, sql``, sql`r.country IS NOT NULL`),
-        facet(sql`lb.name`, sql`JOIN release_labels rl ON rl.release_id = r.id JOIN labels lb ON lb.id = rl.label_id`),
-        facet(sql`fmt.value`, sql`JOIN release_formats rf ON rf.release_id = r.id
-          CROSS JOIN LATERAL unnest(array_remove(ARRAY[rf.name, rf.size] || rf.descriptions, NULL)) AS fmt(value)`),
-        facet(sql`r.edition_type::text`, sql``, sql`r.edition_type IS NOT NULL`),
-        facet(sql`ci.condition_media::text`, sql``, sql`ci.condition_media IS NOT NULL`),
-        facet(sql`tg.name`, sql`JOIN collection_item_tags cit ON cit.collection_item_id = ci.id JOIN tags tg ON tg.id = cit.tag_id`),
-        db.execute<{
-          paid_min: string | null; paid_max: string | null; value_min: string | null; value_max: string | null;
-          year_min: number | null; year_max: number | null; edition_year_min: number | null; edition_year_max: number | null;
-        }>(sql`
+      facet(sql`r.country`, sql``, sql`r.country IS NOT NULL`),
+      facet(
+        sql`lb.name`,
+        sql`JOIN release_labels rl ON rl.release_id = r.id JOIN labels lb ON lb.id = rl.label_id`,
+      ),
+      facet(
+        sql`fmt.value`,
+        sql`JOIN release_formats rf ON rf.release_id = r.id
+          CROSS JOIN LATERAL unnest(array_remove(ARRAY[rf.name, rf.size] || rf.descriptions, NULL)) AS fmt(value)`,
+      ),
+      facet(sql`r.edition_type::text`, sql``, sql`r.edition_type IS NOT NULL`),
+      facet(sql`ci.condition_media::text`, sql``, sql`ci.condition_media IS NOT NULL`),
+      facet(
+        sql`tg.name`,
+        sql`JOIN collection_item_tags cit ON cit.collection_item_id = ci.id JOIN tags tg ON tg.id = cit.tag_id`,
+      ),
+      db.execute<{
+        paid_min: string | null;
+        paid_max: string | null;
+        value_min: string | null;
+        value_max: string | null;
+        year_min: number | null;
+        year_max: number | null;
+        edition_year_min: number | null;
+        edition_year_max: number | null;
+      }>(sql`
           SELECT min(ci.purchase_price_base) AS paid_min, max(ci.purchase_price_base) AS paid_max,
                  min(ci.estimated_value_base) AS value_min, max(ci.estimated_value_base) AS value_max,
                  min(${albumYear}) AS year_min, max(${albumYear}) AS year_max,
                  min(r.release_year) AS edition_year_min, max(r.release_year) AS edition_year_max
             ${from} WHERE ${mine}`),
-      ]);
+    ]);
     const r = ranges[0];
     const n = (v: string | null | undefined) => (v == null ? null : Number(v));
     return {
@@ -343,7 +395,13 @@ export interface CollectionItemDetail {
     paid: number | null;
     estimated: number | null;
     difference: number | null;
-    estimate: { amount: number; currency: string; source: string; kind: string; capturedAt: string | null } | null;
+    estimate: {
+      amount: number;
+      currency: string;
+      source: string;
+      kind: string;
+      capturedAt: string | null;
+    } | null;
     override: { amount: number; currency: string | null } | null;
     disclaimer: string;
   };

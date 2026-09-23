@@ -29,21 +29,43 @@ export async function seedAchievements(db: Database, lists: EssentialListDef[] =
 }
 
 /** Creates (or reuses) shared artist/album rows for each curated list. Idempotent. */
-export async function seedEssentialLists(db: Database, lists: EssentialListDef[] = ESSENTIAL_LISTS) {
+export async function seedEssentialLists(
+  db: Database,
+  lists: EssentialListDef[] = ESSENTIAL_LISTS,
+) {
   for (const def of lists) {
     await db.transaction(async (tx) => {
       const [artist] = await tx
         .select({ id: schema.artists.id })
         .from(schema.artists)
-        .where(and(eq(schema.artists.nameNormalized, normalizeText(def.artist)), isNull(schema.artists.createdByUserId)))
+        .where(
+          and(
+            eq(schema.artists.nameNormalized, normalizeText(def.artist)),
+            isNull(schema.artists.createdByUserId),
+          ),
+        )
         .limit(1);
       const artistId = artist?.id ?? (await repo.insertArtist(tx, def.artist, null));
-      const [existing] = await tx.select().from(schema.essentialLists).where(eq(schema.essentialLists.code, def.code));
+      const [existing] = await tx
+        .select()
+        .from(schema.essentialLists)
+        .where(eq(schema.essentialLists.code, def.code));
       const listId =
         existing?.id ??
-        (await tx.insert(schema.essentialLists).values({ code: def.code, artistId, name: def.name }).returning())[0]!.id;
-      if (existing) await tx.update(schema.essentialLists).set({ name: def.name }).where(eq(schema.essentialLists.id, listId));
-      await tx.delete(schema.essentialListItems).where(eq(schema.essentialListItems.listId, listId));
+        (
+          await tx
+            .insert(schema.essentialLists)
+            .values({ code: def.code, artistId, name: def.name })
+            .returning()
+        )[0]!.id;
+      if (existing)
+        await tx
+          .update(schema.essentialLists)
+          .set({ name: def.name })
+          .where(eq(schema.essentialLists.id, listId));
+      await tx
+        .delete(schema.essentialListItems)
+        .where(eq(schema.essentialListItems.listId, listId));
       for (const [position, album] of def.albums.entries()) {
         const [found] = await tx
           .select({ id: schema.albums.id })
@@ -59,7 +81,11 @@ export async function seedEssentialLists(db: Database, lists: EssentialListDef[]
           .limit(1);
         const albumId =
           found?.id ??
-          (await repo.insertAlbum(tx, { title: album.title, originalReleaseYear: album.year, createdByUserId: null }, [{ artistId }]));
+          (await repo.insertAlbum(
+            tx,
+            { title: album.title, originalReleaseYear: album.year, createdByUserId: null },
+            [{ artistId }],
+          ));
         await tx.insert(schema.essentialListItems).values({
           listId,
           albumId,

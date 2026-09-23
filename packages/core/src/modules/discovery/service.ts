@@ -3,10 +3,32 @@ import type { CoreDeps } from '../../context';
 import type { AchievementService } from '../achievements/service';
 
 export type Insight =
-  | { type: 'essential_almost_complete'; listCode: string; artistId: string; artistName: string; owned: number; total: number; missing: { albumId: string; title: string; year: number | null }[]; message: string }
-  | { type: 'essential_complete'; listCode: string; artistName: string; total: number; message: string }
+  | {
+      type: 'essential_almost_complete';
+      listCode: string;
+      artistId: string;
+      artistName: string;
+      owned: number;
+      total: number;
+      missing: { albumId: string; title: string; year: number | null }[];
+      message: string;
+    }
+  | {
+      type: 'essential_complete';
+      listCode: string;
+      artistName: string;
+      total: number;
+      message: string;
+    }
   | { type: 'decades'; count: number; message: string }
-  | { type: 'explore_artist'; artistId: string; artistName: string; becauseOf: string; sharedStyles: string[]; message: string };
+  | {
+      type: 'explore_artist';
+      artistId: string;
+      artistName: string;
+      becauseOf: string;
+      sharedStyles: string[];
+      message: string;
+    };
 
 export function discoveryService(deps: CoreDeps, achievements: AchievementService) {
   const { db } = deps;
@@ -14,10 +36,18 @@ export function discoveryService(deps: CoreDeps, achievements: AchievementServic
   async function insights(userId: string): Promise<Insight[]> {
     const out: Insight[] = [];
     const lists = await achievements.essentialProgress(userId);
-    const started = lists.filter((l) => l.owned > 0).sort((a, b) => a.total - a.owned - (b.total - b.owned));
+    const started = lists
+      .filter((l) => l.owned > 0)
+      .sort((a, b) => a.total - a.owned - (b.total - b.owned));
     for (const l of started) {
       if (l.complete) {
-        out.push({ type: 'essential_complete', listCode: l.code, artistName: l.artistName, total: l.total, message: `Completaste los ${l.total} esenciales de ${l.artistName}.` });
+        out.push({
+          type: 'essential_complete',
+          listCode: l.code,
+          artistName: l.artistName,
+          total: l.total,
+          message: `Completaste los ${l.total} esenciales de ${l.artistName}.`,
+        });
         continue;
       }
       const missing = l.total - l.owned;
@@ -41,7 +71,11 @@ export function discoveryService(deps: CoreDeps, achievements: AchievementServic
         FROM collection_items ci JOIN releases r ON r.id = ci.release_id JOIN albums a ON a.id = r.album_id
        WHERE ci.user_id = ${userId} AND ci.deleted_at IS NULL`);
     if (dec && dec.n > 1)
-      out.push({ type: 'decades', count: dec.n, message: `Tu colección tiene discos de ${dec.n} décadas distintas.` });
+      out.push({
+        type: 'decades',
+        count: dec.n,
+        message: `Tu colección tiene discos de ${dec.n} décadas distintas.`,
+      });
 
     out.push(...(await exploreArtists(userId)));
     return out;
@@ -52,7 +86,12 @@ export function discoveryService(deps: CoreDeps, achievements: AchievementServic
    * styles with the user's top artists and that the user doesn't own yet.
    */
   async function exploreArtists(userId: string, limit = 5): Promise<Insight[]> {
-    const rows = await db.execute<{ artist_id: string; artist_name: string; because_of: string; shared: string[] }>(sql`
+    const rows = await db.execute<{
+      artist_id: string;
+      artist_name: string;
+      because_of: string;
+      shared: string[];
+    }>(sql`
       WITH mine AS (
         SELECT aa.artist_id, count(DISTINCT ci.id) AS n
           FROM collection_items ci JOIN releases r ON r.id = ci.release_id JOIN album_artists aa ON aa.album_id = r.album_id

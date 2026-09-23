@@ -109,9 +109,7 @@ export async function findVisibleLabelByName(
   name: string,
   userId: string | null,
 ): Promise<string | null> {
-  const cond = userId
-    ? visibleTo(labels.createdByUserId, userId)
-    : isNull(labels.createdByUserId);
+  const cond = userId ? visibleTo(labels.createdByUserId, userId) : isNull(labels.createdByUserId);
   const [row] = await db
     .select({ id: labels.id })
     .from(labels)
@@ -233,7 +231,12 @@ export interface NewReleaseChildren {
     color?: string | null;
     descriptions: string[];
   }[];
-  images: { kind: 'primary' | 'secondary' | 'user'; url: string; width?: number | null; height?: number | null }[];
+  images: {
+    kind: 'primary' | 'secondary' | 'user';
+    url: string;
+    width?: number | null;
+    height?: number | null;
+  }[];
   tracks: {
     position: string | null;
     side: string | null;

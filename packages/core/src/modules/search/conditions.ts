@@ -49,7 +49,14 @@ export const albumYearMatch = (t: QueryToken): SQL =>
 /** A token matches an item if it matches any searchable field. */
 export const anyFieldMatch = (t: QueryToken): SQL =>
   sql`(${sql.join(
-    [artistMatch(t), albumTitleMatch(t), trackMatch(t), editionMatch(t), genreStyleMatch(t), albumYearMatch(t)],
+    [
+      artistMatch(t),
+      albumTitleMatch(t),
+      trackMatch(t),
+      editionMatch(t),
+      genreStyleMatch(t),
+      albumYearMatch(t),
+    ],
     sql` OR `,
   )})`;
 

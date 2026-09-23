@@ -19,7 +19,7 @@ export function currencyService(deps: CoreDeps) {
       .where(and(eq(fxRates.base, base), eq(fxRates.quote, quote), eq(fxRates.date, date)));
     if (cached) return cached.rate;
 
-    let rate: number | null = null;
+    let rate: number | null;
     try {
       rate = await deps.fx.getRate(base, quote, date);
     } catch {

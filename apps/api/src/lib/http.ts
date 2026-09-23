@@ -16,23 +16,41 @@ const STATUS: Record<ErrorCode, 400 | 403 | 404 | 409 | 429 | 502 | 503> = {
 export function errorResponse(err: unknown, c: Context) {
   if (err instanceof ZodError) {
     return c.json(
-      { error: { code: 'VALIDATION', message: 'Datos inválidos', issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })) } },
+      {
+        error: {
+          code: 'VALIDATION',
+          message: 'Datos inválidos',
+          issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+        },
+      },
       400,
     );
   }
   if (err instanceof DomainError) {
-    return c.json({ error: { code: err.code, message: err.message, details: err.details } }, STATUS[err.code]);
+    return c.json(
+      { error: { code: err.code, message: err.message, details: err.details } },
+      STATUS[err.code],
+    );
   }
   if (err instanceof HTTPException) return err.getResponse();
   console.error(err);
   // Upstream HTTP errors (Discogs, etc.) surface as 502 without leaking internals.
   if (err instanceof Error && err.name === 'HttpError') {
-    return c.json({ error: { code: 'UPSTREAM_UNAVAILABLE', message: 'El servicio externo no respondió. Probá de nuevo.' } }, 502);
+    return c.json(
+      {
+        error: {
+          code: 'UPSTREAM_UNAVAILABLE',
+          message: 'El servicio externo no respondió. Probá de nuevo.',
+        },
+      },
+      502,
+    );
   }
   return c.json({ error: { code: 'INTERNAL', message: 'Error inesperado' } }, 500);
 }
 
-export const parse = <T extends z.ZodType>(schema: T, data: unknown): z.infer<T> => schema.parse(data);
+export const parse = <T extends z.ZodType>(schema: T, data: unknown): z.infer<T> =>
+  schema.parse(data);
 
 /** Hono query → object where repeated keys become arrays. */
 export function queryObject(c: Context): Record<string, string | string[]> {

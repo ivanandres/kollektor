@@ -25,7 +25,8 @@ export interface ValueEstimate {
  */
 export function pickSnapshot(snapshots: Snapshot[], condition: Grade | null): Snapshot | null {
   const latest = (pred: (s: Snapshot) => boolean) =>
-    snapshots.filter(pred).sort((a, b) => b.capturedAt.getTime() - a.capturedAt.getTime())[0] ?? null;
+    snapshots.filter(pred).sort((a, b) => b.capturedAt.getTime() - a.capturedAt.getTime())[0] ??
+    null;
   return (
     (condition ? latest((s) => s.kind === 'suggestion' && s.condition === condition) : null) ??
     latest((s) => s.kind === 'median') ??
@@ -39,11 +40,16 @@ export function valuationService(deps: CoreDeps, currency: CurrencyService) {
   const { db } = deps;
 
   async function baseCurrencyOf(userId: string): Promise<string> {
-    const [p] = await db.select({ c: profiles.baseCurrency }).from(profiles).where(eq(profiles.userId, userId));
+    const [p] = await db
+      .select({ c: profiles.baseCurrency })
+      .from(profiles)
+      .where(eq(profiles.userId, userId));
     return p?.c ?? 'USD';
   }
 
-  async function estimate(item: typeof collectionItems.$inferSelect): Promise<ValueEstimate | null> {
+  async function estimate(
+    item: typeof collectionItems.$inferSelect,
+  ): Promise<ValueEstimate | null> {
     if (item.valueOverride != null && item.valueOverrideCurrency) {
       return {
         amount: item.valueOverride,
@@ -112,7 +118,8 @@ export function valuationService(deps: CoreDeps, currency: CurrencyService) {
   /** Pulls fresh market data for a release from the provider and stores snapshots. */
   async function refreshReleaseMarketValue(releaseId: string): Promise<number> {
     const provider = deps.marketValue;
-    if (!provider) throw new DomainError('NOT_CONFIGURED', 'No hay proveedor de valores de mercado');
+    if (!provider)
+      throw new DomainError('NOT_CONFIGURED', 'No hay proveedor de valores de mercado');
     const [ext] = await db
       .select({ externalId: externalIds.externalId })
       .from(externalIds)
@@ -166,11 +173,24 @@ export function valuationService(deps: CoreDeps, currency: CurrencyService) {
       .values(row)
       .onConflictDoUpdate({
         target: [collectionValueSnapshots.userId, collectionValueSnapshots.capturedOn],
-        set: { itemCount: row.itemCount, totalInvested: row.totalInvested, totalEstimated: row.totalEstimated, currency: base },
+        set: {
+          itemCount: row.itemCount,
+          totalInvested: row.totalInvested,
+          totalEstimated: row.totalEstimated,
+          currency: base,
+        },
       });
   }
 
-  return { estimate, recomputeItem, recomputeUser, recomputeRelease, refreshReleaseMarketValue, snapshotCollection, baseCurrencyOf };
+  return {
+    estimate,
+    recomputeItem,
+    recomputeUser,
+    recomputeRelease,
+    refreshReleaseMarketValue,
+    snapshotCollection,
+    baseCurrencyOf,
+  };
 }
 
 export type ValuationService = ReturnType<typeof valuationService>;

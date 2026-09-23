@@ -32,7 +32,9 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
   const collection = collectionService(deps, catalog, valuation, {
     afterChange: (userId) => achievements.evaluate(userId),
   });
-  const profiles = profileService(deps, { onBaseCurrencyChanged: (userId) => valuation.recomputeUser(userId) });
+  const profiles = profileService(deps, {
+    onBaseCurrencyChanged: (userId) => valuation.recomputeUser(userId),
+  });
   const wishlist = wishlistService(deps, catalog, collection);
   const search = opts.search ?? postgresSearchProvider(deps);
   const stats = statsService(deps);
@@ -55,7 +57,11 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
            SELECT 1 FROM price_snapshots ps WHERE ps.release_id = ci.release_id AND ps.source = ${deps.marketValue.source}
              AND ps.kind <> 'lowest' AND ps.captured_at > now() - interval '7 days')`);
       for (const r of stale)
-        await jobs.enqueue('release.refresh_value', { releaseId: r.release_id }, { dedupeKey: `value:${r.release_id}:${now}` });
+        await jobs.enqueue(
+          'release.refresh_value',
+          { releaseId: r.release_id },
+          { dedupeKey: `value:${r.release_id}:${now}` },
+        );
     }
     // Retry FX conversions that failed when the item was saved (provider down or offline).
     const unconverted = await deps.db.execute<{ id: string }>(sql`
@@ -63,16 +69,26 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
         (purchase_price IS NOT NULL AND purchase_price_base IS NULL)
         OR (value_override IS NOT NULL AND estimated_value_base IS NULL))`);
     for (const i of unconverted)
-      await jobs.enqueue('item.recompute', { itemId: i.id }, { dedupeKey: `recompute:${i.id}:${now}` });
+      await jobs.enqueue(
+        'item.recompute',
+        { itemId: i.id },
+        { dedupeKey: `recompute:${i.id}:${now}` },
+      );
     // Snapshots run after the value refreshes queued above.
     const later = new Date((deps.now ? deps.now() : new Date()).getTime() + 30 * 60_000);
     for (const u of users)
-      await jobs.enqueue('collection.snapshot', { userId: u.user_id }, { dedupeKey: `snapshot:${u.user_id}:${now}`, runAfter: later });
+      await jobs.enqueue(
+        'collection.snapshot',
+        { userId: u.user_id },
+        { dedupeKey: `snapshot:${u.user_id}:${now}`, runAfter: later },
+      );
   }
 
   const jobHandlers = {
-    'item.recompute': async (p: Record<string, unknown>) => valuation.recomputeItem(String(p.itemId)),
-    'collection.snapshot': async (p: Record<string, unknown>) => valuation.snapshotCollection(String(p.userId)),
+    'item.recompute': async (p: Record<string, unknown>) =>
+      valuation.recomputeItem(String(p.itemId)),
+    'collection.snapshot': async (p: Record<string, unknown>) =>
+      valuation.snapshotCollection(String(p.userId)),
     'release.refresh_value': async (p: Record<string, unknown>) => {
       await valuation.refreshReleaseMarketValue(String(p.releaseId));
     },

@@ -14,17 +14,44 @@ beforeEach(async () => {
 });
 afterAll(() => h.close());
 
-const add = (input: Record<string, unknown>) => ctx.core.collection.add(ctx.userId, addToCollectionInput.parse(input));
+const add = (input: Record<string, unknown>) =>
+  ctx.core.collection.add(ctx.userId, addToCollectionInput.parse(input));
 
 describe('stats', () => {
   it('dashboard: totals, investment vs estimated value and highlights', async () => {
-    await add({ discogsReleaseId: 1873013, purchasePrice: 100, purchaseCurrency: 'USD', purchaseDate: '2025-03-10' }); // value 300
-    await add({ discogsReleaseId: 2000002, purchasePrice: 30000, purchaseCurrency: 'ARS', purchaseDate: '2026-01-05' }); // 30 USD
-    await add({ discogsReleaseId: 2000006, purchasePrice: 50, purchaseCurrency: 'EUR', purchaseDate: '2026-01-20', valueOverride: 70, valueOverrideCurrency: 'USD' });
+    await add({
+      discogsReleaseId: 1873013,
+      purchasePrice: 100,
+      purchaseCurrency: 'USD',
+      purchaseDate: '2025-03-10',
+    }); // value 300
+    await add({
+      discogsReleaseId: 2000002,
+      purchasePrice: 30000,
+      purchaseCurrency: 'ARS',
+      purchaseDate: '2026-01-05',
+    }); // 30 USD
+    await add({
+      discogsReleaseId: 2000006,
+      purchasePrice: 50,
+      purchaseCurrency: 'EUR',
+      purchaseDate: '2026-01-20',
+      valueOverride: 70,
+      valueOverrideCurrency: 'USD',
+    });
     await add({ discogsReleaseId: 2000003 });
 
     const d = await ctx.core.stats.dashboard(ctx.userId);
-    expect(d.summary).toMatchObject({ items: 4, artists: 3, albums: 4, releases: 4, invested: 185, estimated: 370, difference: 185, currency: 'USD' });
+    expect(d.summary).toMatchObject({
+      items: 4,
+      artists: 3,
+      albums: 4,
+      releases: 4,
+      invested: 185,
+      estimated: 370,
+      difference: 185,
+      currency: 'USD',
+    });
     expect(d.highlights.topArtist).toMatchObject({ label: 'Pink Floyd', count: 2 });
     expect(d.highlights.oldestEdition?.title).toBe('Kind Of Blue');
     expect(d.highlights.mostValuable?.title).toBe('The Dark Side Of The Moon');
@@ -49,7 +76,13 @@ describe('stats', () => {
 
 describe('valuation', () => {
   it('prefers a suggestion for the copy condition over the lowest listing', () => {
-    const base = { id: 'x', releaseId: 'r', source: 'discogs', currency: 'USD', capturedAt: new Date() };
+    const base = {
+      id: 'x',
+      releaseId: 'r',
+      source: 'discogs',
+      currency: 'USD',
+      capturedAt: new Date(),
+    };
     const snaps = [
       { ...base, kind: 'lowest' as const, condition: null, price: 10 },
       { ...base, kind: 'suggestion' as const, condition: 'VG+' as const, price: 25 },
@@ -61,7 +94,12 @@ describe('valuation', () => {
   });
 
   it('refreshes market values through jobs and keeps a value history', async () => {
-    await add({ discogsReleaseId: 1873013, conditionMedia: 'NM', purchasePrice: 100, purchaseCurrency: 'USD' });
+    await add({
+      discogsReleaseId: 1873013,
+      conditionMedia: 'NM',
+      purchasePrice: 100,
+      purchaseCurrency: 'USD',
+    });
     ctx.catalog.market.set('1873013', [
       { kind: 'suggestion', condition: 'NM', amount: 420, currency: 'USD' },
       { kind: 'suggestion', condition: 'VG+', amount: 250, currency: 'USD' },
@@ -70,7 +108,9 @@ describe('valuation', () => {
     expect(await ctx.core.runJobs()).toMatchObject({ done: 1, failed: 0 }); // value refresh
     now = new Date('2026-09-01T12:31:00Z');
     expect(await ctx.core.runJobs()).toMatchObject({ done: 1, failed: 0 }); // snapshot
-    const [item] = (await ctx.core.collection.list(ctx.userId, { sort: 'added_desc', page: 1, pageSize: 10 })).items;
+    const [item] = (
+      await ctx.core.collection.list(ctx.userId, { sort: 'added_desc', page: 1, pageSize: 10 })
+    ).items;
     expect(item?.estimatedValueBase).toBe(420);
 
     // Re-scheduling the same day doesn't duplicate work
@@ -96,7 +136,12 @@ describe('valuation', () => {
   it('retries failed currency conversions from the maintenance job', async () => {
     const saved = ctx.fx['rates'];
     ctx.fx['rates'] = {};
-    const { item } = await add({ discogsReleaseId: 2000002, purchasePrice: 20000, purchaseCurrency: 'ARS', purchaseDate: '2026-08-15' });
+    const { item } = await add({
+      discogsReleaseId: 2000002,
+      purchasePrice: 20000,
+      purchaseCurrency: 'ARS',
+      purchaseDate: '2026-08-15',
+    });
     expect(item.value.paid).toBeNull();
     ctx.fx['rates'] = saved;
     await ctx.core.scheduleMaintenance();

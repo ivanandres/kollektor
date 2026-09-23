@@ -8,15 +8,24 @@ export function collectionFilters(userId: string, q: CollectionQuery, now: Date)
   const f: SQL[] = [sql`ci.user_id = ${userId}`, sql`ci.deleted_at IS NULL`];
   const albumYear = sql`coalesce(a.original_release_year, r.release_year)`;
   const arr = (values: (string | number)[]) =>
-    sql`ARRAY[${sql.join(values.map((v) => sql`${v}`), sql`, `)}]`;
+    sql`ARRAY[${sql.join(
+      values.map((v) => sql`${v}`),
+      sql`, `,
+    )}]`;
 
   if (q.q) f.push(allTokensMatch(tokenize(q.q, now)));
   if (q.artistId?.length)
-    f.push(sql`EXISTS (SELECT 1 FROM album_artists aa WHERE aa.album_id = a.id AND aa.artist_id::text = ANY(${arr(q.artistId)}))`);
+    f.push(
+      sql`EXISTS (SELECT 1 FROM album_artists aa WHERE aa.album_id = a.id AND aa.artist_id::text = ANY(${arr(q.artistId)}))`,
+    );
   if (q.genre?.length)
-    f.push(sql`EXISTS (SELECT 1 FROM album_genres ag JOIN genres g ON g.id = ag.genre_id WHERE ag.album_id = a.id AND g.name = ANY(${arr(q.genre)}))`);
+    f.push(
+      sql`EXISTS (SELECT 1 FROM album_genres ag JOIN genres g ON g.id = ag.genre_id WHERE ag.album_id = a.id AND g.name = ANY(${arr(q.genre)}))`,
+    );
   if (q.style?.length)
-    f.push(sql`EXISTS (SELECT 1 FROM album_styles ast JOIN styles s ON s.id = ast.style_id WHERE ast.album_id = a.id AND s.name = ANY(${arr(q.style)}))`);
+    f.push(
+      sql`EXISTS (SELECT 1 FROM album_styles ast JOIN styles s ON s.id = ast.style_id WHERE ast.album_id = a.id AND s.name = ANY(${arr(q.style)}))`,
+    );
   if (q.decade?.length) f.push(sql`(${albumYear} / 10) * 10 = ANY(${arr(q.decade)}::int[])`);
   if (q.yearFrom != null) f.push(sql`${albumYear} >= ${q.yearFrom}`);
   if (q.yearTo != null) f.push(sql`${albumYear} <= ${q.yearTo}`);
@@ -24,13 +33,19 @@ export function collectionFilters(userId: string, q: CollectionQuery, now: Date)
   if (q.editionYearTo != null) f.push(sql`r.release_year <= ${q.editionYearTo}`);
   if (q.country?.length) f.push(sql`r.country = ANY(${arr(q.country)})`);
   if (q.label?.length)
-    f.push(sql`EXISTS (SELECT 1 FROM release_labels rl JOIN labels lb ON lb.id = rl.label_id WHERE rl.release_id = r.id AND lb.name = ANY(${arr(q.label)}))`);
+    f.push(
+      sql`EXISTS (SELECT 1 FROM release_labels rl JOIN labels lb ON lb.id = rl.label_id WHERE rl.release_id = r.id AND lb.name = ANY(${arr(q.label)}))`,
+    );
   if (q.format?.length)
-    f.push(sql`EXISTS (SELECT 1 FROM release_formats rf WHERE rf.release_id = r.id AND (rf.name = ANY(${arr(q.format)}) OR rf.descriptions && ${arr(q.format)}::text[] OR rf.size = ANY(${arr(q.format)})))`);
+    f.push(
+      sql`EXISTS (SELECT 1 FROM release_formats rf WHERE rf.release_id = r.id AND (rf.name = ANY(${arr(q.format)}) OR rf.descriptions && ${arr(q.format)}::text[] OR rf.size = ANY(${arr(q.format)})))`,
+    );
   if (q.editionType?.length) f.push(sql`r.edition_type::text = ANY(${arr(q.editionType)})`);
   if (q.condition?.length) f.push(sql`ci.condition_media::text = ANY(${arr(q.condition)})`);
   if (q.tag?.length)
-    f.push(sql`EXISTS (SELECT 1 FROM collection_item_tags cit JOIN tags tg ON tg.id = cit.tag_id WHERE cit.collection_item_id = ci.id AND tg.name = ANY(${arr(q.tag)}))`);
+    f.push(
+      sql`EXISTS (SELECT 1 FROM collection_item_tags cit JOIN tags tg ON tg.id = cit.tag_id WHERE cit.collection_item_id = ci.id AND tg.name = ANY(${arr(q.tag)}))`,
+    );
   if (q.paidMin != null) f.push(sql`ci.purchase_price_base >= ${q.paidMin}`);
   if (q.paidMax != null) f.push(sql`ci.purchase_price_base <= ${q.paidMax}`);
   if (q.valueMin != null) f.push(sql`ci.estimated_value_base >= ${q.valueMin}`);

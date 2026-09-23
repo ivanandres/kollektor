@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-const optional = z.string().trim().optional().transform((v) => v || undefined);
+const optional = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => v || undefined);
 
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),

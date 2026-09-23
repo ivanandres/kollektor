@@ -38,12 +38,17 @@ export class YouTubeService implements MusicLinkProvider {
       const channel = normalizeText(item.snippet.channelTitle.replace(/\s*-\s*topic$/i, ''));
       if (!videoTitle.includes(title)) continue;
       let confidence = 0.4;
-      if (channel === artist) confidence += 0.4; // official "Artist - Topic" / artist channel
+      if (channel === artist)
+        confidence += 0.4; // official "Artist - Topic" / artist channel
       else if (videoTitle.includes(artist)) confidence += 0.25;
       if (isLiveOrAlt(item.snippet.title) && !isLiveOrAlt(q.title)) confidence -= 0.25;
       confidence = Math.max(0, Math.min(1, Math.round(confidence * 100) / 100));
       if (!best || confidence > best.confidence)
-        best = { url: `https://www.youtube.com/watch?v=${item.id.videoId}`, externalId: item.id.videoId, confidence };
+        best = {
+          url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+          externalId: item.id.videoId,
+          confidence,
+        };
     }
     return best;
   }

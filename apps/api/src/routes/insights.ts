@@ -13,7 +13,11 @@ export function insightRoutes({ core }: AppDeps) {
     .get('/stats/summary', async (c) => c.json(await core.stats.summary(c.get('userId'))))
     .get('/stats/breakdowns', async (c) => c.json(await core.stats.breakdowns(c.get('userId'), 50)))
     .get('/stats/timeline', async (c) => c.json(await core.stats.timeline(c.get('userId'))))
-    .get('/achievements', async (c) => c.json(await core.achievements.listWithProgress(c.get('userId'))))
-    .get('/achievements/essentials', async (c) => c.json(await core.achievements.essentialProgress(c.get('userId'))))
+    .get('/achievements', async (c) =>
+      c.json(await core.achievements.listWithProgress(c.get('userId'))),
+    )
+    .get('/achievements/essentials', async (c) =>
+      c.json(await core.achievements.essentialProgress(c.get('userId'))),
+    )
     .get('/discover', async (c) => c.json(await core.discovery.insights(c.get('userId'))));
 }

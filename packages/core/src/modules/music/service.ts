@@ -27,7 +27,12 @@ export function musicLinkService(deps: CoreDeps, catalog: CatalogService) {
 
   async function trackQuery(userId: string, trackId: string): Promise<TrackQuery> {
     const [t] = await db
-      .select({ title: tracks.title, duration: tracks.durationSeconds, artistCredit: tracks.artistCredit, releaseId: tracks.releaseId })
+      .select({
+        title: tracks.title,
+        duration: tracks.durationSeconds,
+        artistCredit: tracks.artistCredit,
+        releaseId: tracks.releaseId,
+      })
       .from(tracks)
       .innerJoin(releases, eq(releases.id, tracks.releaseId))
       .where(eq(tracks.id, trackId));
@@ -77,13 +82,18 @@ export function musicLinkService(deps: CoreDeps, catalog: CatalogService) {
       .insert(trackLinks)
       .values(values)
       .onConflictDoUpdate({ target: [trackLinks.trackId, trackLinks.provider], set: values });
-    return found ? { status: 'found', url: match!.url, confidence: match!.confidence } : { status: 'not_found', message: NOT_FOUND_MSG };
+    return found
+      ? { status: 'found', url: match!.url, confidence: match!.confidence }
+      : { status: 'not_found', message: NOT_FOUND_MSG };
   }
 
   async function getLinks(userId: string, trackId: string) {
     const q = await trackQuery(userId, trackId);
     const entries = await Promise.all(
-      (deps.musicLinks ?? []).map(async (p) => [p.provider, await resolve(trackId, p.provider, () => p.findTrack(q))] as const),
+      (deps.musicLinks ?? []).map(
+        async (p) =>
+          [p.provider, await resolve(trackId, p.provider, () => p.findTrack(q))] as const,
+      ),
     );
     const lyrics = deps.lyrics
       ? await resolve(trackId, 'lyrics', () => deps.lyrics!.findLyricsPage(q))

@@ -16,7 +16,12 @@ export function createAuth(opts: { db: Database; core: Core; email: EmailService
     trustedOrigins: env.WEB_ORIGIN.split(',').map((o) => o.trim()),
     database: drizzleAdapter(db, {
       provider: 'pg',
-      schema: { user: schema.user, session: schema.session, account: schema.account, verification: schema.verification },
+      schema: {
+        user: schema.user,
+        session: schema.session,
+        account: schema.account,
+        verification: schema.verification,
+      },
     }),
     emailAndPassword: {
       enabled: true,
@@ -54,5 +59,8 @@ export function createAuth(opts: { db: Database; core: Core; email: EmailService
 export type Auth = ReturnType<typeof createAuth>;
 
 function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
+  );
 }

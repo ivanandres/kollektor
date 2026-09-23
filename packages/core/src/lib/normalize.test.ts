@@ -1,9 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { decadeOf, normalizeCatalogNumber, normalizeText, sideFromPosition, sortName, stripDisambiguation } from './normalize';
+import {
+  decadeOf,
+  normalizeCatalogNumber,
+  normalizeText,
+  sideFromPosition,
+  sortName,
+  stripDisambiguation,
+} from './normalize';
 
 describe('normalize', () => {
   it('lowercases, strips accents and punctuation', () => {
-    expect(normalizeText('  Él Mató a un Policía Motorizado! ')).toBe('el mato a un policia motorizado');
+    expect(normalizeText('  Él Mató a un Policía Motorizado! ')).toBe(
+      'el mato a un policia motorizado',
+    );
     expect(normalizeText('Simon & Garfunkel')).toBe('simon and garfunkel');
     expect(normalizeText('"Heroes"')).toBe('heroes');
   });

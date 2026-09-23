@@ -25,7 +25,11 @@ describe('global search', () => {
     expect(r.albums.map((a) => a.title)).toEqual([]); // no album *titled* love
     const tracks = r.tracks.map((t) => `${t.title} — ${t.artist}`);
     expect(tracks).toEqual(
-      expect.arrayContaining(['Oh My Love — John Lennon', 'Whole Lotta Love — Led Zeppelin', 'All You Need Is Love — The Beatles']),
+      expect.arrayContaining([
+        'Oh My Love — John Lennon',
+        'Whole Lotta Love — Led Zeppelin',
+        'All You Need Is Love — The Beatles',
+      ]),
     );
     // the wishlist-only track is flagged as not owned
     expect(r.tracks.find((t) => t.title === 'All You Need Is Love')?.collectionItemId).toBeNull();
@@ -42,13 +46,20 @@ describe('global search', () => {
   });
 
   it('song title, including song + artist', async () => {
-    expect((await search('money')).tracks[0]).toMatchObject({ title: 'Money', albumTitle: 'The Dark Side Of The Moon' });
+    expect((await search('money')).tracks[0]).toMatchObject({
+      title: 'Money',
+      albumTitle: 'The Dark Side Of The Moon',
+    });
     expect((await search('so what miles')).tracks.map((t) => t.title)).toEqual(['So What']);
   });
 
   it('year, label and catalog number find editions', async () => {
-    expect((await search('1973')).releases.map((r) => r.albumTitle)).toEqual(['The Dark Side Of The Moon']);
-    expect((await search('EMI')).releases.map((r) => r.albumTitle)).toEqual(['The Dark Side Of The Moon']);
+    expect((await search('1973')).releases.map((r) => r.albumTitle)).toEqual([
+      'The Dark Side Of The Moon',
+    ]);
+    expect((await search('EMI')).releases.map((r) => r.albumTitle)).toEqual([
+      'The Dark Side Of The Moon',
+    ]);
     expect((await search('shvl-815')).releases.map((r) => r.albumTitle)).toEqual(['Animals']);
     expect((await search('harvest 1977')).releases.map((r) => r.albumTitle)).toEqual(['Animals']);
   });
