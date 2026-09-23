@@ -71,7 +71,7 @@ su variable en `.env`:
 ## Comandos
 
 ```bash
-pnpm test            # 86 tests (unitarios + integración contra Postgres + API de punta a punta)
+pnpm test            # 89 tests (unitarios + integración contra Postgres + API de punta a punta)
 pnpm typecheck
 pnpm lint
 pnpm format

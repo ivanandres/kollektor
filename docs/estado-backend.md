@@ -1,16 +1,16 @@
 # Estado del backend — noche del 23/09/2026
 
-Resumen: el backend del MVP (fases 1 a 11 del roadmap) está implementado, con 86 tests pasando contra
+Resumen: el backend del MVP (fases 1 a 11 del roadmap) está implementado, con 89 tests pasando contra
 Postgres real. Falta todo lo visual: web (fase 12, espera las pantallas de diseño) y app móvil (fase 13).
 
 ## Por fase
 
 | Fase | Qué quedó | Dónde |
 |---|---|---|
-| 1. Setup + arquitectura + DB | Monorepo pnpm/Turborepo, TS estricto, esquema completo (34 tablas) con migraciones, `pg_trgm` + `unaccent`, Vitest, ESLint, Prettier, CI de GitHub Actions, Docker y config de Vercel | `packages/db`, `.github/workflows/ci.yml` |
-| 2. Auth + usuarios | Registro, login, logout, recuperación de contraseña por mail, sesión por cookie (web) o bearer (mobile). Perfil con username único, bio, avatar (subida prefirmada a R2/S3) y privacidad granular, **privado por default** | `apps/api/src/auth.ts`, `modules/profiles` |
+| 1. Setup + arquitectura + DB | Monorepo pnpm/Turborepo, TS estricto, esquema completo (35 tablas) con migraciones, `pg_trgm` + `unaccent`, Vitest, ESLint, Prettier, CI de GitHub Actions, Docker y config de Vercel | `packages/db`, `.github/workflows/ci.yml` |
+| 2. Auth + usuarios | Registro, login, logout, recuperación de contraseña por mail, sesión por cookie (web) o bearer (mobile). Perfil con username único, bio, avatar (subida prefirmada a R2/S3) y privacidad granular, **privado por default**. Borrado de cuenta con todos sus datos | `apps/api/src/auth.ts`, `modules/profiles` |
 | 3. Artistas / álbumes / ediciones / temas | Modelo por edición: varios artistas por álbum, varios sellos y catálogos por edición, formatos estructurados (cantidad, tamaño, velocidad, color, descripciones), tracklist por lado, ids externos genéricos | `modules/catalog` |
-| 4. Colección | Alta, edición, baja lógica, tags, condición Goldmine, número de copia, precio en cualquier moneda convertido a la moneda base según la fecha de compra, valor estimado con fuente, export CSV | `modules/collection`, `modules/currency`, `modules/valuation` |
+| 4. Colección | Alta, edición, baja lógica, tags, condición Goldmine, número de copia, precio en cualquier moneda convertido a la moneda base según la fecha de compra, valor estimado con fuente, fotos de la copia propia, export CSV | `modules/collection`, `modules/currency`, `modules/valuation` |
 | 5. Discogs | `DiscogsService` con rate limit (55/min), reintentos ante 429/5xx, búsqueda por texto, artista, título, catálogo, código de barras, país, año y formato. Ediciones de un master, importación idempotente y segura ante concurrencia, valores de mercado por condición con fallback, importación de colección pública | `packages/integrations/src/discogs`, `modules/imports` |
 | 6. Agregar vinilo | Manual (queda privada del usuario), desde Discogs y por foto: código de barras → catálogo → artista/título con Claude visión, siempre devolviendo **candidatos** para confirmar. Altas idempotentes para conexiones malas | `modules/recognition`, `integrations/src/vision` |
 | 7. Wishlist | Por álbum (cualquier edición) o por edición específica, prioridad, precio objetivo, estados, "Agregar a mi colección" que conserva el historial | `modules/wishlist` |
@@ -81,8 +81,6 @@ mismo `SearchProvider` (Meilisearch o Typesense), sin tocar la API.
   conviene moverlo a Postgres o Redis.
 - **Discogs OAuth por usuario** (colecciones privadas y más cupo): no está hecho. Hoy la importación
   funciona con colecciones públicas.
-- **Fotos propias de cada copia** (no la portada genérica): el esquema tiene `release_images.kind = user`,
-  pero el endpoint está pendiente.
 - **Deploy:** la configuración de Vercel y Docker está escrita pero no pude probarla en este entorno (no hay
   Docker ni cuenta de Vercel). Hay que validarla en el primer deploy.
 - Los **tipos de cambio** y las **APIs externas reales** no se pudieron llamar desde este entorno, porque la
