@@ -360,6 +360,24 @@
             "count": 6
         }
     ],
+    "locations": [
+        {
+            "value": "Estante 1",
+            "count": 7
+        },
+        {
+            "value": "Estante 2",
+            "count": 7
+        },
+        {
+            "value": "Estante 3",
+            "count": 6
+        },
+        {
+            "value": "Estante 4",
+            "count": 6
+        }
+    ],
     "ranges": {
         "paid": {
             "min": 25,
