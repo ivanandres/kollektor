@@ -129,6 +129,10 @@ export interface MarketValue {
 export interface MarketValueProvider {
   readonly source: string;
   getMarketValues(externalReleaseId: string): Promise<MarketValue[]>;
+  /** Cheapest copy currently for sale (what you could buy today). */
+  getLowestListing?(
+    externalReleaseId: string,
+  ): Promise<{ amount: number; currency: string } | null>;
 }
 
 export interface FxRateProvider {

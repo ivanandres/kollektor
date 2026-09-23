@@ -118,7 +118,7 @@ las hizo (`isVerified: false`).
 
 | Método y ruta | Descripción |
 |---|---|
-| `GET /wishlist?status=&includePurchased=true` | Por defecto oculta los comprados. Cada ítem trae `ownedEditions` (cuántas ediciones de ese álbum ya tenés) |
+| `GET /wishlist?status=&includePurchased=true` | Por defecto oculta los comprados. Cada ítem trae `ownedEditions` (cuántas ediciones de ese álbum ya tenés), `market` (la copia más barata a la venta en Discogs, si se consultó) y `belowTarget` (hay una copia a tu precio objetivo o menos). El precio se actualiza una vez por día |
 | `POST /wishlist` | Una sola fuente: `discogsMasterId` (cualquier edición del álbum), `discogsReleaseId` (esa edición), `albumId`, `releaseId` o `manual`. Opcionales: `targetPrice`, `targetCurrency`, `priority` (1 alta, 2 media, 3 baja), `status`, `notes`. Responde 409 si ya está en la wishlist |
 | `PATCH /wishlist/:id` | `status`: `wanted` → `searching` → `found`. El estado `purchased` solo se alcanza con `/purchase` |
 | `DELETE /wishlist/:id` | |
@@ -149,7 +149,7 @@ las hizo (`isVerified: false`).
 | `GET /stats/timeline` | Discos agregados por mes, gasto por año y por mes, mes de mayor gasto e historial de valor |
 | `GET /achievements` | Todos los logros con `unlocked`, `unlockedAt` y `progress: { current, target }` |
 | `GET /achievements/essentials` | Progreso de cada discografía esencial, con los álbumes que faltan |
-| `GET /discover` | Mensajes listos para mostrar, de tipo `essential_almost_complete`, `essential_complete`, `decades` y `explore_artist` (por ejemplo "Te falta 1 disco para completar Led Zeppelin.") |
+| `GET /discover` | Mensajes listos para mostrar, de tipo `wishlist_price_alert`, `essential_almost_complete`, `essential_complete`, `decades` y `explore_artist` (por ejemplo "Te falta 1 disco para completar Led Zeppelin.") |
 
 ## Importar desde Discogs
 

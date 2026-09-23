@@ -176,6 +176,18 @@ export class DiscogsService implements CatalogProvider, MarketValueProvider {
     };
   }
 
+  async getLowestListing(externalReleaseId: string) {
+    const stats = await this.get<DMarketStats>(
+      `/marketplace/stats/${encodeURIComponent(externalReleaseId)}`,
+      {
+        curr_abbr: this.currency,
+      },
+    );
+    return stats.lowest_price?.value != null
+      ? { amount: stats.lowest_price.value, currency: stats.lowest_price.currency }
+      : null;
+  }
+
   /**
    * Price suggestions per condition require the token's account to have seller settings;
    * if unavailable we fall back to the marketplace's lowest listing (clearly a weaker signal).

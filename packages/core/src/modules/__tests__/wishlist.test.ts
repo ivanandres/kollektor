@@ -60,6 +60,26 @@ describe('wishlist', () => {
     expect(history[0]).toMatchObject({ status: 'purchased', collectionItemId: item.id });
   });
 
+  it('alerts when a wished edition is for sale below the target price', async () => {
+    const w = await add({ discogsReleaseId: 2000001, targetPrice: 50000, targetCurrency: 'ARS' });
+    expect(w).toMatchObject({ market: null, belowTarget: false });
+    ctx.catalog.lowest.set('2000001', { amount: 45, currency: 'USD' }); // = ARS 45.000
+    await ctx.core.scheduleMaintenance();
+    await ctx.core.runJobs();
+    const [item] = await ctx.core.wishlist.list(ctx.userId);
+    expect(item).toMatchObject({ market: { lowest: 45, currency: 'USD' }, belowTarget: true });
+    const alert = (await ctx.core.discovery.insights(ctx.userId)).find(
+      (i) => i.type === 'wishlist_price_alert',
+    );
+    expect(alert?.message).toBe(
+      'Hay un The Dark Side Of The Moon a USD 45, por debajo de tu objetivo de ARS 50000.',
+    );
+    // Above target → no alert
+    ctx.catalog.lowest.set('2000001', { amount: 60, currency: 'USD' });
+    await ctx.core.valuation.refreshLowestListing(item!.release!.id);
+    expect((await ctx.core.wishlist.list(ctx.userId))[0]).toMatchObject({ belowTarget: false });
+  });
+
   it('refuses to purchase an edition of a different album', async () => {
     const w = await add({ discogsMasterId: 10414 });
     await expect(

@@ -11,6 +11,7 @@ import { conflict, invalid, notFound } from '../../lib/errors';
 import { recordActivity } from '../activity/service';
 import type { CatalogService } from '../catalog/service';
 import type { CollectionService } from '../collection/service';
+import type { CurrencyService } from '../currency/service';
 
 const { wishlistItems, releases, releaseLabels } = schema;
 
@@ -20,6 +21,7 @@ export function wishlistService(
   deps: CoreDeps,
   catalog: CatalogService,
   collection: CollectionService,
+  currency?: CurrencyService,
 ) {
   const { db } = deps;
 
@@ -218,7 +220,29 @@ export function wishlistService(
       SELECT r.album_id, count(*)::int AS n FROM collection_items ci JOIN releases r ON r.id = ci.release_id
        WHERE ci.user_id = ${userId} AND ci.deleted_at IS NULL GROUP BY r.album_id`);
     const owned = new Map(ownedAlbums.map((o) => [o.album_id, o.n]));
-    return rows.map((r) => ({
+    const listings = releaseIds.length
+      ? await db.execute<{
+          release_id: string;
+          price: string;
+          currency: string;
+          captured_at: Date;
+        }>(sql`
+          SELECT DISTINCT ON (release_id) release_id, price, currency, captured_at FROM price_snapshots
+           WHERE kind = 'lowest' AND release_id::text = ANY(ARRAY[${sql.join(
+             releaseIds.map((r) => sql`${r}`),
+             sql`, `,
+           )}])
+           ORDER BY release_id, captured_at DESC`)
+      : [];
+    const market = new Map(listings.map((l) => [l.release_id, l]));
+    const belowTarget = async (r: (typeof rows)[number]) => {
+      const m = r.releaseId ? market.get(r.releaseId) : undefined;
+      if (!m || r.targetPrice == null || !r.targetCurrency || !currency) return false;
+      const inTarget = await currency.convert(Number(m.price), m.currency, r.targetCurrency);
+      return inTarget != null && inTarget <= r.targetPrice;
+    };
+    const alerts = await Promise.all(rows.map(belowTarget));
+    return rows.map((r, i) => ({
       id: r.id,
       album: albums.get(r.albumId)!,
       release: releaseRows.find((x) => x.id === r.releaseId) ?? null,
@@ -230,6 +254,19 @@ export function wishlistService(
       collectionItemId: r.collectionItemId,
       /** You already own another edition of this album. */
       ownedEditions: owned.get(r.albumId) ?? 0,
+      /** Cheapest copy for sale of the wished edition (Discogs), when known. */
+      market: (() => {
+        const m = r.releaseId ? market.get(r.releaseId) : undefined;
+        return m
+          ? {
+              lowest: Number(m.price),
+              currency: m.currency,
+              checkedAt: new Date(m.captured_at).toISOString(),
+            }
+          : null;
+      })(),
+      /** A copy is for sale at or below your target price. */
+      belowTarget: alerts[i]!,
       createdAt: r.createdAt.toISOString(),
     }));
   }

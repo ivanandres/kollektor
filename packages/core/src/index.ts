@@ -37,10 +37,10 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
   const profiles = profileService(deps, {
     onBaseCurrencyChanged: (userId) => valuation.recomputeUser(userId),
   });
-  const wishlist = wishlistService(deps, catalog, collection);
+  const wishlist = wishlistService(deps, catalog, collection, currency);
   const search = opts.search ?? postgresSearchProvider(deps);
   const stats = statsService(deps);
-  const discovery = discoveryService(deps, achievements);
+  const discovery = discoveryService(deps, achievements, wishlist);
   const music = musicLinkService(deps, catalog);
   const recognition = recognitionService(deps);
   const jobs = jobService(deps);
@@ -81,6 +81,21 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
         { itemId: i.id },
         { dedupeKey: `recompute:${i.id}:${now}` },
       );
+    // Wishlist price alerts: cheapest listing of each wished edition, once a day.
+    if (deps.marketValue?.getLowestListing) {
+      const wished = await deps.db.execute<{ release_id: string }>(sql`
+        SELECT DISTINCT w.release_id FROM wishlist_items w
+          JOIN external_ids e ON e.entity_type = 'release' AND e.entity_id = w.release_id AND e.source = ${deps.marketValue.source}
+         WHERE w.status <> 'purchased' AND w.release_id IS NOT NULL AND NOT EXISTS (
+           SELECT 1 FROM price_snapshots ps WHERE ps.release_id = w.release_id AND ps.kind = 'lowest'
+             AND ps.captured_at > now() - interval '20 hours')`);
+      for (const r of wished)
+        await jobs.enqueue(
+          'wishlist.check_listing',
+          { releaseId: r.release_id },
+          { dedupeKey: `listing:${r.release_id}:${now}` },
+        );
+    }
     // Snapshots run after the value refreshes queued above.
     const later = new Date((deps.now ? deps.now() : new Date()).getTime() + 30 * 60_000);
     for (const u of users)
@@ -93,6 +108,9 @@ export function createCore(deps: CoreDeps, opts: { search?: SearchProvider } = {
 
   const jobHandlers = {
     [imports.JOB]: imports.handler,
+    'wishlist.check_listing': async (p: Record<string, unknown>) => {
+      await valuation.refreshLowestListing(String(p.releaseId));
+    },
     'item.recompute': async (p: Record<string, unknown>) =>
       valuation.recomputeItem(String(p.itemId)),
     'collection.snapshot': async (p: Record<string, unknown>) =>

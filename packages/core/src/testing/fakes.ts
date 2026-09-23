@@ -193,6 +193,11 @@ export class FakeCatalog implements CatalogProvider, MarketValueProvider {
     return { items, page, pages: Math.max(1, Math.ceil(ids.length / size)), total: ids.length };
   }
 
+  lowest = new Map<string, { amount: number; currency: string } | null>();
+  async getLowestListing(id: string) {
+    return this.lowest.get(id) ?? null;
+  }
+
   async getMarketValues(id: string) {
     return this.market.get(id) ?? [];
   }

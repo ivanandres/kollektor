@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import type { CoreDeps } from '../../context';
 import type { AchievementService } from '../achievements/service';
+import type { WishlistService } from '../wishlist/service';
 
 export type Insight =
   | {
@@ -22,6 +23,17 @@ export type Insight =
     }
   | { type: 'decades'; count: number; message: string }
   | {
+      type: 'wishlist_price_alert';
+      wishlistItemId: string;
+      albumTitle: string;
+      artist: string;
+      lowest: number;
+      currency: string;
+      targetPrice: number;
+      targetCurrency: string;
+      message: string;
+    }
+  | {
       type: 'explore_artist';
       artistId: string;
       artistName: string;
@@ -30,11 +42,29 @@ export type Insight =
       message: string;
     };
 
-export function discoveryService(deps: CoreDeps, achievements: AchievementService) {
+export function discoveryService(
+  deps: CoreDeps,
+  achievements: AchievementService,
+  wishlist?: WishlistService,
+) {
   const { db } = deps;
 
   async function insights(userId: string): Promise<Insight[]> {
     const out: Insight[] = [];
+    for (const w of wishlist ? await wishlist.list(userId) : []) {
+      if (!w.belowTarget || !w.market || w.targetPrice == null || !w.targetCurrency) continue;
+      out.push({
+        type: 'wishlist_price_alert',
+        wishlistItemId: w.id,
+        albumTitle: w.album.title,
+        artist: w.album.artistDisplay,
+        lowest: w.market.lowest,
+        currency: w.market.currency,
+        targetPrice: w.targetPrice,
+        targetCurrency: w.targetCurrency,
+        message: `Hay un ${w.album.title} a ${w.market.currency} ${w.market.lowest}, por debajo de tu objetivo de ${w.targetCurrency} ${w.targetPrice}.`,
+      });
+    }
     const lists = await achievements.essentialProgress(userId);
     const started = lists
       .filter((l) => l.owned > 0)

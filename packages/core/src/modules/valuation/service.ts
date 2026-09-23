@@ -149,6 +149,34 @@ export function valuationService(deps: CoreDeps, currency: CurrencyService) {
     return values.length;
   }
 
+  /** Cheapest listing for sale right now (used by wishlist price alerts). */
+  async function refreshLowestListing(releaseId: string): Promise<boolean> {
+    const provider = deps.marketValue;
+    if (!provider?.getLowestListing) return false;
+    const [ext] = await db
+      .select({ externalId: externalIds.externalId })
+      .from(externalIds)
+      .where(
+        and(
+          eq(externalIds.entityType, 'release'),
+          eq(externalIds.entityId, releaseId),
+          eq(externalIds.source, provider.source),
+        ),
+      );
+    if (!ext) return false;
+    const lowest = await provider.getLowestListing(ext.externalId);
+    if (!lowest) return false;
+    await db.insert(priceSnapshots).values({
+      releaseId,
+      source: provider.source,
+      kind: 'lowest',
+      price: lowest.amount,
+      currency: lowest.currency,
+      capturedAt: nowOf(deps),
+    });
+    return true;
+  }
+
   /** Stores today's totals for the "collection value over time" chart. */
   async function snapshotCollection(userId: string): Promise<void> {
     const base = await baseCurrencyOf(userId);
@@ -183,6 +211,7 @@ export function valuationService(deps: CoreDeps, currency: CurrencyService) {
   }
 
   return {
+    refreshLowestListing,
     estimate,
     recomputeItem,
     recomputeUser,
