@@ -1,0 +1,37 @@
+{
+  "id": 1873013,
+  "title": "The Dark Side Of The Moon",
+  "uri": "https://www.discogs.com/release/1873013-Pink-Floyd-The-Dark-Side-Of-The-Moon",
+  "artists": [{ "id": 45467, "name": "Pink Floyd", "anv": "", "join": "" }],
+  "year": 1973,
+  "released": "1973-03-23",
+  "country": "UK",
+  "genres": ["Rock"],
+  "styles": ["Prog Rock", "Psychedelic Rock"],
+  "labels": [
+    { "id": 2331, "name": "Harvest", "catno": "SHVL 804" },
+    { "id": 26126, "name": "EMI", "catno": "SHVL 804" }
+  ],
+  "formats": [{ "name": "Vinyl", "qty": "1", "descriptions": ["LP", "Album", "Stereo"], "text": "Gatefold" }],
+  "identifiers": [{ "type": "Matrix / Runout", "value": "SHVL 804 A-2U" }, { "type": "Barcode", "value": "5 099902 987613" }],
+  "tracklist": [
+    { "position": "", "type_": "heading", "title": "Side One" },
+    { "position": "A1", "type_": "track", "title": "Speak To Me", "duration": "1:30" },
+    { "position": "A2", "type_": "track", "title": "Breathe", "duration": "2:43" },
+    { "position": "B1", "type_": "track", "title": "Money", "duration": "6:22" },
+    { "position": "", "type_": "index", "title": "Medley", "sub_tracks": [
+      { "position": "B4a", "type_": "track", "title": "Brain Damage", "duration": "3:48" },
+      { "position": "B4b", "type_": "track", "title": "Eclipse", "duration": "2:03",
+        "artists": [{ "id": 1, "name": "Roger Waters", "join": "&" }, { "id": 2, "name": "David Gilmour", "join": "" }] }
+    ] }
+  ],
+  "images": [
+    { "type": "primary", "uri": "https://i.discogs.com/primary.jpg", "width": 600, "height": 600 },
+    { "type": "secondary", "uri": "https://i.discogs.com/back.jpg", "width": 600, "height": 600 }
+  ],
+  "notes": "Solid blue triangle labels.",
+  "master_id": 10362,
+  "community": { "have": 12000, "want": 8000 },
+  "lowest_price": 249.99,
+  "num_for_sale": 12
+}

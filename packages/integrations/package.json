@@ -10,7 +10,9 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.128.0",
     "@kollektor/core": "workspace:*",
+    "@kollektor/schemas": "workspace:*",
     "zod": "4.6.5"
   }
 }
