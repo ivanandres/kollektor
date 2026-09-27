@@ -198,6 +198,7 @@ export const COLLECTION_SORTS = [
 export const collectionQuery = z.object({
   q: z.string().trim().max(200).optional(),
   artistId: list(z.uuid()),
+  albumId: list(z.uuid()),
   genre: list(z.string()),
   style: list(z.string()),
   decade: list(int),

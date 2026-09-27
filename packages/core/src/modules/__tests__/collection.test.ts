@@ -206,6 +206,12 @@ describe('collection', () => {
       'The Dark Side Of The Moon|UK',
     ]);
     expect(await titles({ q: 'shvl 804' })).toEqual(['The Dark Side Of The Moon|UK']);
+    const dsotm = (await ctx.core.collection.list(ctx.userId, q({ q: 'shvl 804' }))).items[0]!;
+    expect(dsotm).toMatchObject({ label: 'Harvest', catalogNumber: 'SHVL 804' });
+    expect(await titles({ albumId: dsotm.albumId })).toEqual([
+      'The Dark Side Of The Moon|Japan',
+      'The Dark Side Of The Moon|UK',
+    ]);
     const facets = await ctx.core.collection.facets(ctx.userId);
     expect(facets.countries[0]).toMatchObject({ value: 'UK', count: 3 });
     expect(facets.decades.map((d) => Number(d.value))).toEqual([1950, 1960, 1970]);

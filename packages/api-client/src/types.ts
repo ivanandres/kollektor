@@ -2,7 +2,7 @@
  * Response types derived from the domain services, as they arrive over JSON
  * (Dates become ISO strings). Type-only imports: nothing from the server ships to clients.
  */
-import type { Core } from '@kollektor/core';
+import type { Core, ExternalRelease } from '@kollektor/core';
 
 /** What JSON.parse gives back for a server value. */
 export type Jsonify<T> = T extends Date
@@ -51,6 +51,11 @@ export type ActivityEntry = Out<Core['activity']['list']>[number];
 export type PublicProfile = Out<Core['publicViews']['profile']>;
 export type PublicCollection = Out<Core['publicViews']['collectionOf']>;
 export type PublicWishlist = Out<Core['publicViews']['wishlistOf']>;
+
+/** Full Discogs edition preview (not imported). */
+export type ExternalReleasePreview = Jsonify<ExternalRelease> & {
+  attribution: string;
+};
 
 type ExternalPage = Out<NonNullable<Core['deps']['catalogProvider']>['search']>;
 export type ExternalCandidate = ExternalPage['items'][number] & Ownership;

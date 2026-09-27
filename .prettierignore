@@ -3,3 +3,4 @@ packages/db/drizzle/
 **/fixtures/**
 docs/
 design/
+.next/

@@ -56,6 +56,7 @@ export function publicService(
     const res = await collection.list(p.userId, {
       q: q.q,
       artistId: q.artistId,
+      albumId: q.albumId,
       genre: q.genre,
       style: q.style,
       decade: q.decade,

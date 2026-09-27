@@ -238,7 +238,7 @@ export function createApiClient(opts: ApiClientOptions) {
       searchExternal: (query: Partial<CatalogSearchQuery>) =>
         get<T.ExternalSearchPage>('/catalog/external/search', query as Query),
       externalRelease: (discogsId: number | string) =>
-        get<unknown>(`/catalog/external/releases/${id(String(discogsId))}`),
+        get<T.ExternalReleasePreview>(`/catalog/external/releases/${id(String(discogsId))}`),
       masterVersions: (masterId: number | string, page = 1) =>
         get<T.ExternalSearchPage>(`/catalog/external/masters/${id(String(masterId))}/versions`, {
           page,

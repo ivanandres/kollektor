@@ -1,0 +1,348 @@
+/* ─── Mobile shared ─── */
+.rule {
+  border-bottom: 2px solid var(--color-divider);
+}
+.pad {
+  padding: 16px 20px;
+}
+.top {
+  padding: calc(16px + env(safe-area-inset-top)) 20px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.brand {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.iconBox {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-divider);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+}
+.three {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 2px solid var(--color-divider);
+}
+.three > div {
+  padding: 14px 12px;
+  min-width: 0;
+}
+.three > div:first-child {
+  padding-left: 20px;
+}
+.three > div + div {
+  border-left: 1px solid var(--color-divider);
+}
+.small {
+  font-size: 12px;
+  color: var(--color-neutral-700);
+}
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+/* ─── 1c Progreso ─── */
+.hero {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  padding: 22px 20px 20px;
+}
+.heroKicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.heroTitle {
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-top: 10px;
+}
+.dots {
+  display: grid;
+  gap: 3px;
+  margin-top: 18px;
+}
+.dots > div {
+  height: 22px;
+  border: 1.5px solid var(--color-bg);
+}
+.heroFoot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.heroFoot a,
+.heroFoot button {
+  color: var(--color-bg);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.recent {
+  padding: 16px 0 16px 20px;
+  border-bottom: 2px solid var(--color-divider);
+}
+.recentRow {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-right: 20px;
+  scrollbar-width: none;
+}
+.recentItem {
+  flex: none;
+  width: 128px;
+}
+.recentTitle {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 6px;
+  line-height: 1.2;
+}
+.badges {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.badge {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.badgeMark {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+}
+.badgeName {
+  font-size: 10.5px;
+  line-height: 1.2;
+}
+.insight {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 14px;
+  line-height: 1.35;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.insight:hover {
+  color: var(--color-text);
+}
+
+/* ─── 1b Números ─── */
+.hello {
+  padding: calc(16px + env(safe-area-inset-top)) 20px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 2px solid var(--color-divider);
+}
+.big {
+  font-size: 96px;
+  line-height: 0.85;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 2px solid var(--color-divider);
+}
+.two > div {
+  padding: 14px 16px;
+}
+.two > div:first-child {
+  padding-left: 20px;
+}
+.two > div:nth-child(2) {
+  border-left: 1px solid var(--color-divider);
+}
+.diffRow {
+  grid-column: 1 / 3;
+  padding: 10px 20px !important;
+  border-top: 1px solid var(--color-divider);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.hbars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hbar {
+  display: grid;
+  grid-template-columns: 48px 1fr 28px;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+.fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 13px;
+}
+
+/* ─── Empty state ─── */
+.empty {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.emptyTitle {
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* ─── 1k Web ─── */
+.kpis {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+  border-bottom: 2px solid var(--color-divider);
+}
+.kpis > div {
+  padding: 24px 20px;
+}
+.kpis > div:first-child {
+  padding: 24px 32px;
+}
+.kpis > div + div {
+  border-left: 1px solid var(--color-divider);
+}
+.kpiLabel {
+  font-size: 13px;
+  color: var(--color-neutral-700);
+}
+.kpiBig {
+  font-size: 88px;
+  line-height: 0.9;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+.kpiNum {
+  font-size: 36px;
+  font-weight: 800;
+}
+.kpiAccent {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+.kpiAccent .kpiLabel,
+.kpiAccent .small {
+  color: var(--color-bg);
+}
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 2px solid var(--color-divider);
+}
+.charts > div {
+  padding: 20px 24px;
+}
+.charts > div:first-child {
+  padding: 20px 32px;
+}
+.charts > div + div {
+  border-left: 1px solid var(--color-divider);
+}
+.vbars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 150px;
+}
+.vbar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  gap: 4px;
+}
+.artistBar {
+  display: grid;
+  grid-template-columns: 110px 1fr 24px;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+.stack {
+  display: flex;
+  height: 28px;
+  margin-bottom: 14px;
+}
+.stack > div {
+  border-right: 2px solid var(--color-bg);
+}
+.legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+.bottomRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+}
+.bottomRow > div:first-child {
+  padding: 20px 32px 28px;
+}
+.bottomRow > div + div {
+  padding: 20px 24px 28px;
+  border-left: 1px solid var(--color-divider);
+}
+.six {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+}
+.disco {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-text);
+  text-decoration: none;
+  display: block;
+}
+.disco:hover {
+  color: var(--color-text);
+}
+.nextBox {
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--color-surface);
+  font-size: 13px;
+}

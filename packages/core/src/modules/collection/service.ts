@@ -36,6 +36,9 @@ export interface CollectionListItem {
   country: string | null;
   formatSummary: string | null;
   editionType: string | null;
+  /** First label of the edition and its catalog number. */
+  label: string | null;
+  catalogNumber: string | null;
   coverImageUrl: string | null;
   conditionMedia: string | null;
   conditionSleeve: string | null;
@@ -285,6 +288,8 @@ export function collectionService(
       country: string | null;
       format_summary: string | null;
       edition_type: string | null;
+      label: string | null;
+      catalog_number: string | null;
       cover_image_url: string | null;
       condition_media: string | null;
       condition_sleeve: string | null;
@@ -298,12 +303,17 @@ export function collectionService(
     }>(sql`
       SELECT ci.id, r.id AS release_id, a.id AS album_id, a.title, ${ARTIST_DISPLAY} AS artist,
              a.original_release_year, r.release_year, r.country, r.format_summary, r.edition_type,
+             fl.name AS label, fl.catalog_number,
              ${COVER_URL} AS cover_image_url, ci.condition_media, ci.condition_sleeve,
              ci.purchase_price, ci.purchase_currency, ci.purchase_price_base, ci.estimated_value_base,
              ci.base_currency, ci.created_at, count(*) OVER ()::int AS total
         FROM collection_items ci
         JOIN releases r ON r.id = ci.release_id
         JOIN albums a ON a.id = r.album_id
+        LEFT JOIN LATERAL (
+          SELECT lb.name, rl.catalog_number FROM release_labels rl JOIN labels lb ON lb.id = rl.label_id
+           WHERE rl.release_id = r.id ORDER BY rl.position LIMIT 1
+        ) fl ON true
        WHERE ${where}
        ORDER BY ${collectionOrderBy(q.sort)}, ci.id
        LIMIT ${q.pageSize} OFFSET ${offset}`);
@@ -319,6 +329,8 @@ export function collectionService(
       country: r.country,
       formatSummary: r.format_summary,
       editionType: r.edition_type,
+      label: r.label,
+      catalogNumber: r.catalog_number,
       coverImageUrl: r.cover_image_url,
       conditionMedia: r.condition_media,
       conditionSleeve: r.condition_sleeve,

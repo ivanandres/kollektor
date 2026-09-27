@@ -18,6 +18,7 @@ export function collectionFilters(userId: string, q: CollectionQuery, now: Date)
     f.push(
       sql`EXISTS (SELECT 1 FROM album_artists aa WHERE aa.album_id = a.id AND aa.artist_id::text = ANY(${arr(q.artistId)}))`,
     );
+  if (q.albumId?.length) f.push(sql`a.id::text = ANY(${arr(q.albumId)})`);
   if (q.genre?.length)
     f.push(
       sql`EXISTS (SELECT 1 FROM album_genres ag JOIN genres g ON g.id = ag.genre_id WHERE ag.album_id = a.id AND g.name = ANY(${arr(q.genre)}))`,
