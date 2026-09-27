@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-57e53d99-70d9-4966-a9fb-ed4ccd543397/styles.css">
+<style>body{margin:0;background:#dcdad8;font-family:"Archivo",system-ui,sans-serif}a{color:var(--color-accent)}a:hover{color:var(--color-accent-600)}.dv-turn{padding:40px 44px 32px;border-bottom:2px solid rgba(0,0,0,.15);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;text-decoration:none}.dv-tname{font:700 15px/1.2 "Archivo",system-ui,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.1);color:#1a1a1a;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 12px/1.3 "Archivo",system-ui,sans-serif;color:rgba(0,0,0,.6)}.dv-card{max-width:100%;background:var(--color-bg);box-shadow:0 2px 10px rgba(0,0,0,.12);overflow:hidden}.dv-opt:target .dv-oid{background:#ec3013;color:#fff}.dv-next{margin:26px 0 0;font:12px/1.5 "Archivo",system-ui,sans-serif;color:rgba(0,0,0,.55)}.dv-group{font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:rgba(0,0,0,.5);margin:36px 0 16px}</style>
+</helmet>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Kolektorz — mockups MVP (mobile + web)</span></div>
+<p style="margin:0 0 4px;max-width:760px;font-size:13px;line-height:1.5;color:rgba(0,0,0,.65)">Sistema Modernist: Archivo, rojo único, esquinas rectas, reglas de 2px. Portadas como placeholders rayados. Variaciones en Dashboard (<a class="dv-oid" href="#1b">1b</a> / <a class="dv-oid" href="#1c">1c</a>) y Colección (<a class="dv-oid" href="#1d">1d</a> / <a class="dv-oid" href="#1e">1e</a>). Clickeable: vista grid/lista, búsqueda (probá los atajos), filtros, flujo de cámara, formulario, tracklist, estados de wishlist.</p>
+
+<div class="dv-group">Mobile · 390 × 844</div>
+<div class="dv-opts">
+
+<!-- 1a LOGIN -->
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Login / registro</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column;position:relative">
+  <div style="height:44px;padding:0 20px;display:flex;align-items:center;font-size:13px;font-weight:600">9:41</div>
+  <div style="flex:1;display:flex;flex-direction:column;padding:24px 20px 28px">
+    <div style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--color-accent)">Kolektorz</div>
+    <div style="font-size:52px;line-height:.95;font-weight:800;letter-spacing:-.03em;margin-top:28px">Qué tenés.<br>Qué querés.<br>Cuánto vale.</div>
+    <div style="height:2px;background:var(--color-divider);margin:32px 0 24px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--color-divider);margin-bottom:20px">
+      <div onClick="{{ setLoginIn }}" style="padding:12px;font-size:14px;font-weight:700;cursor:pointer;background:{{ loginInBg }};color:{{ loginInFg }}">Iniciar sesión</div>
+      <div onClick="{{ setLoginUp }}" style="padding:12px;font-size:14px;font-weight:700;cursor:pointer;border-left:1px solid var(--color-divider);background:{{ loginUpBg }};color:{{ loginUpFg }}">Crear cuenta</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
+        <div class="field"><label>Username</label><input class="input" style="min-height:48px" placeholder="ivan.discos"></div>
+      </sc-if>
+      <div class="field"><label>Email</label><input class="input" style="min-height:48px" placeholder="ivan@mail.com"></div>
+      <div class="field"><label>Contraseña</label><input class="input" type="password" style="min-height:48px" value="••••••••"></div>
+    </div>
+    <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}"><div style="margin-top:12px;font-size:13px"><a href="#1a">¿Olvidaste tu contraseña?</a></div></sc-if>
+    <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;font-size:12px;color:var(--color-neutral-700)">Tu colección es privada por defecto. Podés hacerla pública desde Perfil.</div></sc-if>
+    <div style="flex:1"></div>
+    <button class="btn btn-primary" style="width:100%;min-height:52px;justify-content:space-between;font-size:16px;padding:0 16px"><span>{{ loginCta }}</span><span>→</span></button>
+  </div>
+</div></div>
+
+<!-- 1b DASHBOARD A -->
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Dashboard A — números primero</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column">
+  <div style="height:44px;padding:0 20px;display:flex;align-items:center;font-size:13px;font-weight:600">9:41</div>
+  <div style="flex:1;overflow:auto">
+    <div style="padding:8px 20px 16px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--color-divider)">
+      <div><div style="font-size:12px;color:var(--color-neutral-700)">Hola, Iván</div><div style="font-size:22px;font-weight:800;white-space:nowrap;letter-spacing:-.02em">Tu colección</div></div>
+      <div style="width:36px;height:36px;background:var(--color-neutral-300)"></div>
+    </div>
+    <div style="padding:20px 20px 16px;border-bottom:2px solid var(--color-divider)">
+      <div style="font-size:96px;line-height:.85;font-weight:800;letter-spacing:-.05em">172</div>
+      <div style="font-size:15px;font-weight:600;margin-top:6px">vinilos</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:2px solid var(--color-divider)">
+      <div style="padding:14px 20px"><div style="font-size:24px;font-weight:800">96</div><div style="font-size:12px;color:var(--color-neutral-700)">artistas</div></div>
+      <div style="padding:14px 12px;border-left:1px solid var(--color-divider)"><div style="font-size:24px;font-weight:800">158</div><div style="font-size:12px;color:var(--color-neutral-700)">álbumes</div></div>
+      <div style="padding:14px 12px;border-left:1px solid var(--color-divider)"><div style="font-size:24px;font-weight:800">172</div><div style="font-size:12px;color:var(--color-neutral-700)">ediciones</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:2px solid var(--color-divider)">
+      <div style="padding:14px 20px"><div style="font-size:12px;color:var(--color-neutral-700)">Invertido</div><div style="font-size:22px;font-weight:800">USD 4.250</div></div>
+      <div style="padding:14px 16px;border-left:1px solid var(--color-divider)"><div style="font-size:12px;color:var(--color-neutral-700)">Valor estimado*</div><div style="font-size:22px;font-weight:800">USD 5.680</div></div>
+      <div style="grid-column:1 / 3;padding:10px 20px;border-top:1px solid var(--color-divider);display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px">Diferencia</span><span style="font-size:18px;font-weight:800;color:var(--color-accent-700)">+USD 1.430</span></div>
+    </div>
+    <div style="padding:16px 20px;border-bottom:2px solid var(--color-divider)">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Por década</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <sc-for list="{{ decades }}" as="d" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:48px 1fr 28px;gap:8px;align-items:center;font-size:12px"><span>{{ d.label }}</span><div style="height:10px;background:var(--color-surface)"><div style="height:10px;width:{{ d.pct }};background:{{ d.color }}"></div></div><span style="text-align:right;font-weight:600">{{ d.n }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="padding:16px 20px;border-bottom:2px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Próximo logro</span><span style="font-size:12px;color:var(--color-neutral-700)">faltan 78</span></div>
+      <div style="font-size:18px;font-weight:800">250 discos</div>
+      <div style="height:8px;background:var(--color-surface);margin-top:8px"><div style="height:8px;width:69%;background:var(--color-accent)"></div></div>
+    </div>
+    <div style="padding:16px 20px 24px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Tu colección en números</div>
+      <sc-for list="{{ facts }}" as="f" hint-placeholder-count="6">
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--color-divider);font-size:13px"><span style="color:var(--color-neutral-700)">{{ f.k }}</span><span style="font-weight:600;text-align:right">{{ f.v }}</span></div>
+      </sc-for>
+      <div style="font-size:11px;color:var(--color-neutral-700);margin-top:10px">* Estimación basada en datos de mercado. No es una tasación.</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);border-top:2px solid var(--color-divider);height:64px;font-size:11px;font-weight:600;flex:none">
+    <div style="display:flex;align-items:center;justify-content:center;color:var(--color-accent);box-shadow:inset 0 3px 0 var(--color-accent)">Inicio</div><div style="display:flex;align-items:center;justify-content:center">Colección</div><div style="display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:var(--color-bg);font-size:28px;font-weight:800">+</div><div style="display:flex;align-items:center;justify-content:center">Wishlist</div><div style="display:flex;align-items:center;justify-content:center">Perfil</div>
+  </div>
+</div></div>
+
+<!-- 1c DASHBOARD B -->
+<div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Dashboard B — progreso y descubrimiento</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column">
+  <div style="height:44px;padding:0 20px;display:flex;align-items:center;font-size:13px;font-weight:600">9:41</div>
+  <div style="flex:1;overflow:auto">
+    <div style="padding:8px 20px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:20px;font-weight:800;letter-spacing:-.02em">Kolektorz</div>
+      <div style="display:flex;gap:8px"><div style="width:36px;height:36px;border:1px solid var(--color-divider);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></div><div style="width:36px;height:36px;background:var(--color-neutral-300)"></div></div>
+    </div>
+    <div style="background:var(--color-accent);color:var(--color-bg);padding:22px 20px 20px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">Discografía esencial</div>
+      <div style="font-size:34px;line-height:1;font-weight:800;letter-spacing:-.03em;margin-top:10px">Te falta 1 disco para completar Pink Floyd.</div>
+      <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:18px">
+        <sc-for list="{{ pfDots }}" as="p" hint-placeholder-count="10"><div style="height:22px;background:{{ p.bg }};border:1.5px solid var(--color-bg)"></div></sc-for>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:13px;font-weight:600"><span>9 de 10 · falta Meddle (1971)</span><span>Agregar a wishlist →</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:2px solid var(--color-divider)">
+      <div style="padding:14px 20px"><div style="font-size:22px;font-weight:800;white-space:nowrap">172</div><div style="font-size:12px;color:var(--color-neutral-700)">vinilos</div></div>
+      <div style="padding:14px 12px;border-left:1px solid var(--color-divider)"><div style="font-size:18px;font-weight:800;margin-top:6px">5.680</div><div style="font-size:12px;color:var(--color-neutral-700)">USD estimado</div></div>
+      <div style="padding:14px 12px;border-left:1px solid var(--color-divider)"><div style="font-size:18px;font-weight:800;margin-top:6px;color:var(--color-accent-700)">+1.430</div><div style="font-size:12px;color:var(--color-neutral-700)">vs. invertido</div></div>
+    </div>
+    <div style="padding:16px 0 16px 20px;border-bottom:2px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;padding-right:20px;margin-bottom:10px"><span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Últimos agregados</span><span style="font-size:12px;color:var(--color-accent-700)">Ver todos</span></div>
+      <div style="display:flex;gap:10px;overflow:auto;padding-right:20px">
+        <sc-for list="{{ recent }}" as="a" hint-placeholder-count="4">
+          <div style="flex:none;width:128px"><div style="width:128px;height:128px;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 7px,var(--color-neutral-300) 7px 8px);display:flex;align-items:flex-end;padding:6px;font:10px ui-monospace,Menlo,monospace;color:var(--color-neutral-700)">portada</div><div style="font-size:13px;font-weight:700;margin-top:6px;line-height:1.2">{{ a.title }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ a.artist }}</div></div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="padding:16px 20px;border-bottom:2px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Logros</span><span style="font-size:12px;color:var(--color-neutral-700)">14 de 42</span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <sc-for list="{{ badges }}" as="b" hint-placeholder-count="8">
+          <div style="display:flex;flex-direction:column;gap:6px"><div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;background:{{ b.bg }};color:{{ b.fg }};border:{{ b.border }}">{{ b.mark }}</div><div style="font-size:10.5px;line-height:1.2;color:{{ b.label }}">{{ b.name }}</div></div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="padding:16px 20px 24px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Para vos</div>
+      <sc-for list="{{ insights }}" as="i" hint-placeholder-count="3">
+        <div style="padding:12px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35;display:flex;justify-content:space-between;gap:12px"><span>{{ i }}</span><span style="color:var(--color-accent)">→</span></div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);border-top:2px solid var(--color-divider);height:64px;font-size:11px;font-weight:600;flex:none">
+    <div style="display:flex;align-items:center;justify-content:center;color:var(--color-accent);box-shadow:inset 0 3px 0 var(--color-accent)">Inicio</div><div style="display:flex;align-items:center;justify-content:center">Colección</div><div style="display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:var(--color-bg);font-size:28px;font-weight:800">+</div><div style="display:flex;align-items:center;justify-content:center">Wishlist</div><div style="display:flex;align-items:center;justify-content:center">Perfil</div>
+  </div>
+</div></div>
+
+<!-- 1d COLECCION GRID/LIST -->
+<div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Colección A — grid / lista (tocá el toggle)</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column">
+  <div style="height:44px;padding:0 20px;display:flex;align-items:center;font-size:13px;font-weight:600">9:41</div>
+  <div style="padding:8px 20px 12px;flex:none">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:30px;font-weight:800;letter-spacing:-.02em">Colección</div><div style="font-size:14px;font-weight:600;color:var(--color-neutral-700)">172</div></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <div style="flex:1;display:flex;align-items:center;gap:8px;padding:0 12px;height:44px;background:var(--color-surface);border:1px solid var(--color-divider);font-size:14px;color:var(--color-neutral-700)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>Artista, álbum, tema, sello…</div>
+      <div style="display:grid;grid-template-columns:44px 44px;border:1px solid var(--color-divider)">
+        <div onClick="{{ setGrid }}" style="display:flex;align-items:center;justify-content:center;cursor:pointer;background:{{ gridBg }};color:{{ gridFg }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg></div>
+        <div onClick="{{ setList }}" style="display:flex;align-items:center;justify-content:center;cursor:pointer;border-left:1px solid var(--color-divider);background:{{ listBg }};color:{{ listFg }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:10px;overflow:auto">
+      <span style="flex:none;padding:6px 10px;font-size:12px;font-weight:600;background:var(--color-text);color:var(--color-bg)">Filtros · 2</span>
+      <span style="flex:none;padding:6px 10px;font-size:12px;background:var(--color-accent-100);color:var(--color-accent-800)">Rock ×</span>
+      <span style="flex:none;padding:6px 10px;font-size:12px;background:var(--color-accent-100);color:var(--color-accent-800)">1970s ×</span>
+      <span style="flex:none;padding:6px 10px;font-size:12px;border:1px solid var(--color-divider)">Orden: reciente</span>
+    </div>
+  </div>
+  <div style="flex:1;overflow:auto;border-top:2px solid var(--color-divider)">
+    <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;padding:16px 20px 24px">
+        <sc-for list="{{ items }}" as="a" hint-placeholder-count="6">
+          <div>
+            <div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 7px,var(--color-neutral-300) 7px 8px);display:flex;align-items:flex-end;justify-content:space-between;padding:6px;font:10px ui-monospace,Menlo,monospace;color:var(--color-neutral-700)"><span>portada</span><span style="background:var(--color-bg);color:var(--color-text);padding:1px 4px;font-family:Archivo,sans-serif;font-weight:600">{{ a.cond }}</span></div>
+            <div style="font-size:14px;font-weight:700;margin-top:6px;line-height:1.2">{{ a.title }}</div>
+            <div style="font-size:12px;color:var(--color-neutral-700)">{{ a.artist }} · {{ a.year }}</div>
+            <div style="font-size:12px;margin-top:2px;font-weight:600">{{ a.valueF }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <sc-for list="{{ items }}" as="a" hint-placeholder-count="8">
+          <div style="display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--color-divider)">
+            <div style="width:56px;height:56px;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 5px,var(--color-neutral-300) 5px 6px)"></div>
+            <div style="min-width:0"><div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.title }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ a.artist }} · {{ a.year }}</div><div style="font-size:11px;color:var(--color-neutral-700)">{{ a.ed }} · {{ a.format }} · {{ a.cond }}</div></div>
+            <div style="text-align:right"><div style="font-size:13px;font-weight:700">{{ a.valueF }}</div><div style="font-size:11px;color:var(--color-neutral-700)">pagué {{ a.paid }}</div></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);border-top:2px solid var(--color-divider);height:64px;font-size:11px;font-weight:600;flex:none">
+    <div style="display:flex;align-items:center;justify-content:center">Inicio</div><div style="display:flex;align-items:center;justify-content:center;color:var(--color-accent);box-shadow:inset 0 3px 0 var(--color-accent)">Colección</div><div style="display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:var(--color-bg);font-size:28px;font-weight:800">+</div><div style="display:flex;align-items:center;justify-content:center">Wishlist</div><div style="display:flex;align-items:center;justify-content:center">Perfil</div>
+  </div>
+</div></div>
+
+<!-- 1e COLECCION LOMOS -->
+<div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Colección B — estante de lomos (tocá un lomo)</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column">
+  <div style="height:44px;padding:0 20px;display:flex;align-items:center;font-size:13px;font-weight:600">9:41</div>
+  <div style="padding:8px 20px 12px;flex:none;border-bottom:2px solid var(--color-divider)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:30px;font-weight:800;letter-spacing:-.02em">Estante</div><div style="font-size:13px;color:var(--color-neutral-700)">A–Z por artista</div></div>
+  </div>
+  <div style="flex:1;overflow:auto">
+    <sc-for list="{{ spines }}" as="s" hint-placeholder-count="12">
+      <div onClick="{{ s.pick }}" style="cursor:pointer;display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:12px;padding:0 20px;height:{{ s.h }};background:{{ s.bg }};color:{{ s.fg }};border-bottom:1px solid var(--color-divider)">
+        <span style="font:600 11px ui-monospace,Menlo,monospace;opacity:.7">{{ s.letter }}</span>
+        <span style="font-size:15px;font-weight:800;letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.artist }} — {{ s.title }}</span>
+        <span style="font-size:11px;font-weight:600">{{ s.year }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <div style="flex:none;display:grid;grid-template-columns:72px 1fr;gap:12px;padding:12px 20px;border-top:2px solid var(--color-divider);background:var(--color-surface)">
+    <div style="width:72px;height:72px;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 5px,var(--color-neutral-300) 5px 6px)"></div>
+    <div><div style="font-size:15px;font-weight:800;line-height:1.2">{{ spineSel.title }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ spineSel.artist }} · {{ spineSel.ed }}</div><div style="font-size:12px;margin-top:4px"><b>{{ spineSel.valueF }}</b> est. · pagué {{ spineSel.paidF }}</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);border-top:2px solid var(--color-divider);height:64px;font-size:11px;font-weight:600;flex:none">
+    <div style="display:flex;align-items:center;justify-content:center">Inicio</div><div style="display:flex;align-items:center;justify-content:center;color:var(--color-accent);box-shadow:inset 0 3px 0 var(--color-accent)">Colección</div><div style="display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:var(--color-bg);font-size:28px;font-weight:800">+</div><div style="display:flex;align-items:center;justify-content:center">Wishlist</div><div style="display:flex;align-items:center;justify-content:center">Perfil</div>
+  </div>
+</div></div>
+
+<!-- 1f BUSQUEDA -->
+<div class="dv-opt" id="1f"><div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Buscador global + filtros</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column;position:relative">
+  <div style="height:44px;padding:0 20px;display:flex;align-items:center;font-size:13px;font-weight:600">9:41</div>
+  <div style="padding:8px 20px 12px;flex:none">
+    <div style="display:flex;gap:8px">
+      <div style="flex:1;display:flex;align-items:center;gap:8px;padding:0 12px;height:48px;background:var(--color-surface);border:2px solid var(--color-accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input value="{{ q }}" onChange="{{ onQ }}" style="flex:1;border:0;background:transparent;font:inherit;font-size:16px;outline:none;min-width:0"></div>
+      <div onClick="{{ openSheet }}" style="width:48px;height:48px;border:1px solid var(--color-divider);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"></path></svg></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+      <sc-for list="{{ qChips }}" as="c" hint-placeholder-count="5"><span onClick="{{ c.go }}" style="cursor:pointer;padding:5px 10px;font-size:12px;border:1px solid var(--color-divider);background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</span></sc-for>
+    </div>
+  </div>
+  <div style="flex:1;overflow:auto;border-top:2px solid var(--color-divider);padding-bottom:24px">
+    <div style="padding:10px 20px;font-size:12px;color:var(--color-neutral-700)">{{ resultCount }}</div>
+    <sc-if value="{{ hasArtists }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:6px 20px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--color-surface)">Artistas</div>
+      <sc-for list="{{ rArtists }}" as="r" hint-placeholder-count="1"><div style="display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--color-divider)"><div style="width:40px;height:40px;border-radius:50%;background:var(--color-neutral-300)"></div><div style="flex:1"><div style="font-size:15px;font-weight:700">{{ r.name }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ r.n }} en tu colección</div></div></div></sc-for>
+    </sc-if>
+    <sc-if value="{{ hasAlbums }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:6px 20px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--color-surface)">Álbumes</div>
+      <sc-for list="{{ rAlbums }}" as="r" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--color-divider)"><div style="width:40px;height:40px;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 4px,var(--color-neutral-300) 4px 5px)"></div><div style="flex:1"><div style="font-size:15px;font-weight:700">{{ r.title }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ r.artist }} · {{ r.year }}</div></div></div></sc-for>
+    </sc-if>
+    <sc-if value="{{ hasTracks }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:6px 20px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--color-surface)">Temas</div>
+      <sc-for list="{{ rTracks }}" as="r" hint-placeholder-count="2"><div style="display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--color-divider)"><div style="font:600 12px ui-monospace,Menlo,monospace;color:var(--color-neutral-700)">{{ r.pos }}</div><div><div style="font-size:15px;font-weight:700">{{ r.t }}</div><div style="font-size:12px;color:var(--color-neutral-700)">en {{ r.al }} — {{ r.a }}</div></div></div></sc-for>
+    </sc-if>
+    <sc-if value="{{ hasReleases }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:6px 20px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--color-surface)">Ediciones · sello · catálogo</div>
+      <sc-for list="{{ rReleases }}" as="r" hint-placeholder-count="2"><div style="padding:10px 20px;border-bottom:1px solid var(--color-divider)"><div style="font-size:15px;font-weight:700">{{ r.title }} <span style="font-weight:400;color:var(--color-neutral-700)">— {{ r.artist }}</span></div><div style="font-size:12px;color:var(--color-neutral-700)">{{ r.label }} · {{ r.cat }} · {{ r.country }} · {{ r.ed }}</div></div></sc-for>
+    </sc-if>
+    <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><div style="padding:24px 20px;font-size:14px">Nada en tu colección. <a href="#1g">Buscar en Discogs →</a></div></sc-if>
+  </div>
+  <sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:color-mix(in srgb,var(--color-neutral-900) 45%,transparent)"></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-bg);border-top:2px solid var(--color-text);padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:20px;font-weight:800">Filtros</div><span onClick="{{ clearFilters }}" style="cursor:pointer;font-size:13px;color:var(--color-accent-700);font-weight:600">Limpiar todo</span></div>
+      <sc-for list="{{ filterGroups }}" as="g" hint-placeholder-count="3">
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">{{ g.name }}</div><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="4"><span onClick="{{ c.toggle }}" style="cursor:pointer;padding:8px 12px;font-size:13px;border:1px solid var(--color-divider);background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</span></sc-for></div></div>
+      </sc-for>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="field"><label>Pagado desde</label><input class="input" style="min-height:44px" placeholder="USD 0"></div><div class="field"><label>hasta</label><input class="input" style="min-height:44px" placeholder="USD 200"></div></div>
+      <button onClick="{{ closeSheet }}" class="btn btn-primary" style="min-height:52px;justify-content:space-between;padding:0 16px;font-size:15px"><span>Ver {{ filteredCount }} vinilos</span><span>→</span></button>
+    </div>
+  </sc-if>
+</div></div>
+
+<!-- 1g CAMARA -->
+<div class="dv-opt" id="1g"><div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Identificar con cámara — 3 pasos (clickeable)</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column">
+  <div style="height:44px;padding:0 20px;display:flex;align-items:center;font-size:13px;font-weight:600">9:41</div>
+  <div style="padding:4px 20px 12px;flex:none;display:flex;justify-content:space-between;align-items:center"><span onClick="{{ camBack }}" style="cursor:pointer;font-size:14px;font-weight:600">{{ camBackLabel }}</span><span style="font-size:14px;font-weight:800">Agregar vinilo</span><span style="font-size:13px;color:var(--color-neutral-700)">Manual</span></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);flex:none;border-top:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider)">
+    <sc-for list="{{ camSteps }}" as="s" hint-placeholder-count="3"><div onClick="{{ s.go }}" style="cursor:pointer;padding:10px 12px;font-size:12px;font-weight:600;background:{{ s.bg }};color:{{ s.fg }};border-left:{{ s.bl }}">{{ s.n }} {{ s.label }}</div></sc-for>
+  </div>
+  <sc-if value="{{ cam0 }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;display:flex;flex-direction:column;background:var(--color-text);color:var(--color-bg)">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;background:repeating-linear-gradient(135deg,#2d2b2b 0 7px,#383535 7px 8px)">
+        <div style="width:280px;height:280px;border:2px solid var(--color-bg);position:relative"><div style="position:absolute;left:-2px;top:-2px;width:28px;height:28px;border-left:5px solid var(--color-accent);border-top:5px solid var(--color-accent)"></div><div style="position:absolute;right:-2px;bottom:-2px;width:28px;height:28px;border-right:5px solid var(--color-accent);border-bottom:5px solid var(--color-accent)"></div></div>
+        <div style="position:absolute;left:20px;bottom:16px;font:11px ui-monospace,Menlo,monospace;opacity:.7">visor de cámara</div>
+      </div>
+      <div style="padding:14px 20px;font-size:13px">Encuadrá la portada. También podés fotografiar la etiqueta o el back cover para afinar la edición.</div>
+      <div style="display:grid;grid-template-columns:1fr 88px 1fr;align-items:center;padding:8px 20px 28px">
+        <span style="font-size:13px;font-weight:600">Subir foto</span>
+        <div onClick="{{ camNext }}" style="cursor:pointer;width:76px;height:76px;border-radius:50%;border:4px solid var(--color-bg);display:flex;align-items:center;justify-content:center;justify-self:center"><div style="width:58px;height:58px;border-radius:50%;background:var(--color-accent)"></div></div>
+        <span style="font-size:13px;font-weight:600;text-align:right">Barcode</span>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ cam1 }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;overflow:auto;display:flex;flex-direction:column">
+      <div style="padding:16px 20px;border-bottom:2px solid var(--color-divider)">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Identificado</div>
+        <div style="font-size:24px;font-weight:800;line-height:1.1;margin-top:4px">Pink Floyd — The Dark Side of the Moon</div>
+        <div style="font-size:13px;color:var(--color-neutral-700);margin-top:6px">Encontramos 4 ediciones posibles en Discogs. Elegí la tuya: mirá sello y catálogo en la etiqueta.</div>
+      </div>
+      <sc-for list="{{ cands }}" as="c" hint-placeholder-count="4">
+        <div onClick="{{ c.pick }}" style="cursor:pointer;display:grid;grid-template-columns:20px 64px 1fr;gap:12px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--color-divider);background:{{ c.bg }}">
+          <div style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--color-divider);box-shadow:{{ c.dot }};background:{{ c.dotBg }}"></div>
+          <div style="width:64px;height:64px;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 5px,var(--color-neutral-300) 5px 6px)"></div>
+          <div><div style="font-size:14px;font-weight:700">{{ c.country }} · {{ c.year }} · {{ c.label }}</div><div style="font-size:12px;color:var(--color-neutral-700)">Cat. {{ c.cat }} · {{ c.format }}</div><div style="font-size:12px;margin-top:2px">{{ c.note }}</div></div>
+        </div>
+      </sc-for>
+      <div style="padding:14px 20px;font-size:13px"><a href="#1h">No es ninguna — cargar manualmente</a></div>
+      <div style="flex:1"></div>
+      <div style="padding:12px 20px 24px"><button onClick="{{ camNext }}" class="btn btn-primary" style="width:100%;min-height:52px;justify-content:space-between;padding:0 16px;font-size:15px"><span>Usar esta edición</span><span>→</span></button></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ cam2 }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;overflow:auto;display:flex;flex-direction:column">
+      <div style="display:grid;grid-template-columns:72px 1fr;gap:12px;padding:16px 20px;border-bottom:2px solid var(--color-divider)">
+        <div style="width:72px;height:72px;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 5px,var(--color-neutral-300) 5px 6px)"></div>
+        <div><div style="font-size:16px;font-weight:800;line-height:1.2">The Dark Side of the Moon</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ candSel.country }} · {{ candSel.year }} · {{ candSel.label }} · {{ candSel.cat }}</div><div style="font-size:11px;margin-top:4px;color:var(--color-accent-700);font-weight:600">Datos importados de Discogs · 10 temas</div></div>
+      </div>
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:14px">
+        <div><div style="font-size:12px;margin-bottom:6px;color:var(--color-neutral-700)">Condición del disco</div><div style="display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--color-divider)"><sc-for list="{{ condOpts }}" as="o" hint-placeholder-count="6"><div onClick="{{ o.pick }}" style="cursor:pointer;padding:12px 0;text-align:center;font-size:13px;font-weight:600;border-left:{{ o.bl }};background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div></sc-for></div></div>
+        <div><div style="font-size:12px;margin-bottom:6px;color:var(--color-neutral-700)">Condición de la portada</div><div style="display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--color-divider)"><sc-for list="{{ sleeveOpts }}" as="o" hint-placeholder-count="6"><div onClick="{{ o.pick }}" style="cursor:pointer;padding:12px 0;text-align:center;font-size:13px;font-weight:600;border-left:{{ o.bl }};background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div></sc-for></div></div>
+        <div style="display:grid;grid-template-columns:1fr 90px;gap:8px"><div class="field"><label>Precio pagado</label><input class="input" style="min-height:48px;font-size:18px;font-weight:700" value="35"></div><div class="field"><label>Moneda</label><input class="input" style="min-height:48px" value="USD"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="field"><label>Fecha</label><input class="input" style="min-height:48px" value="27/09/2026"></div><div class="field"><label>Dónde</label><input class="input" style="min-height:48px" value="Disquería Oid Mortales"></div></div>
+        <div class="field"><label>Notas</label><input class="input" style="min-height:48px" placeholder="Incluye posters y stickers"></div>
+        <div style="padding:10px 12px;background:var(--color-surface);font-size:12px">Valor estimado de esta edición: <b>USD 52</b> · Marketplace, referencia.</div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="padding:12px 20px 24px"><button class="btn btn-primary" style="width:100%;min-height:52px;justify-content:space-between;padding:0 16px;font-size:15px"><span>Guardar en colección</span><span>✓</span></button></div>
+    </div>
+  </sc-if>
+</div></div>
+
+<!-- 1h MANUAL -->
+<div class="dv-opt" id="1h"><div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Agregar manualmente — secciones plegables</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column">
+  <div style="height:44px;padding:0 20px;display:flex;align-items:center;font-size:13px;font-weight:600">9:41</div>
+  <div style="padding:4px 20px 12px;flex:none;display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px;font-weight:600">Cancelar</span><span style="font-size:14px;font-weight:800">Nuevo vinilo</span><span style="font-size:13px;color:var(--color-neutral-700)">Cámara</span></div>
+  <div style="flex:none;padding:8px 20px;background:var(--color-accent-100);color:var(--color-accent-800);font-size:12px;font-weight:600;display:flex;justify-content:space-between"><span>Sin conexión · borrador guardado en el teléfono</span><span>hace 5 s</span></div>
+  <div style="flex:1;overflow:auto;border-top:2px solid var(--color-divider)">
+    <sc-for list="{{ formSections }}" as="s" hint-placeholder-count="4">
+      <div style="border-bottom:2px solid var(--color-divider)">
+        <div onClick="{{ s.toggle }}" style="cursor:pointer;display:grid;grid-template-columns:28px 1fr auto;align-items:center;padding:16px 20px">
+          <span style="font:600 12px ui-monospace,Menlo,monospace;color:var(--color-accent)">{{ s.n }}</span>
+          <div><div style="font-size:17px;font-weight:800">{{ s.title }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ s.sub }}</div></div>
+          <span style="font-size:20px;font-weight:600">{{ s.sign }}</span>
+        </div>
+        <sc-if value="{{ s.open }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 20px">
+            <sc-for list="{{ s.fields }}" as="f" hint-placeholder-count="4">
+              <div class="field" style="grid-column:{{ f.span }}"><label>{{ f.label }}</label><input class="input" style="min-height:46px" placeholder="{{ f.ph }}"></div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+  <div style="padding:12px 20px 24px;flex:none;border-top:2px solid var(--color-divider)"><button class="btn btn-primary" style="width:100%;min-height:52px;justify-content:space-between;padding:0 16px;font-size:15px"><span>Guardar en colección</span><span>✓</span></button></div>
+</div></div>
+
+<!-- 1i FICHA -->
+<div class="dv-opt" id="1i"><div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Ficha del vinilo — tocá un tema</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column">
+  <div style="flex:1;overflow:auto">
+    <div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 9px,var(--color-neutral-300) 9px 10px);display:flex;flex-direction:column;justify-content:space-between;padding:12px 16px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600"><span style="background:var(--color-bg);padding:6px 10px">← Colección</span><span style="background:var(--color-bg);padding:6px 10px">Editar</span></div>
+      <span style="font:11px ui-monospace,Menlo,monospace;color:var(--color-neutral-700)">portada · 1:1</span>
+    </div>
+    <div style="padding:16px 20px;border-bottom:2px solid var(--color-divider)">
+      <div style="font-size:14px;font-weight:600">Pink Floyd</div>
+      <div style="font-size:30px;line-height:1.02;font-weight:800;letter-spacing:-.02em;margin-top:2px">The Dark Side of the Moon</div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><span class="tag tag-accent">1ª edición</span><span class="tag tag-neutral">VG+ / VG</span><span class="tag tag-neutral">Rock · Prog</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:2px solid var(--color-divider)">
+      <div style="padding:12px 20px"><div style="font-size:11px;color:var(--color-neutral-700)">Pagaste</div><div style="font-size:20px;font-weight:800">USD 35</div></div>
+      <div style="padding:12px;border-left:1px solid var(--color-divider)"><div style="font-size:11px;color:var(--color-neutral-700)">Valor estimado</div><div style="font-size:20px;font-weight:800">USD 52</div></div>
+      <div style="padding:12px;border-left:1px solid var(--color-divider)"><div style="font-size:11px;color:var(--color-neutral-700)">Diferencia</div><div style="font-size:20px;font-weight:800;color:var(--color-accent-700)">+USD 17</div></div>
+      <div style="grid-column:1 / 4;padding:8px 20px;border-top:1px solid var(--color-divider);font-size:11px;color:var(--color-neutral-700)">Estimación de Discogs Marketplace, act. 21/09. No es una tasación.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:2px solid var(--color-divider)">
+      <sc-for list="{{ meta }}" as="m" hint-placeholder-count="8"><div style="padding:10px 20px;border-bottom:1px solid var(--color-divider)"><div style="font-size:11px;color:var(--color-neutral-700)">{{ m.k }}</div><div style="font-size:14px;font-weight:600">{{ m.v }}</div></div></sc-for>
+    </div>
+    <div style="padding:14px 20px;border-bottom:2px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;font-size:13px"><b>Pink Floyd esencial</b><span>9 / 10</span></div>
+      <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:8px"><sc-for list="{{ pfDots }}" as="p" hint-placeholder-count="10"><div style="height:8px;background:{{ p.bar }}"></div></sc-for></div>
+    </div>
+    <div style="padding:14px 20px 6px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Tracklist</div>
+    <sc-for list="{{ tracks }}" as="t" hint-placeholder-count="10">
+      <div style="border-top:1px solid var(--color-divider)">
+        <div onClick="{{ t.toggle }}" style="cursor:pointer;display:grid;grid-template-columns:36px 1fr auto;gap:8px;align-items:center;padding:12px 20px;background:{{ t.bg }}">
+          <span style="font:600 12px ui-monospace,Menlo,monospace;color:var(--color-neutral-700)">{{ t.pos }}</span><span style="font-size:15px;font-weight:600">{{ t.title }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ t.dur }}</span>
+        </div>
+        <sc-if value="{{ t.open }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 12px 64px;background:var(--color-surface)">
+            <sc-if value="{{ t.hasSp }}" hint-placeholder-val="{{ true }}"><span class="btn btn-secondary" style="padding:6px 10px;font-size:12px">Spotify ↗</span></sc-if>
+            <sc-if value="{{ t.hasYt }}" hint-placeholder-val="{{ true }}"><span class="btn btn-secondary" style="padding:6px 10px;font-size:12px">YouTube ↗</span></sc-if>
+            <span class="btn btn-ghost" style="font-size:12px">Ver letra ↗</span>
+            <sc-if value="{{ t.missing }}" hint-placeholder-val="{{ false }}"><span style="width:100%;font-size:12px;color:var(--color-neutral-700)">No encontramos este tema en YouTube.</span></sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+    <div style="padding:14px 20px 24px;border-top:1px solid var(--color-divider);font-size:12px;color:var(--color-neutral-700)">Ubicación física y precio pagado: solo visibles para vos.</div>
+  </div>
+</div></div>
+
+<!-- 1j WISHLIST -->
+<div class="dv-opt" id="1j"><div class="dv-olabel"><a class="dv-oid" href="#1j">1j</a>Wishlist — estados (tocá las pestañas)</div>
+<div class="dv-card" style="width:390px;height:844px;display:flex;flex-direction:column">
+  <div style="height:44px;padding:0 20px;display:flex;align-items:center;font-size:13px;font-weight:600">9:41</div>
+  <div style="padding:8px 20px 12px;flex:none;display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:30px;font-weight:800;letter-spacing:-.02em">Quiero comprar</div><span style="font-size:22px;font-weight:800;color:var(--color-accent)">+</span></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);flex:none;border-top:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider)">
+    <sc-for list="{{ wTabs }}" as="w" hint-placeholder-count="4"><div onClick="{{ w.go }}" style="cursor:pointer;padding:12px 10px;font-size:13px;font-weight:700;border-left:{{ w.bl }};background:{{ w.bg }};color:{{ w.fg }}">{{ w.label }} <span style="font-weight:400;opacity:.75">{{ w.n }}</span></div></sc-for>
+  </div>
+  <div style="flex:1;overflow:auto">
+    <sc-for list="{{ wItems }}" as="w" hint-placeholder-count="4">
+      <div style="padding:14px 20px;border-bottom:1px solid var(--color-divider);display:grid;grid-template-columns:72px 1fr;gap:12px">
+        <div style="width:72px;height:72px;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 5px,var(--color-neutral-300) 5px 6px)"></div>
+        <div>
+          <div style="display:flex;justify-content:space-between;gap:8px"><div style="font-size:15px;font-weight:800;line-height:1.2">{{ w.title }}</div><span style="font:600 11px ui-monospace,Menlo,monospace;color:{{ w.prioColor }}">{{ w.prio }}</span></div>
+          <div style="font-size:12px;color:var(--color-neutral-700)">{{ w.artist }} · {{ w.ed }}</div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px"><span>Objetivo <b>USD {{ w.target }}</b></span><span style="color:var(--color-neutral-700)">Mercado ~USD {{ w.market }}</span></div>
+          <sc-if value="{{ w.bought }}" hint-placeholder-val="{{ false }}"><button class="btn btn-primary" style="margin-top:10px;width:100%;justify-content:space-between;min-height:44px"><span>Agregar a mi colección</span><span>→</span></button></sc-if>
+        </div>
+      </div>
+    </sc-for>
+    <sc-if value="{{ wEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px 20px;font-size:14px;color:var(--color-neutral-700)">Nada en este estado todavía.</div></sc-if>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);border-top:2px solid var(--color-divider);height:64px;font-size:11px;font-weight:600;flex:none">
+    <div style="display:flex;align-items:center;justify-content:center">Inicio</div><div style="display:flex;align-items:center;justify-content:center">Colección</div><div style="display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:var(--color-bg);font-size:28px;font-weight:800">+</div><div style="display:flex;align-items:center;justify-content:center;color:var(--color-accent);box-shadow:inset 0 3px 0 var(--color-accent)">Wishlist</div><div style="display:flex;align-items:center;justify-content:center">Perfil</div>
+  </div>
+</div></div>
+</div>
+
+<div class="dv-group">Web · 1280</div>
+<div class="dv-opts">
+
+<!-- 1k WEB DASHBOARD -->
+<div class="dv-opt" id="1k"><div class="dv-olabel"><a class="dv-oid" href="#1k">1k</a>Dashboard web — analítico</div>
+<div class="dv-card" style="width:1280px">
+  <div class="nav" style="padding:14px 32px;gap:28px">
+    <span class="nav-brand" style="margin-right:0;font-size:20px">Kolektorz</span>
+    <div style="display:flex;gap:22px;font-size:14px;flex:1"><span style="color:var(--color-accent);font-weight:700">Inicio</span><span>Colección</span><span>Wishlist</span><span>Estadísticas</span><span>Logros</span></div>
+    <div style="width:280px;display:flex;align-items:center;gap:8px;padding:0 12px;height:38px;background:var(--color-surface);border:1px solid var(--color-divider);font-size:13px;color:var(--color-neutral-700)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>Buscar en tu colección <span style="margin-left:auto;font-family:ui-monospace,monospace;font-size:11px">⌘K</span></div>
+    <button class="btn btn-primary" style="min-height:38px">+ Agregar vinilo</button>
+    <div style="width:32px;height:32px;background:var(--color-neutral-300)"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;border-bottom:2px solid var(--color-divider)">
+    <div style="padding:24px 32px"><div style="font-size:13px;color:var(--color-neutral-700)">Vinilos</div><div style="font-size:88px;line-height:.9;font-weight:800;letter-spacing:-.05em">172</div></div>
+    <div style="padding:24px 20px;border-left:1px solid var(--color-divider)"><div style="font-size:13px;color:var(--color-neutral-700)">Artistas</div><div style="font-size:36px;font-weight:800">96</div><div style="font-size:12px;color:var(--color-neutral-700)">158 álbumes · 172 ediciones</div></div>
+    <div style="padding:24px 20px;border-left:1px solid var(--color-divider)"><div style="font-size:13px;color:var(--color-neutral-700)">Invertido</div><div style="font-size:36px;font-weight:800">4.250</div><div style="font-size:12px;color:var(--color-neutral-700)">USD · prom. 24,7</div></div>
+    <div style="padding:24px 20px;border-left:1px solid var(--color-divider)"><div style="font-size:13px;color:var(--color-neutral-700)">Valor estimado*</div><div style="font-size:36px;font-weight:800">5.680</div><div style="font-size:12px;color:var(--color-neutral-700)">USD · prom. 33,0</div></div>
+    <div style="padding:24px 20px;border-left:1px solid var(--color-divider);background:var(--color-accent);color:var(--color-bg)"><div style="font-size:13px">Diferencia</div><div style="font-size:36px;font-weight:800">+1.430</div><div style="font-size:12px">USD · +33,6 %</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:2px solid var(--color-divider)">
+    <div style="padding:20px 32px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px">Por década</div>
+      <div style="display:flex;align-items:flex-end;gap:10px;height:150px">
+        <sc-for list="{{ decades }}" as="d" hint-placeholder-count="7"><div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:4px"><span style="font-size:11px;font-weight:600">{{ d.n }}</span><div style="height:{{ d.pct }};background:{{ d.color }}"></div><span style="font-size:10px;color:var(--color-neutral-700)">{{ d.short }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="padding:20px 24px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px">Top artistas</div>
+      <sc-for list="{{ topArtists }}" as="d" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:110px 1fr 24px;gap:8px;align-items:center;font-size:12px;margin-bottom:7px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.label }}</span><div style="height:10px;background:var(--color-surface)"><div style="height:10px;width:{{ d.pct }};background:var(--color-text)"></div></div><span style="text-align:right;font-weight:600">{{ d.n }}</span></div></sc-for>
+    </div>
+    <div style="padding:20px 24px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px">Géneros</div>
+      <div style="display:flex;height:28px;margin-bottom:14px"><sc-for list="{{ genres }}" as="g" hint-placeholder-count="5"><div style="width:{{ g.pct }};background:{{ g.color }};border-right:2px solid var(--color-bg)"></div></sc-for></div>
+      <sc-for list="{{ genres }}" as="g" hint-placeholder-count="5"><div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--color-divider)"><span style="display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;background:{{ g.color }}"></span>{{ g.label }}</span><span style="font-weight:600">{{ g.n }}</span></div></sc-for>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:2fr 1fr;">
+    <div style="padding:20px 32px 28px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:14px"><span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Últimos agregados</span><span style="font-size:12px;color:var(--color-accent-700)">Ver colección →</span></div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px">
+        <sc-for list="{{ recent6 }}" as="a" hint-placeholder-count="6"><div><div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 7px,var(--color-neutral-300) 7px 8px)"></div><div style="font-size:13px;font-weight:700;margin-top:6px;line-height:1.2">{{ a.title }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ a.artist }}</div></div></sc-for>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-700);margin-top:18px">* Estimación basada en datos de mercado. No es una tasación.</div>
+    </div>
+    <div style="padding:20px 24px 28px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Discografías</div>
+      <sc-for list="{{ discogs }}" as="d" hint-placeholder-count="4"><div style="padding:8px 0;border-bottom:1px solid var(--color-divider)"><div style="display:flex;justify-content:space-between;font-size:13px"><b>{{ d.name }}</b><span>{{ d.have }} / {{ d.total }}</span></div><div style="height:6px;background:var(--color-surface);margin-top:6px"><div style="height:6px;width:{{ d.pct }};background:{{ d.color }}"></div></div></div></sc-for>
+      <div style="margin-top:14px;padding:12px;background:var(--color-surface);font-size:13px"><b>Próximo logro:</b> 250 discos — faltan 78</div>
+    </div>
+  </div>
+</div></div>
+
+<!-- 1l WEB COLECCION -->
+<div class="dv-opt" id="1l"><div class="dv-olabel"><a class="dv-oid" href="#1l">1l</a>Colección web — filtros combinables + grid/tabla</div>
+<div class="dv-card" style="width:1280px;height:860px;display:flex;flex-direction:column">
+  <div class="nav" style="padding:14px 32px;gap:28px;flex:none">
+    <span class="nav-brand" style="margin-right:0;font-size:20px">Kolektorz</span>
+    <div style="display:flex;gap:22px;font-size:14px;flex:1"><span>Inicio</span><span style="color:var(--color-accent);font-weight:700">Colección</span><span>Wishlist</span><span>Estadísticas</span><span>Logros</span></div>
+    <button class="btn btn-primary" style="min-height:38px">+ Agregar vinilo</button>
+    <div style="width:32px;height:32px;background:var(--color-neutral-300)"></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0">
+    <div style="border-right:2px solid var(--color-divider);padding:20px 24px;overflow:auto;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:18px;font-weight:800">Filtros</span><span onClick="{{ clearFilters }}" style="cursor:pointer;font-size:12px;font-weight:600;color:var(--color-accent-700)">Limpiar todo</span></div>
+      <sc-for list="{{ filterGroups }}" as="g" hint-placeholder-count="4">
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">{{ g.name }}</div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="4"><div onClick="{{ c.toggle }}" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px"><span style="width:14px;height:14px;border:1.5px solid var(--color-divider);background:{{ c.box }}"></span><span style="flex:1">{{ c.label }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ c.count }}</span></div></sc-for>
+          </div>
+        </div>
+      </sc-for>
+      <div><div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Valor estimado (USD)</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input class="input" placeholder="mín"><input class="input" placeholder="máx"></div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;min-height:0">
+      <div style="padding:18px 28px;display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--color-divider);flex:none">
+        <div style="font-size:28px;font-weight:800;letter-spacing:-.02em">Colección</div>
+        <span style="font-size:14px;color:var(--color-neutral-700)">{{ filteredCount }} de 172</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1"><sc-for list="{{ activeChips }}" as="c" hint-placeholder-count="2"><span onClick="{{ c.toggle }}" style="cursor:pointer;padding:5px 10px;font-size:12px;background:var(--color-accent-100);color:var(--color-accent-800)">{{ c.label }} ×</span></sc-for></div>
+        <div style="display:flex;align-items:center;gap:8px;padding:0 12px;height:38px;width:260px;background:var(--color-surface);border:1px solid var(--color-divider);font-size:13px;color:var(--color-neutral-700)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>Filtrar por texto…</div>
+        <div style="display:grid;grid-template-columns:auto auto;border:1px solid var(--color-divider);font-size:13px;font-weight:600">
+          <div onClick="{{ setWGrid }}" style="cursor:pointer;padding:9px 14px;background:{{ wGridBg }};color:{{ wGridFg }}">Grid</div>
+          <div onClick="{{ setWList }}" style="cursor:pointer;padding:9px 14px;border-left:1px solid var(--color-divider);background:{{ wListBg }};color:{{ wListFg }}">Tabla</div>
+        </div>
+      </div>
+      <div style="flex:1;overflow:auto">
+        <sc-if value="{{ wIsGrid }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:22px 18px;padding:22px 28px">
+            <sc-for list="{{ filtered }}" as="a" hint-placeholder-count="10"><div>
+              <div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 7px,var(--color-neutral-300) 7px 8px);display:flex;align-items:flex-end;justify-content:space-between;padding:6px;font:10px ui-monospace,Menlo,monospace;color:var(--color-neutral-700)"><span>portada</span><span style="background:var(--color-bg);color:var(--color-text);padding:1px 4px;font-family:Archivo,sans-serif;font-weight:600">{{ a.cond }}</span></div>
+              <div style="font-size:14px;font-weight:700;margin-top:8px;line-height:1.2">{{ a.title }}</div>
+              <div style="font-size:12px;color:var(--color-neutral-700)">{{ a.artist }} · {{ a.year }}</div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px"><span style="color:var(--color-neutral-700)">{{ a.country }} · {{ a.label }}</span><b>{{ a.valueF }}</b></div>
+            </div></sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ wIsList }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:8px 28px 24px">
+            <table class="table">
+              <thead><tr><th style="width:52px"></th><th>Artista</th><th>Álbum</th><th>Año</th><th>Edición</th><th>Formato</th><th>Cond.</th><th style="text-align:right">Pagado</th><th style="text-align:right">Estimado</th><th style="text-align:right">Dif.</th></tr></thead>
+              <tbody>
+                <sc-for list="{{ filtered }}" as="a" hint-placeholder-count="10"><tr><td><div style="width:40px;height:40px;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 4px,var(--color-neutral-300) 4px 5px)"></div></td><td>{{ a.artist }}</td><td style="font-weight:700">{{ a.title }}</td><td>{{ a.year }}</td><td>{{ a.ed }}</td><td>{{ a.format }}</td><td>{{ a.cond }}</td><td style="text-align:right">{{ a.paid }}</td><td style="text-align:right;font-weight:700">{{ a.value }}</td><td style="text-align:right;color:{{ a.diffColor }};font-weight:600">{{ a.diffS }}</td></tr></sc-for>
+              </tbody>
+            </table>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noFiltered }}" hint-placeholder-val="{{ false }}"><div style="padding:28px;font-size:15px">Ningún vinilo cumple todos los filtros. <span onClick="{{ clearFilters }}" style="cursor:pointer;color:var(--color-accent-700);font-weight:600">Limpiar filtros</span></div></sc-if>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<!-- 1m WEB BUSQUEDA -->
+<div class="dv-opt" id="1m"><div class="dv-olabel"><a class="dv-oid" href="#1m">1m</a>Buscador global web — ⌘K, resultados agrupados (misma búsqueda que <a class="dv-oid" href="#1f">1f</a>)</div>
+<div class="dv-card" style="width:1280px;height:760px;position:relative;display:flex;flex-direction:column">
+  <div class="nav" style="padding:14px 32px;gap:28px;flex:none;opacity:.35">
+    <span class="nav-brand" style="margin-right:0;font-size:20px">Kolektorz</span>
+    <div style="display:flex;gap:22px;font-size:14px;flex:1"><span>Inicio</span><span>Colección</span><span>Wishlist</span><span>Estadísticas</span><span>Logros</span></div>
+    <button class="btn btn-primary" style="min-height:38px">+ Agregar vinilo</button>
+  </div>
+  <div style="flex:1;background:color-mix(in srgb,var(--color-neutral-900) 45%,transparent);padding:48px 0;display:flex;justify-content:center;align-items:flex-start">
+    <div style="width:760px;background:var(--color-bg);box-shadow:var(--shadow-lg);border-top:4px solid var(--color-accent)">
+      <div style="display:flex;align-items:center;gap:12px;padding:0 20px;height:64px;border-bottom:2px solid var(--color-divider)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input value="{{ q }}" onChange="{{ onQ }}" style="flex:1;border:0;background:transparent;font:inherit;font-size:22px;font-weight:600;outline:none"><span style="font:11px ui-monospace,monospace;color:var(--color-neutral-700)">esc</span></div>
+      <div style="display:flex;gap:6px;padding:10px 20px;border-bottom:1px solid var(--color-divider);align-items:center"><span style="font-size:12px;color:var(--color-neutral-700);margin-right:6px">Probá:</span><sc-for list="{{ qChips }}" as="c" hint-placeholder-count="5"><span onClick="{{ c.go }}" style="cursor:pointer;padding:4px 10px;font-size:12px;border:1px solid var(--color-divider);background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</span></sc-for><span style="margin-left:auto;font-size:12px;color:var(--color-neutral-700)">{{ resultCount }}</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;max-height:480px;overflow:auto">
+        <div style="border-right:1px solid var(--color-divider)">
+          <sc-if value="{{ hasArtists }}" hint-placeholder-val="{{ true }}"><div style="padding:10px 20px 4px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Artistas</div><sc-for list="{{ rArtists }}" as="r" hint-placeholder-count="1"><div style="padding:8px 20px;font-size:14px;display:flex;justify-content:space-between" style-hover="background:var(--color-surface)"><b>{{ r.name }}</b><span style="color:var(--color-neutral-700);font-size:12px">{{ r.n }} discos</span></div></sc-for></sc-if>
+          <sc-if value="{{ hasAlbums }}" hint-placeholder-val="{{ true }}"><div style="padding:10px 20px 4px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Álbumes</div><sc-for list="{{ rAlbums }}" as="r" hint-placeholder-count="2"><div style="padding:8px 20px;display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;flex:none;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 4px,var(--color-neutral-300) 4px 5px)"></div><div><div style="font-size:14px;font-weight:700">{{ r.title }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ r.artist }} · {{ r.year }}</div></div></div></sc-for></sc-if>
+        </div>
+        <div>
+          <sc-if value="{{ hasTracks }}" hint-placeholder-val="{{ true }}"><div style="padding:10px 20px 4px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Temas</div><sc-for list="{{ rTracks }}" as="r" hint-placeholder-count="2"><div style="padding:8px 20px"><div style="font-size:14px;font-weight:700">{{ r.t }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ r.pos }} · {{ r.al }} — {{ r.a }}</div></div></sc-for></sc-if>
+          <sc-if value="{{ hasReleases }}" hint-placeholder-val="{{ false }}"><div style="padding:10px 20px 4px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Ediciones</div><sc-for list="{{ rReleases }}" as="r" hint-placeholder-count="2"><div style="padding:8px 20px"><div style="font-size:14px;font-weight:700">{{ r.title }}</div><div style="font-size:12px;color:var(--color-neutral-700)">{{ r.label }} · {{ r.cat }} · {{ r.country }}</div></div></sc-for></sc-if>
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><div style="padding:20px;font-size:14px">Sin resultados en tu colección.</div></sc-if>
+        </div>
+      </div>
+      <div style="padding:10px 20px;border-top:2px solid var(--color-divider);font-size:12px;display:flex;justify-content:space-between"><span style="color:var(--color-neutral-700)">Busca en artistas, álbumes, temas, sellos, catálogo y año · tolera errores de tipeo</span><span style="font-weight:600;color:var(--color-accent-700)">Buscar en Discogs →</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- 1n WEB FICHA -->
+<div class="dv-opt" id="1n"><div class="dv-olabel"><a class="dv-oid" href="#1n">1n</a>Ficha web — portada + datos + tracklist con links</div>
+<div class="dv-card" style="width:1280px">
+  <div class="nav" style="padding:14px 32px;gap:28px">
+    <span class="nav-brand" style="margin-right:0;font-size:20px">Kolektorz</span>
+    <div style="display:flex;gap:22px;font-size:14px;flex:1"><span>Inicio</span><span style="color:var(--color-accent);font-weight:700">Colección</span><span>Wishlist</span><span>Estadísticas</span><span>Logros</span></div>
+    <button class="btn btn-secondary" style="min-height:38px">Editar</button>
+    <button class="btn btn-primary" style="min-height:38px">+ Agregar vinilo</button>
+  </div>
+  <div style="display:grid;grid-template-columns:480px 1fr 1fr">
+    <div style="padding:32px;border-right:1px solid var(--color-divider)">
+      <div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,var(--color-neutral-200) 0 9px,var(--color-neutral-300) 9px 10px);display:flex;align-items:flex-end;padding:10px;font:11px ui-monospace,Menlo,monospace;color:var(--color-neutral-700)">portada · frente</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px"><div style="aspect-ratio:1;background:var(--color-surface);border:2px solid var(--color-text)"></div><div style="aspect-ratio:1;background:var(--color-surface)"></div><div style="aspect-ratio:1;background:var(--color-surface)"></div><div style="aspect-ratio:1;background:var(--color-surface)"></div></div>
+      <div style="font-size:11px;color:var(--color-neutral-700);margin-top:6px">frente · dorso · etiqueta A · etiqueta B</div>
+    </div>
+    <div style="padding:32px 28px;border-right:1px solid var(--color-divider)">
+      <div style="font-size:15px;font-weight:600">Pink Floyd</div>
+      <div style="font-size:44px;line-height:1;font-weight:800;letter-spacing:-.03em;margin-top:4px">The Dark Side of the Moon</div>
+      <div style="display:flex;gap:6px;margin-top:14px"><span class="tag tag-accent">1ª edición</span><span class="tag tag-neutral">Rock · Prog Rock</span></div>
+      <div style="height:2px;background:var(--color-divider);margin:22px 0 0"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:2px solid var(--color-divider)">
+        <div style="padding:14px 0"><div style="font-size:12px;color:var(--color-neutral-700)">Pagaste</div><div style="font-size:22px;font-weight:800;white-space:nowrap">USD 35</div></div>
+        <div style="padding:14px 14px;border-left:1px solid var(--color-divider)"><div style="font-size:12px;color:var(--color-neutral-700)">Valor estimado</div><div style="font-size:22px;font-weight:800;white-space:nowrap">USD 52</div></div>
+        <div style="padding:14px 14px;border-left:1px solid var(--color-divider)"><div style="font-size:12px;color:var(--color-neutral-700)">Diferencia</div><div style="font-size:22px;font-weight:800;white-space:nowrap;color:var(--color-accent-700)">+17</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-700);margin-top:6px">Estimación Discogs Marketplace · act. 21/09/2026 · no es tasación</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;margin-top:14px">
+        <sc-for list="{{ meta }}" as="m" hint-placeholder-count="8"><div style="padding:9px 0;border-bottom:1px solid var(--color-divider)"><div style="font-size:11px;color:var(--color-neutral-700)">{{ m.k }}</div><div style="font-size:14px;font-weight:600">{{ m.v }}</div></div></sc-for>
+      </div>
+      <div style="margin-top:16px;padding:12px 14px;background:var(--color-surface);font-size:13px;display:flex;justify-content:space-between"><span><b>Solo vos</b> · Estante 3, fila B · comprado en Oid Mortales</span><span style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Privado</span></div>
+    </div>
+    <div style="padding:32px 28px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Tracklist</span><span style="font-size:12px;color:var(--color-neutral-700)">42:59</span></div>
+      <sc-for list="{{ tracks }}" as="t" hint-placeholder-count="10">
+        <div style="display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--color-divider)">
+          <span style="font:600 11px ui-monospace,Menlo,monospace;color:var(--color-neutral-700)">{{ t.pos }}</span>
+          <span style="font-size:14px;font-weight:600">{{ t.title }}</span>
+          <span style="display:flex;gap:4px;font-size:11px;font-weight:600">
+            <sc-if value="{{ t.hasSp }}" hint-placeholder-val="{{ true }}"><span style="padding:3px 6px;border:1px solid var(--color-divider)">Spotify</span></sc-if>
+            <sc-if value="{{ t.hasYt }}" hint-placeholder-val="{{ true }}"><span style="padding:3px 6px;border:1px solid var(--color-divider)">YouTube</span></sc-if>
+            <sc-if value="{{ t.missing }}" hint-placeholder-val="{{ false }}"><span style="padding:3px 6px;color:var(--color-neutral-600);font-weight:400">sin YouTube</span></sc-if>
+            <span style="padding:3px 6px;color:var(--color-accent-700)">Letra</span>
+          </span>
+        </div>
+      </sc-for>
+      <div style="margin-top:18px;padding:14px;background:var(--color-accent);color:var(--color-bg)"><div style="font-size:12px;font-weight:600">Pink Floyd esencial · 9 / 10</div><div style="font-size:18px;font-weight:800;margin-top:2px">Te falta Meddle para el badge completo.</div></div>
+    </div>
+  </div>
+</div></div>
+</div>
+
+<p class="dv-next">Próximos pasos: "llevá <a class="dv-oid" href="#1c">1c</a> a web" · "sumá Estadísticas y Logros" · "probá una variante oscura de <a class="dv-oid" href="#1i">1i</a>"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ALBUMS = [
+  {id:1,artist:'Pink Floyd',title:'The Dark Side of the Moon',year:1973,ed:'UK 1973 · 1ª ed.',country:'UK',label:'Harvest',cat:'SHVL 804',format:'LP',genre:'Rock',cond:'VG+',paid:35,value:52},
+  {id:2,artist:'Led Zeppelin',title:'Led Zeppelin IV',year:1971,ed:'US 1971',country:'US',label:'Atlantic',cat:'SD 7208',format:'LP',genre:'Rock',cond:'VG',paid:28,value:40},
+  {id:3,artist:'Miles Davis',title:'Kind of Blue',year:1959,ed:'JP 1976 · Reissue',country:'Japón',label:'CBS/Sony',cat:'SOPL 5',format:'LP',genre:'Jazz',cond:'NM',paid:60,value:85},
+  {id:4,artist:'Love',title:'Forever Changes',year:1967,ed:'US 1967',country:'US',label:'Elektra',cat:'EKS-74013',format:'LP',genre:'Rock',cond:'VG',paid:40,value:55},
+  {id:5,artist:'David Bowie',title:'Hunky Dory',year:1971,ed:'UK 1971 · 1ª ed.',country:'UK',label:'RCA Victor',cat:'SF 8244',format:'LP',genre:'Rock',cond:'VG+',paid:70,value:120},
+  {id:6,artist:'Charly García',title:'Clics Modernos',year:1983,ed:'AR 1983',country:'Argentina',label:'SG Discos',cat:'SG 007',format:'LP',genre:'Rock',cond:'VG+',paid:45,value:60},
+  {id:7,artist:'Kraftwerk',title:'Trans-Europe Express',year:1977,ed:'DE 1977',country:'Alemania',label:'Kling Klang',cat:'1C 064-82 306',format:'LP',genre:'Electrónica',cond:'VG',paid:30,value:38},
+  {id:8,artist:'The Beatles',title:'Abbey Road',year:1969,ed:'UK 2019 · Anniversary',country:'UK',label:'Apple',cat:'0602508007',format:'LP',genre:'Rock',cond:'M',paid:32,value:30},
+  {id:9,artist:'John Coltrane',title:'A Love Supreme',year:1965,ed:'US 1965',country:'US',label:'Impulse!',cat:'A-77',format:'LP',genre:'Jazz',cond:'VG',paid:90,value:140},
+  {id:10,artist:'Pink Floyd',title:'Animals',year:1977,ed:'UK 1977',country:'UK',label:'Harvest',cat:'SHVL 815',format:'LP',genre:'Rock',cond:'VG+',paid:38,value:48},
+  {id:11,artist:'Radiohead',title:'OK Computer',year:1997,ed:'UK 2016 · OKNOTOK',country:'UK',label:'XL',cat:'XLLP868',format:'3×LP',genre:'Rock',cond:'NM',paid:40,value:42},
+  {id:12,artist:'Nina Simone',title:'Pastel Blues',year:1965,ed:'NL 1965',country:'Países Bajos',label:'Philips',cat:'PHS 600-187',format:'LP',genre:'Jazz',cond:'VG',paid:25,value:34}
+];
+const TRACKS = [
+  ['A1','Speak to Me','The Dark Side of the Moon','Pink Floyd'],['A2','Breathe','The Dark Side of the Moon','Pink Floyd'],['A4','Time','The Dark Side of the Moon','Pink Floyd'],['B1','Money','The Dark Side of the Moon','Pink Floyd'],['B2','Us and Them','The Dark Side of the Moon','Pink Floyd'],
+  ['A1','Pigs on the Wing 1','Animals','Pink Floyd'],['A2','Dogs','Animals','Pink Floyd'],
+  ['A1','A Love Supreme, Pt. I – Acknowledgement','A Love Supreme','John Coltrane'],['A2','A Love Supreme, Pt. II – Resolution','A Love Supreme','John Coltrane'],
+  ['A1','Alone Again Or','Forever Changes','Love'],['B1','The Red Telephone','Forever Changes','Love'],
+  ['A1','Changes','Hunky Dory','David Bowie'],['A4','Life on Mars?','Hunky Dory','David Bowie'],
+  ['A1','Come Together','Abbey Road','The Beatles'],['B1','Here Comes the Sun','Abbey Road','The Beatles'],
+  ['A1','So What','Kind of Blue','Miles Davis'],['B2','Sinnerman','Pastel Blues','Nina Simone'],
+  ['B1','Money Money','Clics Modernos','Charly García'],['A2','Paranoid Android','OK Computer','Radiohead'],['B3','Karma Police','OK Computer','Radiohead']
+].map(([pos,t,al,a])=>({pos,t,al,a}));
+const DS_TRACKS = [['A1','Speak to Me','1:08'],['A2','Breathe','2:49'],['A3','On the Run','3:45'],['A4','Time','6:53'],['A5','The Great Gig in the Sky','4:44'],['B1','Money','6:23'],['B2','Us and Them','7:49'],['B3','Any Colour You Like','3:26'],['B4','Brain Damage','3:50'],['B5','Eclipse','2:03']];
+const COND = ['M','NM','VG+','VG','G','P'];
+const FORM = [
+  {n:'01',title:'Álbum',sub:'Artista, título, año, género, tracklist',fields:[['Artista','Pink Floyd',2],['Título','Meddle',2],['Año original','1971',1],['Género','Rock',1],['Estilo','Prog Rock',2],['Tracklist','A1 One of These Days…',2]]},
+  {n:'02',title:'Edición',sub:'País, sello, catálogo, formato, condición',fields:[['Año de edición','1971',1],['País','UK',1],['Sello','Harvest',1],['Catálogo','SHVL 795',1],['Formato','LP',1],['Tipo de edición','1ª edición',1],['Cond. disco','VG+',1],['Cond. portada','VG',1]]},
+  {n:'03',title:'Compra',sub:'Fecha, precio, moneda, lugar',fields:[['Fecha','27/09/2026',1],['Precio pagado','45',1],['Moneda','USD',1],['Lugar','Disquería…',1],['Notas personales','',2]]},
+  {n:'04',title:'Colección',sub:'Ubicación física (privada) y tags',fields:[['Ubicación física','Estante 3 · fila B',2],['Tags','prog, favoritos',2]]}
+];
+const CANDS = [
+  {country:'UK',year:1973,label:'Harvest',cat:'SHVL 804',format:'LP, Gatefold',note:'1ª edición · prisma sólido en etiqueta'},
+  {country:'US',year:1973,label:'Harvest',cat:'SMAS-11163',format:'LP, Gatefold',note:'Primera edición US'},
+  {country:'Japón',year:1973,label:'Odeon',cat:'EMS-80324',format:'LP, con OBI',note:'Edición japonesa'},
+  {country:'Europa',year:2016,label:'Pink Floyd Records',cat:'PFRLP8',format:'LP 180 g',note:'Remaster 2016'}
+];
+const WISH = [
+  {title:'Meddle',artist:'Pink Floyd',ed:'UK 1971 · Harvest',target:60,market:75,prio:'ALTA',st:0},
+  {title:'Physical Graffiti',artist:'Led Zeppelin',ed:'Cualquier 1ª ed.',target:80,market:95,prio:'MEDIA',st:0},
+  {title:'Low',artist:'David Bowie',ed:'UK 1977 · RCA',target:50,market:58,prio:'ALTA',st:1},
+  {title:'Bitches Brew',artist:'Miles Davis',ed:'JP · con OBI',target:70,market:90,prio:'BAJA',st:1},
+  {title:'Artaud',artist:'Pescado Rabioso',ed:'AR 1973 · Talent',target:150,market:180,prio:'ALTA',st:2},
+  {title:'Blue',artist:'Joni Mitchell',ed:'US 1971 · Reprise',target:40,market:45,prio:'MEDIA',st:3}
+];
+const fmt = n => 'USD ' + n.toLocaleString('es-AR');
+const on = (b, a='var(--color-accent)') => b ? {bg:a, fg:'var(--color-bg)'} : {bg:'transparent', fg:'var(--color-text)'};
+
+class Component extends DCLogic {
+  state = { signup:false, view:'grid', wview:'grid', q:'love', sheet:false, f:{genre:['Rock'],decade:['1970s'],country:[],cond:[]}, cam:0, cand:0, cm:2, cs:3, open:{0:true}, track:5, wtab:0, spine:0 };
+  toggleF(g,v){ this.setState(s=>{ const cur=s.f[g]; const nx=cur.includes(v)?cur.filter(x=>x!==v):[...cur,v]; return {f:{...s.f,[g]:nx}}; }); }
+  renderVals() {
+    const s = this.state;
+    const items = ALBUMS.map(a => { const d=a.value-a.paid; return {...a, decade:Math.floor(a.year/10)*10+'s', paidF:fmt(a.paid), valueF:fmt(a.value), diffS:(d>=0?'+':'−')+Math.abs(d), diffColor:d>=0?'var(--color-accent-700)':'var(--color-neutral-600)'}; });
+    // search
+    const toks = s.q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const m = str => toks.length>0 && toks.every(t => str.toLowerCase().includes(t));
+    const rAlbums = items.filter(a => m(a.title) || (m(a.title+' '+a.artist) && !m(a.artist)));
+    const artistNames = [...new Set(items.map(a=>a.artist))].filter(n=>m(n));
+    const rArtists = artistNames.map(n=>({name:n, n:items.filter(a=>a.artist===n).length}));
+    const rTracks = TRACKS.filter(t => m(t.t) || (m(t.t+' '+t.al+' '+t.a) && !m(t.al) && !m(t.a)));
+    const rReleases = items.filter(a => m(a.label+' '+a.cat+' '+a.year+' '+a.country));
+    const total = rAlbums.length+rArtists.length+rTracks.length+rReleases.length;
+    const qChips = ['Love','Pink Floyd','Money','1973','Harvest'].map(l=>({label:l, go:()=>this.setState({q:l}), ...on(s.q.toLowerCase()===l.toLowerCase(),'var(--color-text)')}));
+    // filters
+    const groups = [['genre','Género',['Rock','Jazz','Electrónica']],['decade','Década',['1950s','1960s','1970s','1980s','1990s']],['country','País',['UK','US','Japón','Argentina','Alemania']],['cond','Condición',['M','NM','VG+','VG']]];
+    const key = {genre:'genre',decade:'decade',country:'country',cond:'cond'};
+    const filtered = items.filter(a => groups.every(([g]) => s.f[g].length===0 || s.f[g].includes(a[key[g]])));
+    const filterGroups = groups.map(([g,name,opts]) => ({name, chips:opts.map(v => { const act=s.f[g].includes(v); return {label:v, toggle:()=>this.toggleF(g,v), count:items.filter(a=>a[key[g]]===v).length, box:act?'var(--color-accent)':'transparent', ...on(act)}; })}));
+    const activeChips = groups.flatMap(([g]) => s.f[g].map(v=>({label:v, toggle:()=>this.toggleF(g,v)})));
+    // stats
+    const decN = [['1950s',6],['1960s',28],['1970s',64],['1980s',31],['1990s',22],['2000s',9],['2010s',12]];
+    const decades = decN.map(([l,n])=>({label:l, short:l.slice(2), n, pct:Math.round(n/64*100)+'%', color:n===64?'var(--color-accent)':'var(--color-text)'}));
+    const topArtists = [['Pink Floyd',9],['The Beatles',8],['David Bowie',7],['Led Zeppelin',6],['Miles Davis',6],['Charly García',5]].map(([l,n])=>({label:l,n,pct:Math.round(n/9*100)+'%'}));
+    const gcol = ['var(--color-accent)','var(--color-text)','var(--color-neutral-600)','var(--color-neutral-400)','var(--color-neutral-300)'];
+    const genres = [['Rock',94],['Jazz',38],['Electrónica',17],['Soul / Funk',13],['Otros',10]].map(([l,n],i)=>({label:l,n,pct:(n/172*100).toFixed(1)+'%',color:gcol[i]}));
+    const discogs = [['Pink Floyd',9,10],['Led Zeppelin',7,10],['The Beatles',8,13],['David Bowie',7,15]].map(([name,have,total])=>({name,have,total,pct:Math.round(have/total*100)+'%',color:have/total>.85?'var(--color-accent)':'var(--color-text)'}));
+    const pfDots = Array.from({length:10},(_,i)=>({bg:i<9?'var(--color-bg)':'transparent', bar:i<9?'var(--color-accent)':'var(--color-surface)'}));
+    const badgeDefs = [['1','Primer vinilo',1],['50','50 discos',1],['100','100 discos',1],['5G','5 géneros',1],['7D','7 décadas',1],['JP','Edición japonesa',1],['PF','Pink Floyd completo',0],['250','250 discos',0]];
+    const badges = badgeDefs.map(([mark,name,got])=>({mark,name, bg:got?'var(--color-text)':'transparent', fg:got?'var(--color-bg)':'var(--color-neutral-500)', border:got?'0':'1.5px dashed var(--color-neutral-400)', label:got?'var(--color-text)':'var(--color-neutral-600)'}));
+    // camera
+    const stepL = ['Foto','Edición','Compra'];
+    const camSteps = stepL.map((label,i)=>({n:'0'+(i+1), label, go:()=>this.setState({cam:i}), bl:i?'1px solid var(--color-divider)':'0', ...(i===s.cam?on(true):i<s.cam?{bg:'var(--color-surface)',fg:'var(--color-text)'}:{bg:'transparent',fg:'var(--color-neutral-600)'})}));
+    const cands = CANDS.map((c,i)=>({...c, pick:()=>this.setState({cand:i}), bg:i===s.cand?'var(--color-accent-100)':'transparent', dotBg:i===s.cand?'var(--color-accent)':'transparent', dot:i===s.cand?'inset 0 0 0 3px var(--color-bg)':'none'}));
+    const condRow = (k) => COND.map((label,i)=>({label, pick:()=>this.setState({[k]:i}), bl:i?'1px solid var(--color-divider)':'0', ...on(s[k]===i)}));
+    // form
+    const formSections = FORM.map((f,i)=>({...f, open:!!s.open[i], sign:s.open[i]?'−':'+', toggle:()=>this.setState(st=>({open:{...st.open,[i]:!st.open[i]}})), fields:f.fields.map(([label,ph,sp])=>({label,ph,span:sp===2?'1 / 3':'auto'}))}));
+    // tracks
+    const tracks = DS_TRACKS.map(([pos,title,dur],i)=>({pos,title,dur, open:s.track===i, bg:s.track===i?'var(--color-surface)':'transparent', toggle:()=>this.setState(st=>({track:st.track===i?-1:i})), hasSp:true, hasYt:i!==2, missing:i===2}));
+    const meta = [['Año original','1973'],['Año de edición','1973'],['País','UK'],['Sello','Harvest'],['Catálogo','SHVL 804'],['Formato','LP · Gatefold'],['Edición','1ª edición'],['Fuente','Discogs #1873013']].map(([k,v])=>({k,v}));
+    // wishlist
+    const wl = ['Quiero','Buscando','Encontrado','Comprado'];
+    const wTabs = wl.map((label,i)=>({label, n:WISH.filter(w=>w.st===i).length, go:()=>this.setState({wtab:i}), bl:i?'1px solid var(--color-divider)':'0', ...on(s.wtab===i,'var(--color-text)')}));
+    const wItems = WISH.filter(w=>w.st===s.wtab).map(w=>({...w, bought:w.st===3, prioColor:w.prio==='ALTA'?'var(--color-accent-700)':'var(--color-neutral-600)'}));
+    // spines
+    const sorted = [...items].sort((a,b)=>a.artist.replace(/^The /,'').localeCompare(b.artist.replace(/^The /,'')));
+    const spBg = ['var(--color-text)','var(--color-surface)','var(--color-neutral-300)','var(--color-bg)','var(--color-neutral-700)','var(--color-surface)'];
+    const spines = sorted.map((a,i)=>{ const sel=s.spine===i; const bg=sel?'var(--color-accent)':spBg[i%spBg.length]; const dark=sel||bg.includes('text')||bg.includes('700'); return {...a, letter:a.artist.replace(/^The /,'')[0], h:(44+(a.id*7)%18)+'px', bg, fg:dark?'var(--color-bg)':'var(--color-text)', pick:()=>this.setState({spine:i})}; });
+    const recent = [items[5],items[8],items[4],items[2]];
+    return {
+      isSignup:s.signup, isLogin:!s.signup, loginCta:s.signup?'Crear cuenta':'Entrar',
+      setLoginIn:()=>this.setState({signup:false}), setLoginUp:()=>this.setState({signup:true}),
+      loginInBg:on(!s.signup,'var(--color-text)').bg, loginInFg:on(!s.signup,'var(--color-text)').fg, loginUpBg:on(s.signup,'var(--color-text)').bg, loginUpFg:on(s.signup,'var(--color-text)').fg,
+      items, decades, topArtists, genres, discogs, pfDots, badges, recent, recent6:[...recent,items[0],items[10]],
+      facts:[{k:'Artista más representado',v:'Pink Floyd · 9'},{k:'Década predominante',v:'1970s · 64'},{k:'Género predominante',v:'Rock · 55%'},{k:'Edición más antigua',v:'Kind of Blue · 1959'},{k:'Disco más valioso',v:'A Love Supreme · USD 140'},{k:'Última incorporación',v:'Clics Modernos · ayer'}],
+      insights:['Tenés 7 de los 10 esenciales de Led Zeppelin.','Tu colección cubre 7 décadas. Una más desbloquea “8 décadas”.','Si te gusta David Bowie, explorá Low y "Heroes".'],
+      isGrid:s.view==='grid', isList:s.view==='list', setGrid:()=>this.setState({view:'grid'}), setList:()=>this.setState({view:'list'}),
+      gridBg:on(s.view==='grid','var(--color-text)').bg, gridFg:on(s.view==='grid','var(--color-text)').fg, listBg:on(s.view==='list','var(--color-text)').bg, listFg:on(s.view==='list','var(--color-text)').fg,
+      wIsGrid:s.wview==='grid', wIsList:s.wview==='list', setWGrid:()=>this.setState({wview:'grid'}), setWList:()=>this.setState({wview:'list'}),
+      wGridBg:on(s.wview==='grid','var(--color-text)').bg, wGridFg:on(s.wview==='grid','var(--color-text)').fg, wListBg:on(s.wview==='list','var(--color-text)').bg, wListFg:on(s.wview==='list','var(--color-text)').fg,
+      spines, spineSel:spines[s.spine],
+      q:s.q, onQ:e=>this.setState({q:e.target.value}), qChips, rAlbums, rArtists, rTracks, rReleases,
+      hasAlbums:rAlbums.length>0, hasArtists:rArtists.length>0, hasTracks:rTracks.length>0, hasReleases:rReleases.length>0, noResults:total===0,
+      resultCount: total+' resultados para “'+s.q+'”',
+      sheet:s.sheet, openSheet:()=>this.setState({sheet:true}), closeSheet:()=>this.setState({sheet:false}),
+      filterGroups, filtered, filteredCount:filtered.length, activeChips, noFiltered:filtered.length===0,
+      clearFilters:()=>this.setState({f:{genre:[],decade:[],country:[],cond:[]}}),
+      cam0:s.cam===0, cam1:s.cam===1, cam2:s.cam===2, camSteps, cands, candSel:CANDS[s.cand],
+      camNext:()=>this.setState(st=>({cam:Math.min(2,st.cam+1)})), camBack:()=>this.setState(st=>({cam:Math.max(0,st.cam-1)})), camBackLabel:s.cam?'← Atrás':'Cerrar',
+      condOpts:condRow('cm'), sleeveOpts:condRow('cs'),
+      formSections, tracks, meta, wTabs, wItems, wEmpty:wItems.length===0
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -2,3 +2,4 @@ pnpm-lock.yaml
 packages/db/drizzle/
 **/fixtures/**
 docs/
+design/
