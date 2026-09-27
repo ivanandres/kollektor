@@ -1,0 +1,73 @@
+.head {
+  padding: calc(16px + env(safe-area-inset-top)) 20px 12px;
+  border-bottom: 2px solid var(--color-divider);
+}
+.box {
+  flex: 1;
+  height: 48px;
+  border: 2px solid var(--color-accent);
+  color: var(--color-text);
+}
+.box input {
+  font-size: 16px;
+}
+.filterBtn {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border: 1px solid var(--color-divider);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.chips {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.results {
+  padding-bottom: 24px;
+}
+.count {
+  padding: 10px 20px;
+  font-size: 12px;
+  color: var(--color-neutral-700);
+}
+.group {
+  padding: 6px 20px;
+  background: var(--color-surface);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.trackRow {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+}
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-neutral-300);
+  flex: none;
+}
+.title {
+  font-size: 15px;
+  font-weight: 700;
+}
+.sub {
+  font-size: 12px;
+  color: var(--color-neutral-700);
+}
+.pos {
+  font: 600 12px var(--mono);
+  color: var(--color-neutral-700);
+}

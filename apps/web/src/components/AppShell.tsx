@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useSession } from '@/lib/queries';
+import { useIsDesktop } from '@/lib/responsive';
 import { CommandK } from './CommandK';
 import { BottomNav, Shell, TopNav } from './Nav';
 
@@ -11,6 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const path = usePathname();
   const { data: session, isPending, isError } = useSession();
+  const desktop = useIsDesktop();
   const [searchOpen, setSearchOpen] = useState(false);
   const [navActions, setNavActions] = useState<ReactNode>(null);
 
@@ -44,13 +46,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <Shell.Provider value={ctx}>
-      <div className="d-only">
-        <TopNav dimmed={searchOpen} />
-      </div>
+      {desktop ? <TopNav dimmed={searchOpen} /> : null}
       <main>{children}</main>
-      <div className="m-only">
-        <BottomNav />
-      </div>
+      {desktop ? null : <BottomNav />}
       {searchOpen ? <CommandK onClose={closeSearch} /> : null}
     </Shell.Provider>
   );

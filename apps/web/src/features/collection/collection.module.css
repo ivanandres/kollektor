@@ -1,0 +1,224 @@
+/* ─── 1d mobile ─── */
+.head {
+  padding: calc(16px + env(safe-area-inset-top)) 20px 12px;
+  border-bottom: 2px solid var(--color-divider);
+}
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.count {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+}
+.searchRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.searchRow :global(.searchbox) {
+  flex: 1;
+  height: 44px;
+  font-size: 14px;
+}
+.searchRow :global(.searchbox) input {
+  font-size: 16px; /* no iOS zoom on focus */
+}
+.viewToggle {
+  grid-template-columns: repeat(3, 44px);
+  height: 44px;
+}
+.chips {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 12px;
+  padding: 16px 20px 24px;
+}
+.gTitle {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 6px;
+  line-height: 1.2;
+}
+.small {
+  font-size: 12px;
+  color: var(--color-neutral-700);
+}
+.gValue {
+  font-size: 12px;
+  margin-top: 2px;
+  font-weight: 600;
+}
+.listRow {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.lTitle {
+  font-size: 14px;
+  font-weight: 700;
+}
+.tiny {
+  font-size: 11px;
+  color: var(--color-neutral-700);
+}
+
+/* ─── 1e shelf ─── */
+.spine {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.spineLetter {
+  font: 600 11px var(--mono);
+  opacity: 0.7;
+}
+.spineName {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.spineYear {
+  font-size: 11px;
+  font-weight: 600;
+}
+.preview {
+  position: sticky;
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 2px solid var(--color-divider);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+}
+.preview:hover {
+  color: var(--color-text);
+}
+
+/* ─── 1l web ─── */
+.web {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: calc(100dvh - 68px);
+}
+.side {
+  border-right: 2px solid var(--color-divider);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 68px;
+  align-self: start;
+  max-height: calc(100dvh - 68px);
+  overflow: auto;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: left;
+}
+.box {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border: 1.5px solid var(--color-divider);
+}
+.bar {
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid var(--color-divider);
+  position: sticky;
+  top: 68px;
+  z-index: 3;
+  background: var(--color-bg);
+}
+.wTitle {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.wText {
+  width: 260px;
+  height: 38px;
+  font-size: 13px;
+}
+.wToggle {
+  font-size: 13px;
+  font-weight: 600;
+}
+.wToggle > button {
+  padding: 9px 14px;
+}
+.wGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 22px 18px;
+  padding: 22px 28px;
+}
+@media (min-width: 1600px) {
+  .wGrid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+.wCardTitle {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 8px;
+  line-height: 1.2;
+}
+.wCardMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.tableWrap {
+  padding: 8px 28px 24px;
+}
+.tableWrap tbody tr {
+  cursor: pointer;
+}
+.num {
+  text-align: right !important;
+  white-space: nowrap;
+}
+.sentinel {
+  height: 1px;
+}

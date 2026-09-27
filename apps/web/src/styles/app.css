@@ -284,3 +284,10 @@ button {
 .nav a.btn-secondary:hover {
   color: var(--color-text);
 }
+
+/* Native search inputs: no browser clear button (the mockups don't have one). */
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}

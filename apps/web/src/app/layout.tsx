@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { Providers } from '@/components/Providers';
+// Archivo, self-hosted with the same weights the Modernist system loads (works offline).
+import '@fontsource/archivo/latin-400.css';
+import '@fontsource/archivo/latin-600.css';
+import '@fontsource/archivo/latin-800.css';
 import '@/styles/modernist.css';
 import '@/styles/app.css';
 
@@ -23,15 +27,6 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es-AR">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* Same weights the Modernist system loads. */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap"
-        />
-      </head>
       <body>
         <Providers>{children}</Providers>
       </body>
