@@ -15,8 +15,8 @@ export function dec1(n: number | null | undefined): string {
 }
 
 /** "USD 4.250" */
-export function money(n: number | null | undefined, currency = 'USD'): string {
-  return n == null ? '—' : `${currency} ${num(n)}`;
+export function money(n: number | null | undefined, currency?: string | null): string {
+  return n == null ? '—' : `${currency ?? 'USD'} ${num(n)}`;
 }
 
 /** "+1.430" / "−320" (true minus sign, as in the mockups). */
@@ -26,9 +26,9 @@ export function signed(n: number | null | undefined): string {
 }
 
 /** "+USD 1.430" */
-export function signedMoney(n: number | null | undefined, currency = 'USD'): string {
+export function signedMoney(n: number | null | undefined, currency?: string | null): string {
   if (n == null) return '—';
-  return `${n >= 0 ? '+' : '−'}${currency} ${num(Math.abs(n))}`;
+  return `${n >= 0 ? '+' : '−'}${currency ?? 'USD'} ${num(Math.abs(n))}`;
 }
 
 export function pct(part: number, total: number): string {
