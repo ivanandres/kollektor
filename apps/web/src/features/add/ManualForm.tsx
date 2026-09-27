@@ -264,7 +264,7 @@ export function ManualForm() {
   useEffect(() => {
     if (loaded.current) return;
     loaded.current = true;
-    let draft: { values: Values; savedAt: number; idem: string } | null = null;
+    let draft: { values: Values; savedAt: number; idem: string } | null;
     try {
       draft = JSON.parse(localStorage.getItem(DRAFT_KEY) ?? 'null');
     } catch {
