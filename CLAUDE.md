@@ -8,11 +8,18 @@
 - Todo lo del usuario se filtra por `user_id`; filas de catálogo con `created_by_user_id` son privadas de su creador (`visibleTo`). Campos privados que nunca se publican: `purchase_place`, `storage_location`.
 - SQL crudo con `sql\`\``: parámetros de fecha como ISO string con `::timestamptz`; arrays con `ARRAY[...]`.
 
+## Web (`apps/web`)
+
+- Next 16 (leer `apps/web/AGENTS.md`): App Router, todo client-side detrás de `AppShell` (gate de sesión). `/api/*` se reenvía a `API_URL`.
+- Diseño: implementa `design/project/Kolektorz Mockups.dc.html` (sistema Modernist en `src/styles/modernist.css`, copia literal). Mobile < 960px, web ≥ 960px (`src/lib/responsive.tsx`). Detalle y decisiones en `docs/frontend-web.md`.
+- Datos con React Query (`src/lib/queries.ts`); tras mutar, `useInvalidateAll()`. Montos con `src/lib/format.ts` (`USD 4.250`, signo `−`).
+- Lógica pura fuera de los componentes (`src/lib/*`, `features/add/manualInput.ts`) para testearla con Vitest (`@/` apunta a `apps/web/src`).
+
 ## Comandos
 
 - `pnpm test` (Vitest contra Postgres `TEST_DATABASE_URL`, trunca la DB de test), `pnpm typecheck`, `pnpm lint`, `pnpm format`.
 - `pnpm db:generate` tras cambiar el esquema; `pnpm db:migrate`; `pnpm db:seed`; `pnpm db:seed:demo`.
-- API local: `pnpm --filter @kollektor/api dev` (puerto 3001).
+- API local: `pnpm --filter @kollektor/api dev` (puerto 3001). Web: `pnpm --filter @kollektor/web dev` (puerto 3000; demo@kollektor.app / vinilos-demo tras `pnpm db:seed:demo`).
 
 ## Tests
 

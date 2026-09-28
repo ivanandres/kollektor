@@ -11,10 +11,10 @@ El modelo gira alrededor de **la edición que posee el usuario**
 | Parte                                        | Estado                                       |
 | -------------------------------------------- | -------------------------------------------- |
 | Backend (API + dominio + DB + integraciones) | ✅ Fases 1–11 implementadas y testeadas      |
-| Frontend web (Next.js)                       | ⏳ Pendiente: espera las pantallas de diseño |
+| Frontend web (Next.js, PWA)                  | ✅ Pantallas del handoff de diseño (Fase 12) |
 | App móvil (Expo)                             | ⏳ Post-MVP (Fase 13)                        |
 
-Detalle en [`docs/estado-backend.md`](docs/estado-backend.md). Para diseñar las pantallas:
+Detalle en [`docs/estado-backend.md`](docs/estado-backend.md) y [`docs/frontend-web.md`](docs/frontend-web.md). Para diseñar las pantallas:
 [`docs/pantallas-y-datos.md`](docs/pantallas-y-datos.md) (qué datos y acciones tiene cada una). Análisis y decisiones en
 [`docs/00-analisis-y-arquitectura.md`](docs/00-analisis-y-arquitectura.md) y [`docs/adr/`](docs/adr/).
 
@@ -23,6 +23,7 @@ Detalle en [`docs/estado-backend.md`](docs/estado-backend.md). Para diseñar las
 ```
 apps/
   api/                 Hono + Better Auth: HTTP, sesiones, rutas (única puerta de entrada)
+  web/                 Next.js (PWA): pantallas mobile (390) y web (1280) del handoff de diseño
 packages/
   core/                Dominio: catálogo, colección, wishlist, búsqueda, stats, logros, valuación…
                        + puertos (interfaces) para servicios externos
@@ -31,6 +32,7 @@ packages/
   schemas/             Validaciones Zod compartidas (API, web y mobile)
   api-client/          Cliente tipado de la API para web (Next.js) y mobile (Expo)
 docs/                  Análisis, ADRs, referencia de la API y ejemplos de respuestas reales
+design/                Handoff de Claude Design (mockups Kolektorz + sistema Modernist), solo referencia
 ```
 
 El dominio (`packages/core`) no conoce HTTP ni proveedores: depende de interfaces (`ports.ts`) que
@@ -54,7 +56,11 @@ pnpm db:seed                    # logros + discografías esenciales curadas
 pnpm db:seed:demo               # opcional: demo@kollektor.app / vinilos-demo con 26 discos
 
 pnpm --filter @kollektor/api dev    # API en http://localhost:3001/api
+pnpm --filter @kollektor/web dev    # web en http://localhost:3000 (proxy de /api a la API)
 ```
+
+La web reenvía `/api/*` a `API_URL` (default `http://localhost:3001`), así las cookies de sesión
+quedan en el mismo dominio. `WEB_ORIGIN` de la API tiene que ser la URL de la web.
 
 Sin claves externas la app funciona igual: la carga manual, la colección, la búsqueda, las
 estadísticas y los logros no dependen de terceros. Cada integración se activa sola al completar
@@ -74,7 +80,7 @@ su variable en `.env`:
 ## Comandos
 
 ```bash
-pnpm test            # 112 tests (unitarios + integración contra Postgres + API de punta a punta)
+pnpm test            # 121 tests (unitarios + integración contra Postgres + API de punta a punta + lógica de la web)
 pnpm typecheck
 pnpm lint
 pnpm format
@@ -88,6 +94,8 @@ y nunca llaman a servicios externos: usan fakes y fixtures.
 
 - **Ahora (Vercel + Neon + R2):** proyecto de Vercel con root `apps/api` (usa `apps/api/vercel.json`:
   migra y siembra en el build, cron diario de mantenimiento). Variables de entorno según `.env.example`.
+  La web es un segundo proyecto de Vercel con root `apps/web` (Next.js, sin configuración extra) y la
+  variable `API_URL` apuntando a la API; en la API, `WEB_ORIGIN` es la URL de la web.
 - **Después (VPS):** `docker compose --profile prod up -d` (Postgres + migraciones + API) detrás de un
   reverse proxy con TLS, y un cron del sistema:
   `curl -H "Authorization: Bearer $CRON_SECRET" https://api.tu-dominio/api/cron/maintenance`.

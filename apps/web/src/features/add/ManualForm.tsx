@@ -140,6 +140,8 @@ export function ManualForm() {
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // A save that failed for lack of connection is retried as soon as the signal comes back.
+  const [retryWhenOnline, setRetryWhenOnline] = useState(false);
   const idem = useRef<string>('');
   const loaded = useRef(false);
 
@@ -228,6 +230,14 @@ export function ManualForm() {
     idem.current = crypto.randomUUID();
   }
 
+  useEffect(() => {
+    if (!online || !retryWhenOnline) return;
+    setRetryWhenOnline(false);
+    void save();
+    // `save` reads the latest values; only react to the connection coming back
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online, retryWhenOnline]);
+
   async function save() {
     if (!valid) {
       setOpen((o) => ({ ...o, '01': true }));
@@ -248,9 +258,11 @@ export function ManualForm() {
       toast.celebrate(res.unlockedAchievements);
       router.replace(`/coleccion/${res.item.id}`);
     } catch (e) {
+      const offline = e instanceof ApiError && e.code === 'NETWORK';
+      setRetryWhenOnline(offline);
       setError(
-        e instanceof ApiError && e.code === 'NETWORK'
-          ? 'Sin conexión. El borrador queda guardado en el teléfono; guardalo cuando vuelvas a tener señal.'
+        offline
+          ? 'Sin conexión. El borrador queda guardado en el teléfono y se guarda solo cuando vuelva la señal.'
           : errorMessage(e),
       );
       setBusy(false);
