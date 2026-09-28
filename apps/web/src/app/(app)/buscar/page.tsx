@@ -54,7 +54,7 @@ function Search() {
   };
 
   return (
-    <div>
+    <div className={s.page}>
       <div className={`m-head ${s.head}`}>
         <div style={{ display: 'flex', gap: 8 }}>
           <label className={`searchbox ${s.box}`}>

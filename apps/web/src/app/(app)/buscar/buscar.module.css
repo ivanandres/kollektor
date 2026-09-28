@@ -71,3 +71,8 @@
   font: 600 12px var(--mono);
   color: var(--color-neutral-700);
 }
+/* On the web the ⌘K modal is the main search; this page still works as a centered column. */
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+}
