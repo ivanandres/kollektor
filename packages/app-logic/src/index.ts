@@ -4,3 +4,4 @@ export * from './filters';
 export * from './format';
 export * from './gamification';
 export * from './manualInput';
+export * from './item';

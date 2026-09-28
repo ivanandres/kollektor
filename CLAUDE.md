@@ -15,6 +15,12 @@
 - Datos con React Query (`src/lib/queries.ts`); tras mutar, `useInvalidateAll()`. Montos con `src/lib/format.ts` (`USD 4.250`, signo `−`).
 - Lógica pura fuera de los componentes (`src/lib/*`, `features/add/manualInput.ts`) para testearla con Vitest (`@/` apunta a `apps/web/src`).
 
+## Mobile (`apps/mobile`)
+
+- Expo SDK 57 + Expo Router (leer `apps/mobile/AGENTS.md`; instalar paquetes con `EXPO_OFFLINE=1 npx expo install …`). Rutas en `src/app/`. Detalle en `docs/mobile.md`.
+- Mismos hooks y lógica que la web vía `@kollektor/app-logic` (`createQueries(api, ReactQuery)`); nada de lógica de negocio duplicada en las pantallas.
+- Sesión por bearer token en SecureStore; `EXPO_PUBLIC_API_URL` define la API.
+
 ## Comandos
 
 - `pnpm test` (Vitest contra Postgres `TEST_DATABASE_URL`, trunca la DB de test), `pnpm typecheck`, `pnpm lint`, `pnpm format`.

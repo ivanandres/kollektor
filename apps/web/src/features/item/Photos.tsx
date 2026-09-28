@@ -6,25 +6,9 @@ import { useRef, useState } from 'react';
 import { useToast } from '@/components/Toasts';
 import { api, errorMessage } from '@/lib/api';
 import { keys } from '@/lib/queries';
-import { coverOf } from './itemData';
 import s from './item.module.css';
 
-export interface Picture {
-  url: string;
-  label: string;
-}
-
-/** Edition images from the catalog followed by the owner's photos of this copy. */
-export function picturesOf(item: CollectionItem): Picture[] {
-  const release = item.release.images.map((img, i) => ({
-    url: img.url,
-    label: img.kind === 'primary' ? 'portada' : `imagen ${i + 1}`,
-  }));
-  const own = item.photos.map((p) => ({ url: p.url, label: p.caption ?? 'tu foto' }));
-  // No edition images: fall back to the album cover, like the collection list does.
-  const cover = release.length ? null : coverOf(item);
-  return [...(cover ? [{ url: cover, label: 'portada' }] : []), ...release, ...own];
-}
+export { picturesOf, type Picture } from '@kollektor/app-logic';
 
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 

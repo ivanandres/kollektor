@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Cover } from '@/components/Cover';
 import { money, signedMoney } from '@kollektor/app-logic';
 import { useEssentials } from '@/lib/queries';
-import { essentialFor, metaRows, tags, valueNote } from './itemData';
+import { essentialFor, metaRows, tags, valueNote } from '@kollektor/app-logic';
 import { MoreEditions } from './MoreEditions';
 import { picturesOf } from './Photos';
 import { TrackRowMobile } from './Tracks';

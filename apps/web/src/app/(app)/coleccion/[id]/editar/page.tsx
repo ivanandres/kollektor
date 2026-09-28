@@ -9,7 +9,7 @@ import { copyToFields, CopyForm, type CopyValues } from '@/components/CopyForm';
 import { useToast } from '@/components/Toasts';
 import s from '@/features/flow/flow.module.css';
 import { AddPhoto, picturesOf } from '@/features/item/Photos';
-import { coverOf } from '@/features/item/itemData';
+import { coverOf } from '@kollektor/app-logic';
 import { api, errorMessage } from '@/lib/api';
 import { editionLine } from '@kollektor/app-logic';
 import { useInvalidateAll, useItem } from '@/lib/queries';

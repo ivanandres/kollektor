@@ -34,6 +34,9 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm --filter @kollektor/web build
+      - run: pnpm --filter @kollektor/mobile export:web
+        env:
+          EXPO_OFFLINE: '1'
 
   e2e:
     runs-on: ubuntu-latest

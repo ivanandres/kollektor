@@ -7,7 +7,7 @@ import { Cover } from '@/components/Cover';
 import { NavActions } from '@/components/Nav';
 import { duration, money, signed } from '@kollektor/app-logic';
 import { useEssentials } from '@/lib/queries';
-import { essentialFor, metaRows, tags, totalDuration, valueNote } from './itemData';
+import { essentialFor, metaRows, tags, totalDuration, valueNote } from '@kollektor/app-logic';
 import { MoreEditions } from './MoreEditions';
 import { AddPhoto, picturesOf } from './Photos';
 import { TrackRowWeb } from './Tracks';

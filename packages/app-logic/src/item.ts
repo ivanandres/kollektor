@@ -1,6 +1,6 @@
 import type { CollectionItem, EssentialProgress } from '@kollektor/api-client';
-import { countryEs } from '@/lib/filters';
-import { editionLong, shortDate } from '@kollektor/app-logic';
+import { countryEs } from './filters';
+import { editionLong, shortDate } from './format';
 
 export function coverOf(item: CollectionItem): string | null {
   return item.release.coverImageUrl ?? item.release.album.coverImageUrl ?? null;
@@ -84,4 +84,21 @@ export function essentialFor(item: CollectionItem, list: EssentialProgress[] | u
 export function totalDuration(item: CollectionItem): number | null {
   const d = item.release.tracks.map((t) => t.durationSeconds);
   return d.length && d.every((x) => x != null) ? d.reduce<number>((a, b) => a + (b ?? 0), 0) : null;
+}
+
+export interface Picture {
+  url: string;
+  label: string;
+}
+
+/** Edition images from the catalog followed by the owner's photos of this copy. */
+export function picturesOf(item: CollectionItem): Picture[] {
+  const release = item.release.images.map((img, i) => ({
+    url: img.url,
+    label: img.kind === 'primary' ? 'portada' : `imagen ${i + 1}`,
+  }));
+  const own = item.photos.map((p) => ({ url: p.url, label: p.caption ?? 'tu foto' }));
+  // No edition images: fall back to the album cover, like the collection list does.
+  const cover = release.length ? null : coverOf(item);
+  return [...(cover ? [{ url: cover, label: 'portada' }] : []), ...release, ...own];
 }

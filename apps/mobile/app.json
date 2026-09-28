@@ -35,7 +35,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Kolektorz usa la cámara para identificar tus discos por la portada o el código de barras.",
+          "cameraPermission": "Kolektorz usa la c\u00e1mara para identificar tus discos por la portada o el c\u00f3digo de barras.",
           "recordAudioAndroid": false
         }
       ],

@@ -12,9 +12,9 @@ El modelo gira alrededor de **la edición que posee el usuario**
 | -------------------------------------------- | -------------------------------------------- |
 | Backend (API + dominio + DB + integraciones) | ✅ Fases 1–11 implementadas y testeadas      |
 | Frontend web (Next.js, PWA)                  | ✅ Pantallas del handoff de diseño (Fase 12) |
-| App móvil (Expo)                             | ⏳ Post-MVP (Fase 13)                        |
+| App móvil (Expo, iOS y Android)              | ✅ Pantallas mobile del diseño (Fase 13)     |
 
-Detalle en [`docs/estado-backend.md`](docs/estado-backend.md) y [`docs/frontend-web.md`](docs/frontend-web.md). Para diseñar las pantallas:
+Detalle en [`docs/estado-backend.md`](docs/estado-backend.md), [`docs/frontend-web.md`](docs/frontend-web.md) y [`docs/mobile.md`](docs/mobile.md). Para diseñar las pantallas:
 [`docs/pantallas-y-datos.md`](docs/pantallas-y-datos.md) (qué datos y acciones tiene cada una). Análisis y decisiones en
 [`docs/00-analisis-y-arquitectura.md`](docs/00-analisis-y-arquitectura.md) y [`docs/adr/`](docs/adr/).
 
@@ -24,6 +24,7 @@ Detalle en [`docs/estado-backend.md`](docs/estado-backend.md) y [`docs/frontend-
 apps/
   api/                 Hono + Better Auth: HTTP, sesiones, rutas (única puerta de entrada)
   web/                 Next.js (PWA): pantallas mobile (390) y web (1280) del handoff de diseño
+  mobile/              Expo (iOS/Android): las pantallas mobile del diseño, nativas
 packages/
   core/                Dominio: catálogo, colección, wishlist, búsqueda, stats, logros, valuación…
                        + puertos (interfaces) para servicios externos
@@ -31,6 +32,7 @@ packages/
   db/                  Esquema Drizzle + migraciones SQL
   schemas/             Validaciones Zod compartidas (API, web y mobile)
   api-client/          Cliente tipado de la API para web (Next.js) y mobile (Expo)
+  app-logic/           Lógica y hooks compartidos por web y mobile (formatos, filtros, logros, queries)
 docs/                  Análisis, ADRs, referencia de la API y ejemplos de respuestas reales
 design/                Handoff de Claude Design (mockups Kolektorz + sistema Modernist), solo referencia
 ```
