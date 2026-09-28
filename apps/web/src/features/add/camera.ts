@@ -87,14 +87,53 @@ interface Detector {
   detect(source: CanvasImageSource): Promise<{ rawValue: string }[]>;
 }
 
-/** Native barcode reader (Chrome/Android); null where the browser lacks it (use manual entry). */
-export function barcodeDetector(): Detector | null {
+/** Barcode reader: the native one (Chrome/Android) or ZXing (Safari/iOS, Firefox), loaded on demand. */
+export function barcodeDetector(): Detector {
   const Ctor = (globalThis as { BarcodeDetector?: new (o: { formats: string[] }) => Detector })
     .BarcodeDetector;
-  if (!Ctor) return null;
-  try {
-    return new Ctor({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
-  } catch {
-    return null;
+  if (Ctor) {
+    try {
+      return new Ctor({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
+    } catch {
+      // unsupported formats: fall through to ZXing
+    }
   }
+  return zxingDetector();
+}
+
+function zxingDetector(): Detector {
+  let reader: Promise<{ decodeFromCanvas(c: HTMLCanvasElement): { getText(): string } }> | null =
+    null;
+  const canvas = typeof document === 'undefined' ? null : document.createElement('canvas');
+  const load = () =>
+    (reader ??= Promise.all([import('@zxing/browser'), import('@zxing/library')]).then(
+      ([{ BrowserMultiFormatReader }, { BarcodeFormat, DecodeHintType }]) => {
+        const hints = new Map();
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+          BarcodeFormat.EAN_13,
+          BarcodeFormat.EAN_8,
+          BarcodeFormat.UPC_A,
+          BarcodeFormat.UPC_E,
+        ]);
+        return new BrowserMultiFormatReader(hints);
+      },
+    ));
+  return {
+    async detect(source) {
+      const v = source as HTMLVideoElement;
+      if (!canvas || !v.videoWidth) return [];
+      const r = await load();
+      const scale = Math.min(1, 960 / v.videoWidth);
+      canvas.width = Math.round(v.videoWidth * scale);
+      canvas.height = Math.round(v.videoHeight * scale);
+      canvas
+        .getContext('2d', { willReadFrequently: true })!
+        .drawImage(v, 0, 0, canvas.width, canvas.height);
+      try {
+        return [{ rawValue: r.decodeFromCanvas(canvas).getText() }];
+      } catch {
+        return []; // no code in this frame
+      }
+    },
+  };
 }

@@ -235,7 +235,11 @@ function PhotoStep({
   const { video, state, capture } = useCamera(true);
   const file = useRef<HTMLInputElement>(null);
   const [typed, setTyped] = useState('');
+  const [typeCode, setTypeCode] = useState(false);
   const detector = useMemo(() => (typeof window === 'undefined' ? null : barcodeDetector()), []);
+  useEffect(() => {
+    if (mode !== 'barcode') setTypeCode(false);
+  }, [mode]);
 
   // Live barcode scanning where the browser supports it. Each code is sent once per scan
   // session, so a failed lookup doesn't re-fire while the code stays in frame.
@@ -279,7 +283,7 @@ function PhotoStep({
 
   const hint =
     mode === 'barcode'
-      ? detector && state === 'live'
+      ? state === 'live' && !typeCode
         ? 'Apuntá al código de barras del dorso. Lo leemos solos.'
         : 'Escribí los números del código de barras (EAN/UPC) del dorso.'
       : mode === 'text'
@@ -312,7 +316,22 @@ function PhotoStep({
       </div>
       <div style={{ padding: '14px 20px', fontSize: 13 }}>
         {hint}
-        {mode === 'barcode' && !(detector && state === 'live') ? (
+        {mode === 'barcode' && state === 'live' && !typeCode ? (
+          <button
+            type="button"
+            className={s.barSide}
+            style={{
+              display: 'block',
+              color: 'inherit',
+              textDecoration: 'underline',
+              marginTop: 6,
+            }}
+            onClick={() => setTypeCode(true)}
+          >
+            ¿No lo lee? Escribí el número
+          </button>
+        ) : null}
+        {mode === 'barcode' && (state !== 'live' || typeCode) ? (
           <InlineInput
             placeholder="7 798141 234567"
             inputMode="numeric"

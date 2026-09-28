@@ -31,7 +31,7 @@ con `@kollektor/api-client`.
 | 1d Colección grid / lista    | `/coleccion` (mobile)                 | Tercer botón del toggle: estante                                                               |
 | 1e Estante de lomos          | `/coleccion` vista "estante"          | A–Z por artista ignorando "The"; tocar un lomo muestra la vista previa y tocarla abre la ficha |
 | 1f Buscador + filtros        | `/buscar`                             | La hoja de filtros también se abre desde Colección                                            |
-| 1g Identificar con cámara    | `/agregar`                            | Cámara trasera, foto → IA, código de barras (lector nativo o a mano), búsqueda por texto      |
+| 1g Identificar con cámara    | `/agregar`                            | Cámara trasera, foto → IA, código de barras (lector nativo o ZXing en iOS), búsqueda por texto |
 | 1h Agregar manualmente       | `/agregar/manual`                     | Borrador guardado en el dispositivo; aviso "Sin conexión"                                      |
 | 1i / 1n Ficha                | `/coleccion/[id]`                     | Links de cada tema buscados a demanda (tocar el tema en mobile, pasar el mouse en web)         |
 | 1j Wishlist                  | `/wishlist`                           | Tocar un disco: estado, prioridad, precio objetivo, "Lo compré"                                |
@@ -74,7 +74,4 @@ hasta que se configuren sus variables (ver README).
 
 ## Pendiente / ideas
 
-- La lectura nativa de códigos de barras (`BarcodeDetector`) existe en Chrome/Android. En Safari
-  (iOS) se escribe el número a mano, hasta que llegue la app Expo (Fase 13) o se sume una librería
-  (`@zxing/browser`).
 - La vista pública del perfil (`/u/:username`) existe en la API y todavía no tiene pantalla.
