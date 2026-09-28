@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CondBadge, Cover } from '@/components/Cover';
+import { NumberInput } from '@/components/NumberInput';
 import { SearchIcon } from '@/components/icons';
 import {
   activeChips,
@@ -39,6 +40,16 @@ export function CollectionWeb() {
   const { data: profile } = useProfile();
   const { data: dash } = useDashboard();
   const currency = profile?.baseCurrency ?? 'USD';
+  // Debounced inputs commit later; merge into the filters current at that moment.
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
+
+  // Keep the text box in sync when the URL changes from outside (⌘K, back button).
+  useEffect(() => {
+    if ((filters.q ?? '') !== q) setText(filters.q ?? '');
+    // only when the URL's q changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.q]);
 
   useEffect(() => {
     if ((filters.q ?? '') !== q) setFilters({ ...filters, q: q || undefined });
@@ -52,21 +63,18 @@ export function CollectionWeb() {
   const sentinel = useSentinel(
     () => list.hasNextPage && !list.isFetchingNextPage && list.fetchNextPage(),
     !!list.hasNextPage,
+    list.data?.pages.length ?? 0,
   );
   const chips = activeChips(filters, facets, currency);
   const filtered = activeCount(filters) > 0 || !!filters.q;
 
   const range = (key: 'valueMin' | 'valueMax', ph: string) => (
-    <input
+    <NumberInput
       className="input"
       placeholder={ph}
-      inputMode="decimal"
       aria-label={`Valor estimado ${ph}`}
-      value={filters[key] ?? ''}
-      onChange={(e) => {
-        const v = e.target.value.replace(',', '.').replace(/[^\d.]/g, '');
-        setFilters({ ...filters, [key]: v === '' ? undefined : Number(v) });
-      }}
+      value={filters[key]}
+      onCommit={(v) => setFilters({ ...filtersRef.current, [key]: v })}
     />
   );
 

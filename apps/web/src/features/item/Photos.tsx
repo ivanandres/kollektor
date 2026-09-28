@@ -6,6 +6,7 @@ import { useRef, useState } from 'react';
 import { useToast } from '@/components/Toasts';
 import { api, errorMessage } from '@/lib/api';
 import { keys } from '@/lib/queries';
+import { coverOf } from './itemData';
 import s from './item.module.css';
 
 export interface Picture {
@@ -20,7 +21,9 @@ export function picturesOf(item: CollectionItem): Picture[] {
     label: img.kind === 'primary' ? 'portada' : `imagen ${i + 1}`,
   }));
   const own = item.photos.map((p) => ({ url: p.url, label: p.caption ?? 'tu foto' }));
-  return [...release, ...own];
+  // No edition images: fall back to the album cover, like the collection list does.
+  const cover = release.length ? null : coverOf(item);
+  return [...(cover ? [{ url: cover, label: 'portada' }] : []), ...release, ...own];
 }
 
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;

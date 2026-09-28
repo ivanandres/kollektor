@@ -2,8 +2,12 @@
 
 import { useEffect, useRef } from 'react';
 
-/** Calls `onVisible` when the returned element scrolls into view (infinite lists). */
-export function useSentinel(onVisible: () => void, enabled: boolean) {
+/**
+ * Calls `onVisible` when the returned element scrolls into view (infinite lists).
+ * `version` (e.g. the number of loaded pages) re-arms the observer, so a sentinel that is still
+ * on screen after a page loads asks for the next one.
+ */
+export function useSentinel(onVisible: () => void, enabled: boolean, version = 0) {
   const ref = useRef<HTMLDivElement>(null);
   const cb = useRef(onVisible);
   cb.current = onVisible;
@@ -15,6 +19,6 @@ export function useSentinel(onVisible: () => void, enabled: boolean) {
     });
     io.observe(el);
     return () => io.disconnect();
-  }, [enabled]);
+  }, [enabled, version]);
   return ref;
 }

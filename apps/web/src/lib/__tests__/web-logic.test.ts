@@ -96,6 +96,18 @@ describe('manual entry', () => {
     ]);
   });
 
+  it('keeps un-numbered titles whole and "/" inside artist names', () => {
+    expect(parseTracklist('A Day in the Life\nI Want You 7:47\nB. Side B opener')).toEqual([
+      { position: null, title: 'A Day in the Life', duration: null },
+      { position: null, title: 'I Want You', duration: '7:47' },
+      { position: 'B', title: 'Side B opener', duration: null },
+    ]);
+    const input = toInput({ ...blank('USD'), artist: 'AC/DC', title: 'Highway to Hell' });
+    expect(input.manual?.album.artists).toEqual(['AC/DC']);
+    const duo = toInput({ ...blank('USD'), artist: 'Simon; Garfunkel', title: 'x' });
+    expect(duo.manual?.album.artists).toEqual(['Simon', 'Garfunkel']);
+  });
+
   it('builds an input the API accepts', () => {
     const v = {
       ...blank('USD'),
@@ -137,5 +149,19 @@ describe('manual entry', () => {
     const input = addToCollectionInput.parse(toInput({ ...blank('USD'), artist: 'X', title: 'Y' }));
     expect(input.purchasePrice).toBeNull();
     expect(input.purchaseCurrency).toBeNull();
+  });
+});
+
+describe('post-login redirect', () => {
+  it('only allows same-origin paths', async () => {
+    const { safeNext } = await import('@/lib/safeNext');
+    const o = 'https://kolektorz.app';
+    expect(safeNext('/coleccion?genre=Rock', o)).toBe('/coleccion?genre=Rock');
+    expect(safeNext('/\\evil.com', o)).toBe('/');
+    expect(safeNext('//evil.com', o)).toBe('/');
+    expect(safeNext('/%5Cevil.com', o)).toBe('/%5Cevil.com');
+    expect(safeNext('https://evil.com', o)).toBe('/');
+    expect(safeNext('/\tevil', o)).toBe('/');
+    expect(safeNext(null, o)).toBe('/');
   });
 });

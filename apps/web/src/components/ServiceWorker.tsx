@@ -11,7 +11,12 @@ export function ServiceWorker() {
   return null;
 }
 
-/** Drops cached personal data (on sign-out / account deletion). */
-export function clearOfflineData() {
-  navigator.serviceWorker?.controller?.postMessage('kz:clear-data');
+/** Drops cached personal data (sign-in, sign-out, account deletion), with or without an active worker. */
+export async function clearOfflineData() {
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((k) => k.endsWith('-data')).map((k) => caches.delete(k)));
+  } catch {
+    // Cache Storage unavailable (insecure context, private mode)
+  }
 }

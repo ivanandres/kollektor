@@ -25,6 +25,13 @@ export function CollectionMobile() {
   const { data: profile } = useProfile();
   const currency = profile?.baseCurrency ?? 'USD';
 
+  // Keep the text box in sync when the URL changes from outside (⌘K, back button).
+  useEffect(() => {
+    if ((filters.q ?? '') !== q) setText(filters.q ?? '');
+    // only when the URL's q changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.q]);
+
   useEffect(() => {
     if ((filters.q ?? '') !== q) setFilters({ ...filters, q: q || undefined });
     // only react to the debounced text
@@ -45,6 +52,7 @@ export function CollectionMobile() {
   const sentinel = useSentinel(
     () => list.hasNextPage && !list.isFetchingNextPage && list.fetchNextPage(),
     !!list.hasNextPage,
+    list.data?.pages.length ?? 0,
   );
   const chips = activeChips(filters, facets, currency);
   const nActive = activeCount(filters);

@@ -129,6 +129,7 @@ function ago(ms: number) {
 export function ManualForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const toWishlist = params.get('destino') === 'wishlist';
   const toast = useToast();
   const invalidate = useInvalidateAll();
   const { data: profile } = useProfile();
@@ -230,13 +231,17 @@ export function ManualForm() {
     idem.current = crypto.randomUUID();
   }
 
+  // Retry only on an actual offline → online transition, never in a loop.
+  const saveRef = useRef<() => Promise<void>>(async () => {});
   useEffect(() => {
-    if (!online || !retryWhenOnline) return;
-    setRetryWhenOnline(false);
-    void save();
-    // `save` reads the latest values; only react to the connection coming back
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [online, retryWhenOnline]);
+    if (!retryWhenOnline) return;
+    const onOnline = () => {
+      setRetryWhenOnline(false);
+      void saveRef.current();
+    };
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, [retryWhenOnline]);
 
   async function save() {
     if (!valid) {
@@ -247,6 +252,19 @@ export function ManualForm() {
     setBusy(true);
     setError(null);
     try {
+      if (toWishlist) {
+        const { manual } = toInput(values);
+        await api.wishlist.add({ manual, priority: 2 }, idem.current);
+        try {
+          localStorage.removeItem(DRAFT_KEY);
+        } catch {
+          // ignore
+        }
+        await invalidate();
+        toast.show(`Sumaste ${values.title} a tu wishlist.`);
+        router.replace('/wishlist');
+        return;
+      }
       const res = await api.collection.add(toInput(values), idem.current);
       try {
         localStorage.removeItem(DRAFT_KEY);
@@ -259,15 +277,19 @@ export function ManualForm() {
       router.replace(`/coleccion/${res.item.id}`);
     } catch (e) {
       const offline = e instanceof ApiError && e.code === 'NETWORK';
-      setRetryWhenOnline(offline);
+      setRetryWhenOnline(offline && !navigator.onLine);
       setError(
         offline
-          ? 'Sin conexión. El borrador queda guardado en el teléfono y se guarda solo cuando vuelva la señal.'
+          ? navigator.onLine
+            ? 'No pudimos conectar. El borrador queda guardado en el teléfono; probá de nuevo en un rato.'
+            : 'Sin conexión. El borrador queda guardado en el teléfono y se guarda solo cuando vuelva la señal.'
           : errorMessage(e),
       );
       setBusy(false);
     }
   }
+
+  saveRef.current = save;
 
   return (
     <div className={s.screen}>
@@ -279,8 +301,8 @@ export function ManualForm() {
         >
           Cancelar
         </button>
-        <span className={s.barTitle}>Nuevo vinilo</span>
-        <Link href="/agregar" className={s.barSide}>
+        <span className={s.barTitle}>{toWishlist ? 'Sumar a la wishlist' : 'Nuevo vinilo'}</span>
+        <Link href={toWishlist ? '/agregar?destino=wishlist' : '/agregar'} className={s.barSide}>
           Cámara
         </Link>
       </div>
@@ -303,7 +325,7 @@ export function ManualForm() {
         </div>
       ) : null}
       <div className={s.body} style={{ borderTop: '2px solid var(--color-divider)' }}>
-        {SECTIONS.map((sec) => {
+        {(toWishlist ? SECTIONS.slice(0, 2) : SECTIONS).map((sec) => {
           const isOpen = !!open[sec.n];
           return (
             <div key={sec.n} className={s.section}>
@@ -383,7 +405,9 @@ export function ManualForm() {
           </div>
         ) : null}
         <button type="button" className="btn btn-primary cta" disabled={busy} onClick={save}>
-          <span>{busy ? 'Guardando…' : 'Guardar en colección'}</span>
+          <span>
+            {busy ? 'Guardando…' : toWishlist ? 'Agregar a wishlist' : 'Guardar en colección'}
+          </span>
           <span>✓</span>
         </button>
       </div>

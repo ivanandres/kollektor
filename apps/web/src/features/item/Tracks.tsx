@@ -126,6 +126,7 @@ export function TrackRowWeb({ track }: { track: Track }) {
   async function openLink(kind: 'spotify' | 'youtube' | 'lyrics', label: string) {
     // Open synchronously (popup blockers), then point it at the link once we have it.
     const win = window.open('about:blank', '_blank');
+    if (win) win.opener = null; // the external page must not control this tab
     try {
       const links = await qc.fetchQuery({
         queryKey: keys.trackLinks(track.id),

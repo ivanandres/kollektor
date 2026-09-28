@@ -14,7 +14,7 @@ import {
 } from '@/components/CopyForm';
 import { useToast } from '@/components/Toasts';
 import { api, errorMessage } from '@/lib/api';
-import { editionLine, money, num, PRIORITY_LABEL } from '@/lib/format';
+import { editionLine, money, PRIORITY_LABEL } from '@/lib/format';
 import { useInvalidateAll, useProfile, useWishlist } from '@/lib/queries';
 import s from './wishlist.module.css';
 
@@ -383,10 +383,13 @@ function BuySheet({ item, onClose }: { item: WishlistItem; onClose: () => void }
   const toast = useToast();
   const invalidate = useInvalidateAll();
   const { data: profile } = useProfile();
+  // Pre-fill with the cheapest listing, in that listing's currency.
   const [values, setValues] = useState<CopyValues>(() => ({
-    ...emptyCopy(profile?.baseCurrency ?? 'USD'),
-    purchasePrice: item.market ? num(item.market.lowest) : '',
+    ...emptyCopy(item.market?.currency ?? profile?.baseCurrency ?? 'USD'),
+    purchasePrice: item.market ? String(item.market.lowest).replace('.', ',') : '',
   }));
+  const needsEdition = !item.release && !item.album.mainReleaseId;
+  const pickHref = `/agregar?q=${encodeURIComponent(`${item.album.artistDisplay} ${item.album.title}`)}&wishlist=${item.id}`;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -432,16 +435,35 @@ function BuySheet({ item, onClose }: { item: WishlistItem; onClose: () => void }
             </div>
           </div>
         </div>
-        <CopyForm value={values} onChange={setValues} />
+        {needsEdition ? (
+          <div style={{ padding: '10px 12px', background: 'var(--color-surface)', fontSize: 13 }}>
+            Este disco está en tu wishlist sin una edición elegida. Buscala en Discogs para
+            guardarla con su tracklist y su valor.
+          </div>
+        ) : (
+          <CopyForm value={values} onChange={setValues} />
+        )}
         {error ? (
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-accent-700)' }}>
             {error}
           </div>
         ) : null}
-        <button type="button" className="btn btn-primary cta" disabled={busy} onClick={buy}>
-          <span>{busy ? 'Guardando…' : 'Guardar en colección'}</span>
-          <span>✓</span>
-        </button>
+        {needsEdition ? (
+          <Link href={pickHref} className="btn btn-primary cta">
+            <span>Elegir la edición que compré</span>
+            <span>→</span>
+          </Link>
+        ) : (
+          <>
+            <button type="button" className="btn btn-primary cta" disabled={busy} onClick={buy}>
+              <span>{busy ? 'Guardando…' : 'Guardar en colección'}</span>
+              <span>✓</span>
+            </button>
+            <Link href={pickHref} style={{ fontSize: 13 }}>
+              Compré otra edición →
+            </Link>
+          </>
+        )}
       </div>
     </>
   );

@@ -504,7 +504,7 @@ function Account() {
   async function signOut() {
     await api.auth.signOut().catch(() => {});
     qc.clear();
-    clearOfflineData();
+    await clearOfflineData();
     router.replace('/login');
   }
 
@@ -513,7 +513,7 @@ function Account() {
     try {
       await api.auth.deleteAccount(password);
       qc.clear();
-      clearOfflineData();
+      await clearOfflineData();
       router.replace('/login');
     } catch (e) {
       toast.show(errorMessage(e), 'error');

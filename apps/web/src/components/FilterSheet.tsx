@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { NumberInput } from './NumberInput';
 import { chipGroups, clearFilters, isOn, SORT_LABEL, toggleValue, type Sort } from '@/lib/filters';
 import { num } from '@/lib/format';
 import { useFacets, type CollectionFilters } from '@/lib/queries';
@@ -34,20 +35,18 @@ export function FilterSheet({ value, onChange, count, currency, onClose, onSubmi
     };
   }, [onClose]);
 
+  const latest = useRef(value);
+  latest.current = value;
   const numInput = (key: 'paidMin' | 'paidMax', label: string, ph: string) => (
     <div className="field">
       <label htmlFor={key}>{label}</label>
-      <input
+      <NumberInput
         id={key}
         className="input"
         style={{ minHeight: 44 }}
-        inputMode="decimal"
         placeholder={ph}
-        value={value[key] ?? ''}
-        onChange={(e) => {
-          const v = e.target.value.replace(',', '.').replace(/[^\d.]/g, '');
-          onChange({ ...value, [key]: v === '' ? undefined : Number(v) });
-        }}
+        value={value[key]}
+        onCommit={(v) => onChange({ ...latest.current, [key]: v })}
       />
     </div>
   );

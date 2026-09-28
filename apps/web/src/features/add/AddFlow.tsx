@@ -28,6 +28,8 @@ export function AddFlow() {
   const router = useRouter();
   const params = useSearchParams();
   const toWishlist = params.get('destino') === 'wishlist';
+  /** Buying a wishlist item: the chosen edition closes that item instead of adding a new one. */
+  const wishlistId = params.get('wishlist');
   const initialQ = params.get('q');
   const [step, setStep] = useState<0 | 1 | 2>(initialQ ? 1 : 0);
   const [source, setSource] = useState<Source | null>(null);
@@ -131,7 +133,10 @@ export function AddFlow() {
           {step ? '← Atrás' : 'Cerrar'}
         </button>
         <span className={s.barTitle}>{toWishlist ? 'Sumar a la wishlist' : 'Agregar vinilo'}</span>
-        <Link href="/agregar/manual" className={s.barSide}>
+        <Link
+          href={toWishlist ? '/agregar/manual?destino=wishlist' : '/agregar/manual'}
+          className={s.barSide}
+        >
           Manual
         </Link>
       </div>
@@ -178,7 +183,7 @@ export function AddFlow() {
           onNext={() => setStep(2)}
         />
       ) : chosen ? (
-        <PurchaseStep cand={chosen} />
+        <PurchaseStep cand={chosen} wishlistId={wishlistId} />
       ) : null}
     </div>
   );
@@ -205,26 +210,39 @@ function PhotoStep({
   const [typed, setTyped] = useState('');
   const detector = useMemo(() => (typeof window === 'undefined' ? null : barcodeDetector()), []);
 
-  // Live barcode scanning where the browser supports it.
+  // Live barcode scanning where the browser supports it. Each code is sent once per scan
+  // session, so a failed lookup doesn't re-fire while the code stays in frame.
+  const onBarcodeRef = useRef(onBarcode);
+  onBarcodeRef.current = onBarcode;
+  const tried = useRef(new Set<string>());
+  useEffect(() => {
+    if (mode !== 'barcode') tried.current.clear();
+  }, [mode]);
   useEffect(() => {
     if (mode !== 'barcode' || !detector || state !== 'live' || busy) return;
     let stop = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const tick = async () => {
       if (stop || !video.current) return;
       try {
         const codes = await detector.detect(video.current);
+        if (stop) return;
         const code = codes[0]?.rawValue;
-        if (code) return onBarcode(code);
+        if (code && !tried.current.has(code)) {
+          tried.current.add(code);
+          return onBarcodeRef.current(code);
+        }
       } catch {
         // frame not ready
       }
-      setTimeout(tick, 300);
+      if (!stop) timer = setTimeout(tick, 300);
     };
     void tick();
     return () => {
       stop = true;
+      clearTimeout(timer);
     };
-  }, [mode, detector, state, busy, onBarcode, video]);
+  }, [mode, detector, state, busy, video]);
 
   const shoot = async () => {
     if (state !== 'live') return file.current?.click();
@@ -447,13 +465,14 @@ function EditionStep({
         : source?.kind === 'versions'
           ? { k: 'Todas las ediciones', t: source.title }
           : { k: 'Búsqueda', t: source?.kind === 'text' ? source.q : '' };
-  const manualHref = `/agregar/manual${
-    source?.kind === 'photo' && source.hints
-      ? `?artista=${encodeURIComponent(source.hints.artist ?? '')}&titulo=${encodeURIComponent(source.hints.title ?? '')}`
-      : source?.kind === 'barcode'
-        ? `?barcode=${encodeURIComponent(source.barcode)}`
-        : ''
-  }`;
+  const manualParams = new URLSearchParams();
+  if (source?.kind === 'photo' && source.hints) {
+    if (source.hints.artist) manualParams.set('artista', source.hints.artist);
+    if (source.hints.title) manualParams.set('titulo', source.hints.title);
+  }
+  if (source?.kind === 'barcode') manualParams.set('barcode', source.barcode);
+  if (toWishlist) manualParams.set('destino', 'wishlist');
+  const manualHref = `/agregar/manual${manualParams.size ? `?${manualParams}` : ''}`;
 
   async function addToWishlist() {
     if (!chosen) return;
@@ -604,7 +623,13 @@ function EditionStep({
 
 // ─── 03 Compra ───
 
-function PurchaseStep({ cand }: { cand: ExternalCandidate }) {
+function PurchaseStep({
+  cand,
+  wishlistId,
+}: {
+  cand: ExternalCandidate;
+  wishlistId: string | null;
+}) {
   const router = useRouter();
   const toast = useToast();
   const invalidate = useInvalidateAll();
@@ -624,10 +649,10 @@ function PurchaseStep({ cand }: { cand: ExternalCandidate }) {
     setBusy(true);
     setError(null);
     try {
-      const res = await api.collection.add(
-        { discogsReleaseId: Number(cand.externalId), ...copyToFields(values) },
-        idem,
-      );
+      const fields = { discogsReleaseId: Number(cand.externalId), ...copyToFields(values) };
+      const res = wishlistId
+        ? await api.wishlist.purchase(wishlistId, fields)
+        : await api.collection.add(fields, idem);
       await invalidate();
       toast.show(`Agregaste ${cand.title} a tu colección.`);
       toast.celebrate(res.unlockedAchievements);

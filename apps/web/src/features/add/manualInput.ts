@@ -61,7 +61,9 @@ export function parseTracklist(text: string) {
     .map((l) => l.trim())
     .filter(Boolean)
     .map((line) => {
-      const m = line.match(/^([A-Za-z]?\d{1,2}[a-z]?|[A-Z])[.)]?\s+(.+?)(?:\s+(\d{1,2}:\d{2}))?$/);
+      const m = line.match(
+        /^([A-Za-z]{0,2}\d{1,3}[a-z]?|[A-Z](?=[.)]))[.)]?\s+(.+?)(?:\s+(\d{1,2}:\d{2}))?$/,
+      );
       if (m) return { position: m[1]!, title: m[2]!, duration: m[3] ?? null };
       const d = line.match(/^(.+?)\s+(\d{1,2}:\d{2})$/);
       return d
@@ -79,7 +81,11 @@ export function toInput(v: Values): AddToCollectionInput {
   return {
     manual: {
       album: {
-        artists: v.artist.split(/\s*[;/]\s*/).filter(Boolean),
+        // ";" separates artists; "/" is part of names like AC/DC.
+        artists: v.artist
+          .split(';')
+          .map((a) => a.trim())
+          .filter(Boolean),
         title: v.title.trim(),
         originalReleaseYear: int(v.year),
         genres: v.genre.trim() ? [v.genre.trim()] : [],

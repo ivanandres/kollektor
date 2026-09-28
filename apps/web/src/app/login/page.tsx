@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
 import { api, errorMessage } from '@/lib/api';
 import { keys } from '@/lib/queries';
+import { safeNext } from '@/lib/safeNext';
+import { clearOfflineData } from '@/components/ServiceWorker';
 import s from './login.module.css';
 
 /** 1a — Login / registro. */
@@ -29,7 +31,6 @@ function Login() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const next = params.get('next');
-  const target = next && next.startsWith('/') && !next.startsWith('//') ? next : '/';
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -51,9 +52,11 @@ function Login() {
       } else {
         await api.auth.signIn({ email: email.trim(), password });
       }
+      // Nothing from a previous session (possibly another person) survives a sign-in.
+      qc.clear();
+      await clearOfflineData();
       await qc.invalidateQueries({ queryKey: keys.session });
-      qc.removeQueries({ queryKey: keys.profile });
-      router.replace(target);
+      router.replace(safeNext(next, window.location.origin));
     } catch (err) {
       setError(errorMessage(err));
     } finally {
