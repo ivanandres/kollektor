@@ -96,8 +96,8 @@ y nunca llaman a servicios externos: usan fakes y fixtures.
   migra y siembra en el build, cron diario de mantenimiento). Variables de entorno según `.env.example`.
   La web es un segundo proyecto de Vercel con root `apps/web` (Next.js, sin configuración extra) y la
   variable `API_URL` apuntando a la API; en la API, `WEB_ORIGIN` es la URL de la web.
-- **Después (VPS):** `docker compose --profile prod up -d` (Postgres + migraciones + API) detrás de un
-  reverse proxy con TLS, y un cron del sistema:
+- **Después (VPS):** `docker compose --profile prod up -d` (Postgres + migraciones + API + web) con un
+  reverse proxy con TLS delante de la web (que ya reenvía `/api` a la API), y un cron del sistema:
   `curl -H "Authorization: Bearer $CRON_SECRET" https://api.tu-dominio/api/cron/maintenance`.
   Migración de datos: `pg_dump` de Neon → `pg_restore` en el VPS. No hay dependencias propietarias de Vercel.
 

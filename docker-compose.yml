@@ -1,5 +1,6 @@
 # Local development: `docker compose up -d db` and run the API with `pnpm dev`.
-# Production on a VPS: `docker compose --profile prod up -d` (put a reverse proxy with TLS in front).
+# Production on a VPS: `docker compose --profile prod up -d` (put a reverse proxy with TLS in front of `web`;
+# it proxies /api to the API, so only the web needs to be public).
 services:
   db:
     image: postgres:16
@@ -36,6 +37,17 @@ services:
     ports: ['3001:3001']
     depends_on:
       migrate: { condition: service_completed_successfully }
+    restart: unless-stopped
+
+  web:
+    profiles: [prod]
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        API_URL: http://api:3001
+    ports: ['3000:3000']
+    depends_on: [api]
     restart: unless-stopped
 
 volumes:
