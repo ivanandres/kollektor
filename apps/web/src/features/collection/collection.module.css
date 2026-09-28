@@ -44,7 +44,7 @@
 }
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px 12px;
   padding: 16px 20px 24px;
 }
@@ -187,13 +187,13 @@
 }
 .wGrid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 22px 18px;
   padding: 22px 28px;
 }
 @media (min-width: 1600px) {
   .wGrid {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 .wCardTitle {

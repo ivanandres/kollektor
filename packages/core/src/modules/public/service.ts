@@ -89,6 +89,7 @@ export function publicService(
         country: i.country,
         formatSummary: i.formatSummary,
         editionType: i.editionType,
+        label: i.label,
         coverImageUrl: i.coverImageUrl,
         conditionMedia: i.conditionMedia,
         conditionSleeve: i.conditionSleeve,

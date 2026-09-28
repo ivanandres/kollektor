@@ -405,6 +405,49 @@ function Privacy({ profile }: { profile: Profile }) {
       <div style={{ fontSize: 12, color: 'var(--color-neutral-700)', marginTop: 10 }}>
         La ubicación física y el lugar de compra nunca se publican.
       </div>
+      {profile.profileVisibility === 'public' ? <ShareLink username={profile.username} /> : null}
+    </div>
+  );
+}
+
+function ShareLink({ username }: { username: string }) {
+  const toast = useToast();
+  const url =
+    typeof window === 'undefined' ? `/u/${username}` : `${window.location.origin}/u/${username}`;
+  return (
+    <div
+      style={{
+        marginTop: 12,
+        padding: '10px 12px',
+        background: 'var(--color-surface)',
+        fontSize: 13,
+        display: 'flex',
+        justifyContent: 'space-between',
+        gap: 12,
+        alignItems: 'center',
+      }}
+    >
+      <Link href={`/u/${username}`} className="ellipsis" style={{ minWidth: 0 }}>
+        {url.replace(/^https?:\/\//, '')}
+      </Link>
+      <button
+        type="button"
+        className="link"
+        style={{ fontSize: 13, flex: 'none' }}
+        onClick={async () => {
+          try {
+            if (navigator.share) await navigator.share({ title: 'Mi colección en Kolektorz', url });
+            else {
+              await navigator.clipboard.writeText(url);
+              toast.show('Link copiado.');
+            }
+          } catch {
+            // share sheet dismissed
+          }
+        }}
+      >
+        Compartir
+      </button>
     </div>
   );
 }

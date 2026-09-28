@@ -39,6 +39,7 @@ con `@kollektor/api-client`.
 | 1l Colección web             | `/coleccion` (web)                    | Sidebar de facetas con cantidades, grid 5 columnas o tabla                                    |
 | 1m Buscador ⌘K               | modal global (web)                    | ⌘K / Ctrl+K o la caja de la barra superior                                                     |
 | — (sin mockup)               | `/coleccion/[id]/editar`              | Editar la copia, sumar fotos, borrar                                                           |
+| — (sin mockup)               | `/u/[username]`                       | Perfil público sin sesión: colección y wishlist según la privacidad del dueño                 |
 | — (sin mockup)               | `/estadisticas`, `/logros`, `/perfil` | Mismo lenguaje visual que 1b/1k/1h; en mobile se llega desde Perfil                            |
 
 ## Decisiones tomadas sin consultarte (fáciles de cambiar)
@@ -74,4 +75,4 @@ hasta que se configuren sus variables (ver README).
 
 ## Pendiente / ideas
 
-- La vista pública del perfil (`/u/:username`) existe en la API y todavía no tiene pantalla.
+- Nada crítico por ahora; ver la lista de próximos pasos en el README.
