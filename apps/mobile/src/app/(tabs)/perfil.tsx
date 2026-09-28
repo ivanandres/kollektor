@@ -11,7 +11,7 @@ import { useToast } from '@/components/Toast';
 import { Chip, Cta, Field, hair, rule, Segmented } from '@/components/ui';
 import { api, errorMessage, tokenStore } from '@/lib/api';
 import { useDashboardVariant } from '@/lib/prefs';
-import { keys, useInvalidateAll, useProfile, useSession } from '@/lib/queries';
+import { keys, useHasPassword, useInvalidateAll, useProfile, useSession } from '@/lib/queries';
 import { c, mono } from '@/lib/theme';
 
 const WEB = process.env.EXPO_PUBLIC_WEB_URL ?? 'https://kolektorz.app';
@@ -334,6 +334,8 @@ function Account() {
   const [deleting, setDeleting] = useState(false);
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  // Google-only accounts have no password: Better Auth asks for a recent sign-in instead.
+  const { data: hasPassword = true } = useHasPassword();
   async function out() {
     await tokenStore.clear();
     qc.clear();
@@ -355,7 +357,7 @@ function Account() {
           onPress: async () => {
             setBusy(true);
             try {
-              await api.auth.deleteAccount(password);
+              await api.auth.deleteAccount(hasPassword ? password : undefined);
               await out();
             } catch (e) {
               toast.show(errorMessage(e), 'error');
@@ -372,16 +374,23 @@ function Account() {
       {deleting ? (
         <>
           <T size={13}>
-            Para confirmar, escribí tu contraseña. Si querés una copia, exportá tu colección desde
-            la web antes.
+            {hasPassword ? 'Para confirmar, escribí tu contraseña. ' : ''}Si querés una copia,
+            exportá tu colección desde la web antes.
           </T>
-          <Field
-            label="Tu contraseña"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
+          {hasPassword ? (
+            <Field
+              label="Tu contraseña"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+          ) : null}
+          <Cta
+            label="Borrar mi cuenta"
+            disabled={hasPassword && !password}
+            busy={busy}
+            onPress={confirmDelete}
           />
-          <Cta label="Borrar mi cuenta" disabled={!password} busy={busy} onPress={confirmDelete} />
         </>
       ) : (
         <Pressable onPress={() => setDeleting(true)}>

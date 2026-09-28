@@ -21,7 +21,8 @@ function AuthGate() {
   const segments = useSegments();
   const router = useRouter();
   const offline = error instanceof ApiError && error.code === 'NETWORK';
-  const onLogin = segments[0] === 'login';
+  // `auth` is the Google deep-link landing: it routes on its own once the token is stored.
+  const onLogin = segments[0] === 'login' || segments[0] === 'auth';
   useEffect(() => {
     if (isPending || offline) return;
     if (!session && !onLogin) router.replace('/login');

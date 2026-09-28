@@ -5,6 +5,8 @@ import type { CollectionFilters } from './filters';
 
 export const keys = {
   session: ['session'] as const,
+  authOptions: ['authOptions'] as const,
+  accounts: ['accounts'] as const,
   profile: ['profile'] as const,
   dashboard: ['dashboard'] as const,
   discover: ['discover'] as const,
@@ -27,6 +29,23 @@ export function createQueries(api: ApiClient, rq: typeof ReactQuery) {
   const { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } = rq;
   const useSession = () =>
     useQuery({ queryKey: keys.session, queryFn: () => api.auth.session(), staleTime: 5 * 60_000 });
+
+  /** Sign-in methods the server offers; fails closed (no Google button) if unreachable. */
+  const useAuthOptions = () =>
+    useQuery({
+      queryKey: keys.authOptions,
+      queryFn: () => api.auth.options(),
+      staleTime: Infinity,
+      retry: false,
+    });
+
+  /** Whether the account has a password (Google-only accounts don't). */
+  const useHasPassword = () =>
+    useQuery({
+      queryKey: keys.accounts,
+      queryFn: () => api.auth.accounts(),
+      select: (accounts) => accounts.some((a) => a.providerId === 'credential'),
+    });
 
   const useProfile = () =>
     useQuery({ queryKey: keys.profile, queryFn: () => api.me.profile(), staleTime: 5 * 60_000 });
@@ -132,6 +151,8 @@ export function createQueries(api: ApiClient, rq: typeof ReactQuery) {
 
   return {
     useSession,
+    useAuthOptions,
+    useHasPassword,
     useProfile,
     useDashboard,
     useDiscover,

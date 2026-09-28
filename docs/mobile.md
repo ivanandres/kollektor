@@ -8,6 +8,12 @@ la misma API que la web.
 
 - **Sesión:** token bearer que la API devuelve en `set-auth-token`, guardado en SecureStore. Sin
   cookies ni header `Origin`.
+- **Continuar con Google (solo Android por ahora):** la app abre `GET /api/mobile/google` en un
+  browser de autenticación (`expo-web-browser`, sesión efímera). El OAuth pasa con cookies adentro de
+  ese browser y la API devuelve el token en `kolektorz://auth?state&token`; la app comprueba que el
+  `state` sea el que generó (`expo-crypto`). En iOS el botón está oculto: ofrecer Google obliga a
+  ofrecer también "Sign in with Apple" (guía 4.8 del App Store), que todavía no está. Cualquier app
+  puede registrar un esquema propio, así que el paso siguiente es usar App Links / Universal Links.
 - **Datos:** los mismos hooks que la web. `@kollektor/app-logic` exporta `createQueries(api, ReactQuery)`
   y la lógica pura (formatos, filtros, logros, carga manual, ficha). Cada app le pasa su propia copia de
   React Query, porque pnpm instala una por versión de React.
@@ -54,5 +60,7 @@ las URLs de producción).
 - Typecheck, lint y bundle (`expo export --platform web`, también en CI).
 - Las pantallas se revisaron renderizadas con react-native-web contra la API y los datos demo, y el
   alta manual se probó de punta a punta.
+- El flujo de Google para la app tiene tests de punta a punta en la API (`apps/api/src/oauth.test.ts`,
+  con el endpoint de tokens de Google simulado); el botón en un Android real todavía no.
 - Todavía **no** se probó en un iPhone o Android real ni en simuladores: la cámara, SecureStore y los
   permisos solo existen ahí.

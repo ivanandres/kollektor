@@ -15,7 +15,7 @@ import { Importer } from '@/features/profile/Importer';
 import { api, errorMessage } from '@/lib/api';
 import { relativeDay } from '@kollektor/app-logic';
 import { useDashboardVariant } from '@/lib/prefs';
-import { keys, useInvalidateAll, useProfile, useSession } from '@/lib/queries';
+import { keys, useHasPassword, useInvalidateAll, useProfile, useSession } from '@/lib/queries';
 import { useDebounced } from '@/lib/search';
 
 /** Perfil (no mockup): accesos, datos, privacidad, preferencias, importar/exportar y cuenta. */
@@ -545,6 +545,8 @@ function Account() {
   const [confirm, setConfirm] = useState(false);
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  // Google-only accounts have no password: Better Auth asks for a recent sign-in instead.
+  const { data: hasPassword = true } = useHasPassword();
 
   async function signOut() {
     await api.auth.signOut().catch(() => {});
@@ -556,7 +558,7 @@ function Account() {
   async function del() {
     setBusy(true);
     try {
-      await api.auth.deleteAccount(password);
+      await api.auth.deleteAccount(hasPassword ? password : undefined);
       qc.clear();
       await clearOfflineData();
       router.replace('/login');
@@ -598,16 +600,18 @@ function Account() {
               Se eliminan tu colección, tu wishlist, tus cargas manuales y tus fotos. No se puede
               deshacer. Si querés una copia, exportá tu colección a CSV antes.
             </div>
-            <div className="field">
-              <label htmlFor="del-pass">Tu contraseña</label>
-              <input
-                id="del-pass"
-                className="input"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+            {hasPassword ? (
+              <div className="field">
+                <label htmlFor="del-pass">Tu contraseña</label>
+                <input
+                  id="del-pass"
+                  className="input"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            ) : null}
             <div className="dialog-actions">
               <button type="button" className="btn btn-secondary" onClick={() => setConfirm(false)}>
                 Cancelar
@@ -615,7 +619,7 @@ function Account() {
               <button
                 type="button"
                 className="btn btn-primary"
-                disabled={busy || !password}
+                disabled={busy || (hasPassword && !password)}
                 onClick={del}
               >
                 Borrar cuenta

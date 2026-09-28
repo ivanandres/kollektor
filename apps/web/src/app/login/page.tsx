@@ -3,8 +3,9 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
+import { oauthErrorMessage } from '@kollektor/app-logic';
 import { api, errorMessage } from '@/lib/api';
-import { keys } from '@/lib/queries';
+import { keys, useAuthOptions } from '@/lib/queries';
 import { safeNext } from '@/lib/safeNext';
 import { clearOfflineData } from '@/components/ServiceWorker';
 import s from './login.module.css';
@@ -27,7 +28,9 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Google sends people back here with ?error= when the round trip fails or they cancel.
+  const [error, setError] = useState<string | null>(() => oauthErrorMessage(params.get('error')));
+  const { data: options } = useAuthOptions();
   const [notice, setNotice] = useState<string | null>(null);
 
   const next = params.get('next');
@@ -60,6 +63,29 @@ function Login() {
     } catch (err) {
       setError(errorMessage(err));
     } finally {
+      setBusy(false);
+    }
+  }
+
+  async function google() {
+    setError(null);
+    setBusy(true);
+    try {
+      const origin = window.location.origin;
+      const back = new URL('/login', origin);
+      if (next) back.searchParams.set('next', next);
+      const { url } = await api.auth.signInSocial({
+        provider: 'google',
+        // The session cookie arrives with the redirect; AppShell picks it up on the next page.
+        callbackURL: new URL(safeNext(next, origin), origin).href,
+        errorCallbackURL: back.href,
+      });
+      // Nothing from a previous session survives: the page is about to be replaced anyway.
+      qc.clear();
+      await clearOfflineData();
+      window.location.assign(url);
+    } catch (err) {
+      setError(errorMessage(err));
       setBusy(false);
     }
   }
@@ -162,6 +188,17 @@ function Login() {
           <span>{busy ? 'Un momento…' : signup ? 'Crear cuenta' : 'Entrar'}</span>
           <span>→</span>
         </button>
+        {options?.google ? (
+          <button
+            type="button"
+            className={`btn btn-secondary ${s.cta} ${s.google}`}
+            disabled={busy}
+            onClick={google}
+          >
+            <span>Continuar con Google</span>
+            <span>G</span>
+          </button>
+        ) : null}
       </form>
     </div>
   );

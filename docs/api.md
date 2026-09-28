@@ -32,11 +32,14 @@ Base: `/api` (local: `http://localhost:3001/api`). JSON en todo, salvo el export
 | `POST /auth/sign-up/email` | `{ name, email, password }` | Crea la cuenta y un perfil **privado** con username sugerido |
 | `POST /auth/sign-in/email` | `{ email, password }` | Cookie de sesión + header `set-auth-token` |
 | `POST /auth/sign-out` | — | |
-| `POST /auth/sign-in/social` | `{ provider: "google", callbackURL }` | Solo si están configuradas `GOOGLE_CLIENT_ID/SECRET`. Devuelve la URL de Google a la que hay que redirigir |
+| `GET /auth-options` | — | `{ google }`: qué métodos de ingreso ofrecer (el botón "Continuar con Google" solo aparece si está configurado) |
+| `POST /auth/sign-in/social` | `{ provider: "google", callbackURL, errorCallbackURL?, disableRedirect: true }` | Web. Solo si están configuradas `GOOGLE_CLIENT_ID/SECRET`. Devuelve `{ url }` de Google; al volver, la cookie de sesión ya está puesta. Los errores vuelven a `errorCallbackURL?error=` |
+| `GET /mobile/google?state&redirect` | — | App. Se abre en un browser de autenticación (`expo-web-browser`); `redirect` solo puede ser `kolektorz://…` (y `exp://…` fuera de producción). Termina en `redirect?state&token` (token bearer) o `redirect?state&error` |
+| `GET /auth/list-accounts` | — | Métodos vinculados (`credential` = email y contraseña, `google`) |
 | `GET /auth/get-session` | — | Sesión actual o `null` |
 | `POST /auth/request-password-reset` | `{ email, redirectTo }` | Envía un mail con un link; `redirectTo` es la pantalla web para elegir la contraseña nueva, que recibe `?token=` |
 | `POST /auth/reset-password` | `{ token, newPassword }` | Cierra las demás sesiones |
-| `POST /auth/delete-user` | `{ password }` | "Borrar mi cuenta": elimina al usuario y todos sus datos (colección, wishlist, cargas manuales, fotos registradas) |
+| `POST /auth/delete-user` | `{ password }` (o `{}` si la cuenta es solo de Google y entró hace menos de un día) | "Borrar mi cuenta": elimina al usuario y todos sus datos (colección, wishlist, cargas manuales, fotos registradas) |
 
 ## Perfil
 

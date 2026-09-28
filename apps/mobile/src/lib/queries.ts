@@ -7,6 +7,8 @@ export { keys } from '@kollektor/app-logic/queries';
 
 export const {
   useSession,
+  useAuthOptions,
+  useHasPassword,
   useProfile,
   useDashboard,
   useDiscover,

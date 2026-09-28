@@ -123,7 +123,12 @@ export function createApiClient(opts: ApiClientOptions) {
         } | null) ?? {};
       // Our API: { error: { code, message } }. Better Auth: { code, message }.
       const code = (e.error?.code ?? statusCode(res.status)) as ApiErrorCode;
-      const message = e.error?.message ?? e.message ?? 'Algo salió mal. Probá de nuevo.';
+      const message =
+        e.error?.message ??
+        (e.code && AUTH_MESSAGES[e.code]) ??
+        (res.status === 429 ? 'Demasiados intentos. Esperá un minuto y probá de nuevo.' : null) ??
+        e.message ??
+        'Algo salió mal. Probá de nuevo.';
       throw new ApiError(res.status, code, message, e.error?.issues ?? [], e.error?.details);
     }
     return data as R;
@@ -151,7 +156,23 @@ export function createApiClient(opts: ApiClientOptions) {
         post<unknown>('/auth/request-password-reset', { email, redirectTo }),
       resetPassword: (token: string, newPassword: string) =>
         post<unknown>('/auth/reset-password', { token, newPassword }),
-      deleteAccount: (password: string) => post<unknown>('/auth/delete-user', { password }),
+      /** Accounts without a password (Google only) need a recent sign-in instead. */
+      deleteAccount: (password?: string) =>
+        post<unknown>('/auth/delete-user', password ? { password } : {}),
+      /** Which sign-in methods the server offers (e.g. "Continuar con Google"). */
+      options: () => get<{ google: boolean }>('/auth-options'),
+      /** Web: returns Google's URL; send the browser there. Back on `callbackURL` with a session. */
+      signInSocial: (body: {
+        provider: 'google';
+        callbackURL: string;
+        errorCallbackURL?: string;
+      }) =>
+        post<{ url: string; redirect: boolean }>('/auth/sign-in/social', {
+          ...body,
+          disableRedirect: true,
+        }),
+      /** Linked sign-in methods: `credential` (email + password), `google`… */
+      accounts: () => get<{ providerId: string }[]>('/auth/list-accounts'),
     },
     me: {
       profile: () => get<T.Profile>('/me/profile'),
@@ -310,6 +331,23 @@ function safeJson(text: string): unknown {
     return null;
   }
 }
+
+/** Better Auth answers in English with a `code`; the product speaks Spanish. */
+const AUTH_MESSAGES: Record<string, string> = {
+  INVALID_EMAIL_OR_PASSWORD: 'El email o la contraseña no son correctos.',
+  INVALID_PASSWORD: 'La contraseña no es correcta.',
+  INVALID_EMAIL: 'Revisá el email.',
+  PASSWORD_TOO_SHORT: 'La contraseña tiene que tener al menos 8 caracteres.',
+  PASSWORD_TOO_LONG: 'La contraseña es demasiado larga.',
+  USER_ALREADY_EXISTS: 'Ya hay una cuenta con ese email. Probá iniciar sesión.',
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: 'Ya hay una cuenta con ese email. Probá iniciar sesión.',
+  INVALID_TOKEN: 'El link ya no es válido. Pedí uno nuevo.',
+  TOKEN_EXPIRED: 'El link venció. Pedí uno nuevo.',
+  SESSION_EXPIRED: 'Por seguridad, cerrá sesión y volvé a entrar antes de hacer esto.',
+  USER_ALREADY_HAS_PASSWORD: 'Escribí tu contraseña para confirmar.',
+  PROVIDER_NOT_FOUND: 'Ese método de ingreso no está disponible.',
+  INVALID_ORIGIN: 'Pedido rechazado por seguridad. Recargá la página.',
+};
 
 function statusCode(status: number): ApiErrorCode {
   if (status === 401) return 'UNAUTHORIZED';

@@ -6,7 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { T } from '@/components/T';
 import { Cta, Field } from '@/components/ui';
 import { api, errorMessage, tokenStore } from '@/lib/api';
-import { keys } from '@/lib/queries';
+import { GOOGLE_ON_THIS_PLATFORM, signInWithGoogle } from '@/lib/googleAuth';
+import { keys, useAuthOptions } from '@/lib/queries';
 import { c } from '@/lib/theme';
 
 /** 1a — Login / registro. */
@@ -20,6 +21,7 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const { data: options } = useAuthOptions();
 
   async function submit() {
     setBusy(true);
@@ -38,6 +40,24 @@ export default function Login() {
       } else {
         await api.auth.signIn({ email: email.trim(), password });
       }
+      await qc.invalidateQueries({ queryKey: keys.session });
+      router.replace('/');
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function google() {
+    setBusy(true);
+    setError(null);
+    try {
+      await tokenStore.clear();
+      qc.clear();
+      const result = await signInWithGoogle();
+      if (!result) return; // closed the browser, or the `auth` route already finished it
+      if (!result.ok) return setError(result.message);
       await qc.invalidateQueries({ queryKey: keys.session });
       router.replace('/');
     } catch (e) {
@@ -176,6 +196,16 @@ export default function Login() {
           ) : null}
           <View style={{ flex: 1, minHeight: 24 }} />
           <Cta label={signup ? 'Crear cuenta' : 'Entrar'} onPress={submit} busy={busy} />
+          {GOOGLE_ON_THIS_PLATFORM && options?.google ? (
+            <View style={{ marginTop: 10 }}>
+              <Cta
+                variant="secondary"
+                label="Continuar con Google"
+                onPress={google}
+                disabled={busy}
+              />
+            </View>
+          ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

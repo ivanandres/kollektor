@@ -25,7 +25,7 @@ con `@kollektor/api-client`.
 
 | Mockup                       | Ruta                                  | Notas                                                                                          |
 | ---------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 1a Login / registro          | `/login`, `/restablecer`              | Recuperar contraseña por mail                                                                  |
+| 1a Login / registro          | `/login`, `/restablecer`              | Recuperar contraseña por mail; "Continuar con Google" si la API lo tiene configurado (`/api/auth-options`) |
 | 1b Dashboard A (números)     | `/` (mobile)                          | Elegible desde Perfil → Preferencias → "Inicio en el teléfono: Números"                        |
 | 1c Dashboard B (progreso)    | `/` (mobile, **default**)             | El bloque rojo muestra la discografía esencial más cerca de completarse                       |
 | 1d Colección grid / lista    | `/coleccion` (mobile)                 | Tercer botón del toggle: estante                                                               |

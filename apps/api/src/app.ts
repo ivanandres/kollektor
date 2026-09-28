@@ -10,6 +10,7 @@ import { meRoutes } from './routes/me';
 import { publicRoutes } from './routes/public';
 import { discogsAccountRoutes, discogsCallbackRoutes } from './routes/discogs';
 import { adminRoutes } from './routes/admin';
+import { oauthRoutes } from './routes/oauth';
 import { perUserRateLimit } from './lib/rate-limit';
 import { accessLog } from './lib/log';
 import { wishlistRoutes } from './routes/wishlist';
@@ -37,6 +38,7 @@ export function createApp(deps: AppDeps) {
 
   app.get('/health', (c) => c.json({ ok: true }));
   app.on(['GET', 'POST'], '/auth/*', (c) => auth.handler(c.req.raw));
+  app.route('/', oauthRoutes(deps));
 
   // Cron (Vercel Cron sends GET with Authorization: Bearer $CRON_SECRET; a VPS crontab can do the same).
   app.on(['GET', 'POST'], '/cron/maintenance', async (c) => {
