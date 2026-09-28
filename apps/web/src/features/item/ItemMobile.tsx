@@ -8,6 +8,7 @@ import { Cover } from '@/components/Cover';
 import { money, signedMoney } from '@/lib/format';
 import { useEssentials } from '@/lib/queries';
 import { essentialFor, metaRows, tags, valueNote } from './itemData';
+import { MoreEditions } from './MoreEditions';
 import { picturesOf } from './Photos';
 import { TrackRowMobile } from './Tracks';
 import s from './item.module.css';
@@ -174,6 +175,10 @@ export function ItemMobile({
           Sin tracklist cargado.
         </div>
       ) : null}
+
+      <div style={{ borderTop: '1px solid var(--color-divider)' }}>
+        <MoreEditions item={item} />
+      </div>
 
       {privateBits.length ? (
         <div style={{ padding: '14px 20px 0', borderTop: '1px solid var(--color-divider)' }}>

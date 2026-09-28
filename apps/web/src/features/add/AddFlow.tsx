@@ -31,7 +31,11 @@ export function AddFlow() {
   /** Buying a wishlist item: the chosen edition closes that item instead of adding a new one. */
   const wishlistId = params.get('wishlist');
   const initialQ = params.get('q');
-  const [step, setStep] = useState<0 | 1 | 2>(initialQ ? 1 : 0);
+  /** Other editions of an album already in the collection (from the ficha). */
+  const albumId = params.get('album');
+  /** Link a manual record to its Discogs edition instead of adding a new one. */
+  const linkItemId = params.get('vincular');
+  const [step, setStep] = useState<0 | 1 | 2>(initialQ || albumId ? 1 : 0);
   const [source, setSource] = useState<Source | null>(null);
   const [cands, setCands] = useState<ExternalCandidate[]>([]);
   const [sel, setSel] = useState(0);
@@ -54,9 +58,25 @@ export function AddFlow() {
     }
   };
 
+  const runAlbum = async (id: string) => {
+    setError(null);
+    setBusy('Buscando ediciones…');
+    setSource({ kind: 'versions', title: params.get('titulo') ?? 'Este álbum' });
+    try {
+      const res = await api.catalog.albumExternalVersions(id);
+      setCands(res.items);
+      setSel(0);
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
   useEffect(() => {
-    if (initialQ) void runText(initialQ);
-    // run once for the ?q= deep link
+    if (albumId) void runAlbum(albumId);
+    else if (initialQ) void runText(initialQ);
+    // run once for the ?q= / ?album= deep links
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -132,7 +152,13 @@ export function AddFlow() {
         <button type="button" className={s.barBtn} onClick={back}>
           {step ? '← Atrás' : 'Cerrar'}
         </button>
-        <span className={s.barTitle}>{toWishlist ? 'Sumar a la wishlist' : 'Agregar vinilo'}</span>
+        <span className={s.barTitle}>
+          {linkItemId
+            ? 'Vincular con Discogs'
+            : toWishlist
+              ? 'Sumar a la wishlist'
+              : 'Agregar vinilo'}
+        </span>
         <Link
           href={toWishlist ? '/agregar/manual?destino=wishlist' : '/agregar/manual'}
           className={s.barSide}
@@ -153,7 +179,7 @@ export function AddFlow() {
               key={label}
               type="button"
               style={style}
-              disabled={i > step || (toWishlist && i === 2)}
+              disabled={i > step || ((toWishlist || !!linkItemId) && i === 2)}
               onClick={() => i < step && setStep(i as 0 | 1)}
             >
               0{i + 1} {label}
@@ -179,6 +205,7 @@ export function AddFlow() {
           busy={busy}
           error={error}
           toWishlist={toWishlist}
+          linkItemId={linkItemId}
           onVersions={loadVersions}
           onNext={() => setStep(2)}
         />
@@ -435,6 +462,7 @@ function EditionStep({
   busy,
   error,
   toWishlist,
+  linkItemId,
   onVersions,
   onNext,
 }: {
@@ -445,6 +473,7 @@ function EditionStep({
   busy: string | null;
   error: string | null;
   toWishlist: boolean;
+  linkItemId: string | null;
   onVersions: (c: ExternalCandidate) => void;
   onNext: () => void;
 }) {
@@ -473,6 +502,23 @@ function EditionStep({
   if (source?.kind === 'barcode') manualParams.set('barcode', source.barcode);
   if (toWishlist) manualParams.set('destino', 'wishlist');
   const manualHref = `/agregar/manual${manualParams.size ? `?${manualParams}` : ''}`;
+
+  async function linkToEdition() {
+    if (!chosen || !linkItemId) return;
+    setAdding(true);
+    try {
+      const res = await api.collection.link(linkItemId, {
+        discogsReleaseId: Number(chosen.externalId),
+      });
+      await invalidate();
+      toast.show('Listo: tu disco ahora tiene los datos de Discogs.');
+      toast.celebrate(res.unlockedAchievements);
+      router.replace(`/coleccion/${linkItemId}`);
+    } catch (e) {
+      toast.show(errorMessage(e), 'error');
+      setAdding(false);
+    }
+  }
 
   async function addToWishlist() {
     if (!chosen) return;
@@ -591,7 +637,7 @@ function EditionStep({
             Ver todas las ediciones de este álbum →
           </button>
         ) : null}
-        <Link href={manualHref}>No es ninguna — cargar manualmente</Link>
+        {linkItemId ? null : <Link href={manualHref}>No es ninguna — cargar manualmente</Link>}
         {cands.length ? (
           <span className="muted" style={{ fontSize: 11 }}>
             Datos provistos por Discogs
@@ -600,7 +646,17 @@ function EditionStep({
       </div>
       <div style={{ flex: 1 }} />
       <div className={s.foot}>
-        {toWishlist ? (
+        {linkItemId ? (
+          <button
+            type="button"
+            className="btn btn-primary cta"
+            disabled={!chosen || adding}
+            onClick={linkToEdition}
+          >
+            <span>Vincular con esta edición</span>
+            <span>→</span>
+          </button>
+        ) : toWishlist ? (
           <button
             type="button"
             className="btn btn-primary cta"

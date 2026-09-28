@@ -8,6 +8,7 @@ import { NavActions } from '@/components/Nav';
 import { duration, money, signed } from '@/lib/format';
 import { useEssentials } from '@/lib/queries';
 import { essentialFor, metaRows, tags, totalDuration, valueNote } from './itemData';
+import { MoreEditions } from './MoreEditions';
 import { AddPhoto, picturesOf } from './Photos';
 import { TrackRowWeb } from './Tracks';
 import s from './item.module.css';
@@ -191,6 +192,7 @@ export function ItemWeb({ item }: { item: CollectionItem }) {
             </div>
           </Link>
         ) : null}
+        <MoreEditions item={item} web />
         {item.release.external.some((e) => e.source === 'discogs') ? (
           <div className="muted" style={{ fontSize: 11, marginTop: 14 }}>
             Datos provistos por Discogs.
