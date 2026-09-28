@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { Cover } from '@/components/Cover';
-import { dec1, num, pct, signed } from '@/lib/format';
-import { nextCountAchievement } from '@/lib/gamification';
+import { dec1, num, pct, signed } from '@kollektor/app-logic';
+import { nextCountAchievement } from '@kollektor/app-logic';
 import { useAchievements, useCollectionPage, useDashboard, useEssentials } from '@/lib/queries';
 import { EmptyCollection } from './EmptyCollection';
 import s from './dashboard.module.css';

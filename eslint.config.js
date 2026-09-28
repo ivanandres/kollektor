@@ -15,6 +15,9 @@ export default tseslint.config(
       '**/.next-e2e/**',
       '**/playwright-report/**',
       '**/test-results/**',
+      'apps/mobile/dist/**',
+      'apps/mobile/.expo/**',
+      'apps/mobile/expo-env.d.ts',
     ],
   },
   js.configs.recommended,
@@ -29,7 +32,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['apps/web/**/*.{ts,tsx}'],
+    files: ['apps/web/**/*.{ts,tsx}', 'apps/mobile/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
     rules: {
       'react-hooks/rules-of-hooks': 'error',

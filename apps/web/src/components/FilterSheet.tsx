@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { NumberInput } from './NumberInput';
 import { chipGroups, clearFilters, isOn, SORT_LABEL, toggleValue, type Sort } from '@/lib/filters';
-import { num } from '@/lib/format';
+import { num } from '@kollektor/app-logic';
 import { useFacets, type CollectionFilters } from '@/lib/queries';
 
 interface Props {

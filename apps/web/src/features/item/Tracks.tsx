@@ -4,7 +4,7 @@ import type { CollectionItem, TrackLinks } from '@kollektor/api-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/Toasts';
 import { api } from '@/lib/api';
-import { duration } from '@/lib/format';
+import { duration } from '@kollektor/app-logic';
 import { keys, useTrackLinks } from '@/lib/queries';
 import s from './item.module.css';
 

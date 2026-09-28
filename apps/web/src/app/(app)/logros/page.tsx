@@ -3,8 +3,8 @@
 import type { Achievement } from '@kollektor/api-client';
 import { useToast } from '@/components/Toasts';
 import { errorMessage } from '@/lib/api';
-import { badgeMark, num, pct, shortDate } from '@/lib/format';
-import { wishedMatcher } from '@/lib/gamification';
+import { badgeMark, num, pct, shortDate } from '@kollektor/app-logic';
+import { wishedMatcher } from '@kollektor/app-logic';
 import {
   useAchievements,
   useAddMissingToWishlist,

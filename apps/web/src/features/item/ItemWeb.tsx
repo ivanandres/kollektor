@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Cover } from '@/components/Cover';
 import { NavActions } from '@/components/Nav';
-import { duration, money, signed } from '@/lib/format';
+import { duration, money, signed } from '@kollektor/app-logic';
 import { useEssentials } from '@/lib/queries';
 import { essentialFor, metaRows, tags, totalDuration, valueNote } from './itemData';
 import { MoreEditions } from './MoreEditions';

@@ -7,3 +7,5 @@ design/
 .next-e2e/
 playwright-report/
 test-results/
+apps/mobile/dist/
+apps/mobile/.expo/

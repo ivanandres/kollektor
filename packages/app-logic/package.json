@@ -1,0 +1,25 @@
+{
+  "name": "@kollektor/app-logic",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./filters": "./src/filters.ts",
+    "./queries": "./src/queries.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@kollektor/schemas": "workspace:*"
+  },
+  "devDependencies": {
+    "@kollektor/api-client": "workspace:*",
+    "@kollektor/core": "workspace:*",
+    "@tanstack/react-query": "^5.104.0"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5"
+  }
+}

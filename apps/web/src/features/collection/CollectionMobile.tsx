@@ -7,7 +7,7 @@ import { CondBadge, Cover } from '@/components/Cover';
 import { FilterSheet } from '@/components/FilterSheet';
 import { GridIcon, ListIcon, SearchIcon, ShelfIcon } from '@/components/icons';
 import { activeChips, activeCount, SORT_LABEL, useUrlFilters } from '@/lib/filters';
-import { editionLine, formatShort, money, num, shelfName } from '@/lib/format';
+import { editionLine, formatShort, money, num, shelfName } from '@kollektor/app-logic';
 import { usePref, COLLECTION_VIEWS, type CollectionView } from '@/lib/prefs';
 import { useCollectionInfinite, useFacets, useProfile } from '@/lib/queries';
 import { useDebounced } from '@/lib/search';

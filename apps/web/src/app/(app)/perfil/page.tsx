@@ -13,7 +13,7 @@ import s from '@/features/flow/flow.module.css';
 import p from '@/features/pages/pages.module.css';
 import { Importer } from '@/features/profile/Importer';
 import { api, errorMessage } from '@/lib/api';
-import { relativeDay } from '@/lib/format';
+import { relativeDay } from '@kollektor/app-logic';
 import { useDashboardVariant } from '@/lib/prefs';
 import { keys, useInvalidateAll, useProfile, useSession } from '@/lib/queries';
 import { useDebounced } from '@/lib/search';

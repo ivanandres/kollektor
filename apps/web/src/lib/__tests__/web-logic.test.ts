@@ -1,7 +1,7 @@
 import { addToCollectionInput } from '@kollektor/schemas';
 import { describe, expect, it } from 'vitest';
-import { blank, parseTracklist, toInput } from '@/features/add/manualInput';
-import { parseAmount } from '@/lib/amount';
+import { blank, parseTracklist, toInput } from '@kollektor/app-logic';
+import { parseAmount } from '@kollektor/app-logic';
 import {
   activeChips,
   activeCount,
@@ -9,7 +9,14 @@ import {
   parseFilters,
   toggleValue,
 } from '@/lib/filters';
-import { badgeMark, editionLine, formatShort, money, signed, signedMoney } from '@/lib/format';
+import {
+  badgeMark,
+  editionLine,
+  formatShort,
+  money,
+  signed,
+  signedMoney,
+} from '@kollektor/app-logic';
 
 describe('format', () => {
   it('formats money like the mockups (es-AR grouping, true minus)', () => {

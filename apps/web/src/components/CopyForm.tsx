@@ -2,10 +2,10 @@
 
 import type { CollectionItemFields } from '@kollektor/schemas';
 import type { InputHTMLAttributes } from 'react';
-import { parseAmount } from '@/lib/amount';
+import { parseAmount } from '@kollektor/app-logic';
 
 export { parseAmount };
-import { CONDITIONS } from '@/lib/format';
+import { CONDITIONS } from '@kollektor/app-logic';
 
 export type CopyValues = {
   conditionMedia: string | null;

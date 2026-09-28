@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CURRENCIES } from '@/components/CopyForm';
-import { blank, parseTracklist, toInput, type FieldKey, type Values } from './manualInput';
+import { blank, parseTracklist, toInput, type FieldKey, type Values } from '@kollektor/app-logic';
 import { useToast } from '@/components/Toasts';
 import s from '@/features/flow/flow.module.css';
 import { api, ApiError, errorMessage } from '@/lib/api';
-import { CONDITIONS } from '@/lib/format';
+import { CONDITIONS } from '@kollektor/app-logic';
 import { useInvalidateAll, useProfile } from '@/lib/queries';
 
 interface Field {

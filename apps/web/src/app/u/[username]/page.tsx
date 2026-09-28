@@ -10,7 +10,7 @@ import { useSentinel } from '@/features/collection/useSentinel';
 import p from '@/features/pages/pages.module.css';
 import { api, ApiError } from '@/lib/api';
 import { countryEs } from '@/lib/filters';
-import { editionLine, money, num, PRIORITY_LABEL } from '@/lib/format';
+import { editionLine, money, num, PRIORITY_LABEL } from '@kollektor/app-logic';
 import { useDebounced } from '@/lib/search';
 import s from './public.module.css';
 

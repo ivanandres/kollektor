@@ -6,7 +6,7 @@ import { Cover } from '@/components/Cover';
 import { SearchIcon } from '@/components/icons';
 import { useToast } from '@/components/Toasts';
 import { errorMessage } from '@/lib/api';
-import { badgeMark, num, signed } from '@/lib/format';
+import { badgeMark, num, signed } from '@kollektor/app-logic';
 import {
   badgeRow,
   essentialDetail,
@@ -14,7 +14,7 @@ import {
   insightHref,
   pickEssential,
   wishedMatcher,
-} from '@/lib/gamification';
+} from '@kollektor/app-logic';
 import {
   useAchievements,
   useAddMissingToWishlist,

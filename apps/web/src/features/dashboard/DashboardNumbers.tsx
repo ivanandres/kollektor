@@ -2,8 +2,8 @@
 
 import type { Dashboard } from '@kollektor/api-client';
 import { Avatar } from '@/components/Avatar';
-import { money, num, pct, relativeDay, signedMoney } from '@/lib/format';
-import { nextCountAchievement } from '@/lib/gamification';
+import { money, num, pct, relativeDay, signedMoney } from '@kollektor/app-logic';
+import { nextCountAchievement } from '@kollektor/app-logic';
 import { useAchievements, useDashboard, useProfile } from '@/lib/queries';
 import { EmptyCollection } from './EmptyCollection';
 import s from './dashboard.module.css';

@@ -10,7 +10,7 @@ const config: NextConfig = {
   // E2E builds use their own folder so they can run next to `next dev`.
   distDir: process.env.NEXT_DIST_DIR || '.next',
   outputFileTracingRoot: fileURLToPath(new URL('../..', import.meta.url)),
-  transpilePackages: ['@kollektor/api-client', '@kollektor/schemas'],
+  transpilePackages: ['@kollektor/api-client', '@kollektor/app-logic', '@kollektor/schemas'],
   async rewrites() {
     return [{ source: '/api/:path*', destination: `${apiUrl}/api/:path*` }];
   },

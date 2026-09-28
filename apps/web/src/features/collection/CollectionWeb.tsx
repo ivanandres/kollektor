@@ -18,7 +18,7 @@ import {
   useUrlFilters,
   type Sort,
 } from '@/lib/filters';
-import { editionLine, formatShort, money, num, signed } from '@/lib/format';
+import { editionLine, formatShort, money, num, signed } from '@kollektor/app-logic';
 import { usePref } from '@/lib/prefs';
 import { useCollectionInfinite, useDashboard, useFacets, useProfile } from '@/lib/queries';
 import { useDebounced } from '@/lib/search';

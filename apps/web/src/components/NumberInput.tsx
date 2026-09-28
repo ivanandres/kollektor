@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type InputHTMLAttributes } from 'react';
-import { parseAmount } from '@/lib/amount';
+import { parseAmount } from '@kollektor/app-logic';
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> & {
   value: number | undefined;

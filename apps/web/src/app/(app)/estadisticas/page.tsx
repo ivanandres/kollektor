@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { countryEs } from '@/lib/filters';
-import { dec1, editionLong, money, num, signed } from '@/lib/format';
+import { dec1, editionLong, money, num, signed } from '@kollektor/app-logic';
 import { useStats } from '@/lib/queries';
 import { HBars, ValueChart, VBars } from '@/features/pages/charts';
 import s from '@/features/pages/pages.module.css';

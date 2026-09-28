@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useToast } from '@/components/Toasts';
 import { api, errorMessage } from '@/lib/api';
-import { num } from '@/lib/format';
+import { num } from '@kollektor/app-logic';
 import { useInvalidateAll } from '@/lib/queries';
 
 /** Discogs account link, Discogs/CSV import with live progress, and CSV export. */

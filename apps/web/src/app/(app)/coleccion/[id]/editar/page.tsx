@@ -11,7 +11,7 @@ import s from '@/features/flow/flow.module.css';
 import { AddPhoto, picturesOf } from '@/features/item/Photos';
 import { coverOf } from '@/features/item/itemData';
 import { api, errorMessage } from '@/lib/api';
-import { editionLine } from '@/lib/format';
+import { editionLine } from '@kollektor/app-logic';
 import { useInvalidateAll, useItem } from '@/lib/queries';
 
 /** Editar los datos de mi copia, sus fotos, o borrarla. */

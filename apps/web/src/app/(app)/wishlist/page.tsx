@@ -14,7 +14,7 @@ import {
 } from '@/components/CopyForm';
 import { useToast } from '@/components/Toasts';
 import { api, errorMessage } from '@/lib/api';
-import { editionLine, money, PRIORITY_LABEL } from '@/lib/format';
+import { editionLine, money, PRIORITY_LABEL } from '@kollektor/app-logic';
 import { useInvalidateAll, useProfile, useWishlist } from '@/lib/queries';
 import s from './wishlist.module.css';
 

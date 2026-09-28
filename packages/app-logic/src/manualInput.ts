@@ -1,5 +1,5 @@
 import type { AddToCollectionInput, ManualReleaseInput } from '@kollektor/schemas';
-import { parseAmount } from '@/lib/amount';
+import { parseAmount } from './amount';
 
 /** Pure logic of the manual entry form (1h): values ↔ API input. */
 export type Values = Record<FieldKey, string>;

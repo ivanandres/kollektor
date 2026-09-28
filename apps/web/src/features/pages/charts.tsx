@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useRef, useState, type PointerEvent } from 'react';
-import { money, num, pct, shortDate } from '@/lib/format';
+import { money, num, pct, shortDate } from '@kollektor/app-logic';
 import s from './pages.module.css';
 
 interface Row {

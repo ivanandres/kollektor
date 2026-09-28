@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Kolektorz",
+    "slug": "kolektorz",
+    "scheme": "kolektorz",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#f3f2f2",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.kolektorz"
+    },
+    "android": {
+      "package": "app.kolektorz",
+      "adaptiveIcon": {
+        "backgroundColor": "#ec3013",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-image",
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Kolektorz usa la cámara para identificar tus discos por la portada o el código de barras.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kolektorz necesita tus fotos para identificar un disco o sumar fotos de tu copia."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

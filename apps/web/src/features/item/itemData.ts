@@ -1,6 +1,6 @@
 import type { CollectionItem, EssentialProgress } from '@kollektor/api-client';
 import { countryEs } from '@/lib/filters';
-import { editionLong, shortDate } from '@/lib/format';
+import { editionLong, shortDate } from '@kollektor/app-logic';
 
 export function coverOf(item: CollectionItem): string | null {
   return item.release.coverImageUrl ?? item.release.album.coverImageUrl ?? null;

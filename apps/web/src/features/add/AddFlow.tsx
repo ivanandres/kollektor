@@ -11,7 +11,7 @@ import { useToast } from '@/components/Toasts';
 import s from '@/features/flow/flow.module.css';
 import { api, ApiError, errorMessage } from '@/lib/api';
 import { countryEs } from '@/lib/filters';
-import { money } from '@/lib/format';
+import { money } from '@kollektor/app-logic';
 import { useInvalidateAll, useProfile } from '@/lib/queries';
 import { barcodeDetector, toBase64, toJpeg, useCamera } from './camera';
 
