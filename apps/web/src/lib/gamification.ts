@@ -1,4 +1,4 @@
-import type { Achievement, EssentialProgress, Insight } from '@kollektor/api-client';
+import type { Achievement, EssentialProgress, Insight, WishlistItem } from '@kollektor/api-client';
 
 /** The discography closest to completion that the user has started. */
 export function pickEssential(list: EssentialProgress[] | undefined): EssentialProgress | null {
@@ -64,4 +64,24 @@ export function insightHref(i: Insight): string {
     default:
       return '/logros';
   }
+}
+
+const norm = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+/**
+ * Whether an essential album is already wished. The curated list and the wishlist can point to
+ * different catalog rows for the same album, so also compare by title and artist.
+ */
+export function wishedMatcher(wishlist: WishlistItem[] | undefined) {
+  const open = (wishlist ?? []).filter((w) => w.status !== 'purchased');
+  const ids = new Set(open.map((w) => w.album.id));
+  const names = new Set(open.map((w) => `${norm(w.album.artistDisplay)}|${norm(w.album.title)}`));
+  return (albumId: string, title: string, artist: string) =>
+    ids.has(albumId) || names.has(`${norm(artist)}|${norm(title)}`);
 }

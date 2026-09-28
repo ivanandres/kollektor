@@ -1,0 +1,136 @@
+/* Screens without a mockup (Estadísticas, Logros, Perfil) — same Modernist language as 1b/1k/1j. */
+.head {
+  padding: calc(16px + env(safe-area-inset-top)) 20px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 2px solid var(--color-divider);
+}
+@media (min-width: 960px) {
+  .head {
+    padding: 24px 32px 20px;
+  }
+}
+.title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.1;
+}
+.sub {
+  font-size: 13px;
+  color: var(--color-neutral-700);
+}
+.section {
+  padding: 16px 20px;
+  border-bottom: 2px solid var(--color-divider);
+  min-width: 0;
+}
+@media (min-width: 960px) {
+  .section {
+    padding: 20px 32px;
+  }
+}
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 960px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .grid > .section + .section {
+    border-left: 1px solid var(--color-divider);
+  }
+  .grid:not(.grid2) > .section:nth-child(3n + 1) {
+    border-left: 0;
+  }
+  .grid2 {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+.kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 2px solid var(--color-divider);
+}
+.kpis > div {
+  padding: 14px 12px;
+  min-width: 0;
+}
+.kpis > div:first-child {
+  padding-left: 20px;
+}
+.kpis > div + div {
+  border-left: 1px solid var(--color-divider);
+}
+@media (min-width: 960px) {
+  .kpis {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .kpis > div {
+    padding: 20px;
+  }
+  .kpis > div:first-child {
+    padding-left: 32px;
+  }
+}
+.kpiNum {
+  font-size: 22px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+@media (min-width: 960px) {
+  .kpiNum {
+    font-size: 32px;
+  }
+}
+.small {
+  font-size: 12px;
+  color: var(--color-neutral-700);
+}
+.hbar {
+  display: grid;
+  grid-template-columns: var(--label-w, 96px) 1fr 32px;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 7px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 13px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.row:hover {
+  color: var(--color-text);
+}
+.linkRow {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.linkRow:hover {
+  color: var(--color-text);
+}

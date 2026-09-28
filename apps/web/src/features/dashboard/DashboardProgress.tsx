@@ -13,6 +13,7 @@ import {
   essentialHeadline,
   insightHref,
   pickEssential,
+  wishedMatcher,
 } from '@/lib/gamification';
 import {
   useAchievements,
@@ -42,7 +43,8 @@ export function DashboardProgress() {
   const firstMissing = hero?.missing[0];
   const wished =
     firstMissing &&
-    wishlist?.some((w) => w.album.id === firstMissing.albumId && w.status !== 'purchased');
+    hero &&
+    wishedMatcher(wishlist)(firstMissing.albumId, firstMissing.title, hero.artistName);
   const unlocked = achievements?.filter((a) => a.unlocked).length ?? 0;
   const forYou = (insights ?? [])
     .filter((i) => !('listCode' in i && hero && i.listCode === hero.code))

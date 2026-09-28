@@ -70,12 +70,10 @@ export function AddFlow() {
     setBusy('Identificando…');
     try {
       const images = await Promise.all(
-        blobs
-          .slice(0, 3)
-          .map(async (b) => ({
-            data: await toBase64(await toJpeg(b)),
-            mediaType: 'image/jpeg' as const,
-          })),
+        blobs.slice(0, 3).map(async (b) => ({
+          data: await toBase64(await toJpeg(b)),
+          mediaType: 'image/jpeg' as const,
+        })),
       );
       const res = await api.catalog.identifyPhoto(images);
       identified(res, { kind: 'photo', hints: res.hints, remaining: res.remainingToday });

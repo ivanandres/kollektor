@@ -12,7 +12,6 @@ export const metadata: Metadata = {
   title: { default: 'Kolektorz', template: '%s · Kolektorz' },
   description: 'Qué tenés. Qué querés. Cuánto vale. Tu colección de vinilos, edición por edición.',
   applicationName: 'Kolektorz',
-  manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'Kolektorz', statusBarStyle: 'default' },
   icons: { icon: '/icon.svg', apple: '/icon-192.png' },
 };

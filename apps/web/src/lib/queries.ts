@@ -45,6 +45,20 @@ export const useAchievements = () =>
 export const useEssentials = () =>
   useQuery({ queryKey: keys.essentials, queryFn: () => api.achievements.essentials() });
 
+export const useStats = () => ({
+  summary: useQuery({ queryKey: ['stats', 'summary'], queryFn: () => api.stats.summary() }),
+  breakdowns: useQuery({
+    queryKey: ['stats', 'breakdowns'],
+    queryFn: () => api.stats.breakdowns(),
+  }),
+  value: useQuery({ queryKey: ['stats', 'value'], queryFn: () => api.stats.value() }),
+  timeline: useQuery({ queryKey: ['stats', 'timeline'], queryFn: () => api.stats.timeline() }),
+  duplicates: useQuery({
+    queryKey: ['stats', 'duplicates'],
+    queryFn: () => api.stats.duplicates(),
+  }),
+});
+
 export const useFacets = () =>
   useQuery({ queryKey: keys.facets, queryFn: () => api.collection.facets() });
 

@@ -1,0 +1,26 @@
+import type { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'Kolektorz',
+    short_name: 'Kolektorz',
+    description:
+      'Qué tenés. Qué querés. Cuánto vale. Tu colección de vinilos, edición por edición.',
+    lang: 'es-AR',
+    start_url: '/',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#f3f2f2',
+    theme_color: '#f3f2f2',
+    icons: [
+      { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml' },
+      { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
+    shortcuts: [
+      { name: 'Agregar vinilo', url: '/agregar' },
+      { name: 'Buscar', url: '/buscar' },
+    ],
+  };
+}

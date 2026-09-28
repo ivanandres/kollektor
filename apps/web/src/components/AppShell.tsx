@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { ApiError } from '@/lib/api';
 import { useSession } from '@/lib/queries';
 import { useIsDesktop } from '@/lib/responsive';
 import { CommandK } from './CommandK';
@@ -11,15 +12,17 @@ import { BottomNav, Shell, TopNav } from './Nav';
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const path = usePathname();
-  const { data: session, isPending, isError } = useSession();
+  const { data: session, isPending, error } = useSession();
+  // Offline: keep the app usable with cached data instead of bouncing to login.
+  const offline = error instanceof ApiError && error.code === 'NETWORK';
   const desktop = useIsDesktop();
   const [searchOpen, setSearchOpen] = useState(false);
   const [navActions, setNavActions] = useState<ReactNode>(null);
 
   useEffect(() => {
-    if (!isPending && (isError || !session))
+    if (!isPending && !offline && !session)
       router.replace(`/login?next=${encodeURIComponent(path)}`);
-  }, [isPending, isError, session, router, path]);
+  }, [isPending, offline, session, router, path]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -42,7 +45,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     [navActions],
   );
 
-  if (isPending || !session) return <div style={{ minHeight: '100dvh' }} aria-busy="true" />;
+  if (isPending || (!session && !offline))
+    return <div style={{ minHeight: '100dvh' }} aria-busy="true" />;
 
   return (
     <Shell.Provider value={ctx}>
