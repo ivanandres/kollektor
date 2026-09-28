@@ -73,6 +73,14 @@ Sin claves externas funcionan la carga manual, la colección, la búsqueda, las 
 logros. La identificación por foto, la búsqueda en Discogs y los links de música muestran un aviso
 hasta que se configuren sus variables (ver README).
 
+## Tests
+
+- Lógica pura (formatos, filtros, montos, carga manual, redirect del login): Vitest, dentro de `pnpm test`.
+- De punta a punta con Playwright (`pnpm --filter @kollektor/web e2e`), en mobile y en web: registro y
+  login, rutas privadas, carga manual (alta, edición, borrado, borrador), filtros y búsqueda, vistas
+  lista/estante/tabla, wishlist hasta "Lo compré", perfil público y privacidad, e Inicio/Estadísticas/
+  Logros/Perfil sin errores. Corren en CI en un job aparte.
+
 ## Pendiente / ideas
 
 - Nada crítico por ahora; ver la lista de próximos pasos en el README.

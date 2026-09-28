@@ -4,3 +4,6 @@ packages/db/drizzle/
 docs/
 design/
 .next/
+.next-e2e/
+playwright-report/
+test-results/

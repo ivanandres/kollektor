@@ -25,3 +25,4 @@
 
 - Integración con fakes de `@kollektor/core/testing` (`FakeCatalog`, `FakeFx`, `seedLibrary`…); nunca llamar APIs reales en tests.
 - Tests de API de punta a punta en `apps/api/src/app.test.ts` con `app.request`.
+- E2E de la web: `pnpm --filter @kollektor/web e2e` (Playwright, `apps/web/e2e/`). Levanta API (:3101) y un build de la web (:3100) contra `E2E_DATABASE_URL` (default: la DB de test), migra y siembra; cada test crea su propio usuario. Proyectos `mobile` (Pixel 7) y `desktop` (1280).

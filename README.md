@@ -81,6 +81,7 @@ su variable en `.env`:
 
 ```bash
 pnpm test            # 121 tests (unitarios + integración contra Postgres + API de punta a punta + lógica de la web)
+pnpm --filter @kollektor/web e2e   # 32 tests de punta a punta en navegador (mobile + web)
 pnpm typecheck
 pnpm lint
 pnpm format

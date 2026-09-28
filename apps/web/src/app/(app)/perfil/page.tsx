@@ -341,6 +341,8 @@ function Toggle2({
     >
       <span style={{ fontSize: 14 }}>{label}</span>
       <div
+        role="group"
+        aria-label={label}
         className="toggle"
         style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)`, gridAutoFlow: 'unset' }}
       >

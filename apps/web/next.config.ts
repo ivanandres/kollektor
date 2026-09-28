@@ -7,6 +7,8 @@ const apiUrl = (process.env.API_URL ?? 'http://localhost:3001').replace(/\/$/, '
 const config: NextConfig = {
   // Self-contained server for the VPS image (apps/web/Dockerfile); Vercel ignores it.
   output: 'standalone',
+  // E2E builds use their own folder so they can run next to `next dev`.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   outputFileTracingRoot: fileURLToPath(new URL('../..', import.meta.url)),
   transpilePackages: ['@kollektor/api-client', '@kollektor/schemas'],
   async rewrites() {
